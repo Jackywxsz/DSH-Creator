@@ -1,0 +1,330 @@
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentPanel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  padding-right: var(--dsh-sidebar-inline-padding);
+  box-sizing: border-box;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentHeader {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 36px;
+  padding-left: 4px;
+  margin: 2px -4px 4px 0;
+  box-sizing: border-box;
+  border-radius: 12px;
+  overflow: hidden;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .sectionLabel {
+  flex: none;
+  max-width: 45%;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 20px;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    max-width 180ms var(--ds-ease-in-out),
+    margin-right 180ms var(--ds-ease-in-out),
+    opacity 120ms var(--ds-ease-in-out),
+    transform 180ms var(--ds-ease-in-out),
+    visibility 0s linear;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .sectionLabel.hidden {
+  max-width: 0;
+  margin-right: -4px;
+  opacity: 0;
+  transform: translateX(-4px);
+  visibility: hidden;
+  transition-delay: 0s, 0s, 0s, 0s, 180ms;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .searchSlot {
+  flex: 1;
+  max-width: 28px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  padding-left: 0;
+  box-sizing: border-box;
+  transition:
+    max-width 180ms var(--ds-ease-in-out),
+    padding-left 180ms var(--ds-ease-in-out);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .searchSlot.expanded {
+  max-width: 100%;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentSearch {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: text;
+  color: var(--dsw-alias-label-secondary);
+  overflow: hidden;
+  transition:
+    width 180ms var(--ds-ease-in-out),
+    padding 180ms var(--ds-ease-in-out),
+    border-color 180ms var(--ds-ease-in-out),
+    background-color 180ms var(--ds-ease-in-out);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentSearch.expanded {
+  width: calc(100% + 4px);
+  height: 30px;
+  margin-inline: -2px;
+  padding: 0 4px 0 0;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--dsw-alias-label-caption);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .searchButton {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentSearch.expanded .searchButton {
+  width: 28px;
+  height: 30px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .searchButton:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentSearch.expanded .searchButton:hover {
+  background: transparent;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .searchInput {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  line-height: 18px;
+  transition: opacity 120ms var(--ds-ease-in-out);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentSearch.expanded .searchInput {
+  margin-left: -2px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .searchInput::placeholder {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .clearButton {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .clearButton:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .headerActions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 92px;
+  opacity: 1;
+  overflow: hidden;
+  visibility: visible;
+  transition:
+    max-width 180ms var(--ds-ease-in-out),
+    opacity 120ms var(--ds-ease-in-out),
+    transform 180ms var(--ds-ease-in-out),
+    visibility 0s linear;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .headerActions.hidden {
+  max-width: 0;
+  opacity: 0;
+  transform: translateX(4px);
+  visibility: hidden;
+  pointer-events: none;
+  transition-delay: 0s, 0s, 0s, 180ms;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentList {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentEmpty {
+  padding: 16px 8px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 64px;
+  margin: 0 0 4px;
+  padding: 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentRow:hover,
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentRow.selected {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentRow:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 2px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .rowCover {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-2);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .rowCover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .coverFallback {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .rowBody {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .rowTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="create-dialog"] {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .createField,
+[data-plugin="dsh-oil-creator"][data-surface="create-dialog"] .createField {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="create-dialog"] .createLabel {
+  display: block;
+  width: 100%;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="create-dialog"] .createInput {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .createError,
+[data-plugin="dsh-oil-creator"][data-surface="create-dialog"] .createError {
+  margin-top: 0;
+  color: var(--dsw-alias-state-error-primary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .rowDate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 17px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .sectionLabel,
+  [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .searchSlot,
+  [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentSearch,
+  [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .searchInput,
+  [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .headerActions {
+    transition: none;
+  }
+}

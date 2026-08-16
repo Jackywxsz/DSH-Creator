@@ -1,0 +1,5 @@
+[data-plugin="dsh-oil-creator"] .oilActionBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

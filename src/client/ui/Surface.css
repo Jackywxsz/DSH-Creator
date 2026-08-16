@@ -1,0 +1,28 @@
+[data-plugin="dsh-oil-creator"] .oilSurface {
+  padding: 14px 14px 16px;
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-2);
+}
+
+[data-plugin="dsh-oil-creator"] .oilSurface + .oilSurface,
+[data-plugin="dsh-oil-creator"] .oilSurface + .block,
+[data-plugin="dsh-oil-creator"] .lede + .oilSurface {
+  margin-top: 16px;
+}
+
+[data-plugin="dsh-oil-creator"] .oilSurfaceTitle {
+  margin-bottom: 4px;
+  font: var(--dsw-font-markdown-base-strong);
+  color: var(--dsw-alias-label-primary);
+}
+
+[data-plugin="dsh-oil-creator"] .oilSurfaceHint {
+  margin: 0 0 12px;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-markdown-small);
+}
+
+[data-plugin="dsh-oil-creator"] .oilSurfaceTitle + .oilActionBar,
+[data-plugin="dsh-oil-creator"] .oilSurfaceHint + .oilActionBar {
+  margin-top: 12px;
+}
