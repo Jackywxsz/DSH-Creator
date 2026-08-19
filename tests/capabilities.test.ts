@@ -38,6 +38,7 @@ describe("creator setup inspection", () => {
       join(subtitleRoot, "scripts", "preview_editor.py"),
       join(subtitleRoot, "scripts", "burn_subtitles.py"),
       join(subtitleRoot, "scripts", "prepare_subtitles.py"),
+      join(subtitleRoot, "scripts", "review_subtitles.py"),
       join(coverRoot, "scripts", "generate_oil_cover.py"),
       join(bin, "ego-browser"),
     ];

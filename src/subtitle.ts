@@ -30,12 +30,14 @@ export async function resolveSubtitleSkill(
   const preview = join(skillDir, "scripts/preview_editor.py");
   const burn = join(skillDir, "scripts/burn_subtitles.py");
   const prepare = join(skillDir, "scripts/prepare_subtitles.py");
+  const review = join(skillDir, "scripts/review_subtitles.py");
   if (
     !(await pathExists(setup))
     || !(await pathExists(python))
     || !(await pathExists(preview))
     || !(await pathExists(burn))
     || !(await pathExists(prepare))
+    || !(await pathExists(review))
   ) {
     throw new Error(`已发现 oil-subtitle 目录，但尚未完成 setup.sh。执行 bash "${setup}" 后重试。`);
   }

@@ -48,9 +48,9 @@ DeepSeek Harness 打开后，左侧切到「内容」，中间是一条片子的
 | `oil_update_content` | 标记待录制、绑定工程、改某一平台的发布标记 |
 | `oil_open_studio` | 打开已绑定的 Screen Studio 工程 |
 | `oil_wait_export` | 等到文件夹里出现稳定的 MP4 / MOV |
-| `oil_generate_subtitles` | 一键跑字幕工作流：转录、排版、烧录；立刻返回；完成后出现 `*_subtitled.mp4` |
+| `oil_generate_subtitles` | 转录、自动校对、排版；立刻返回；完成后打开预览，出现 `subtitle-transcript.json`，不烧录 |
 | `oil_open_subtitle_preview` | 在浏览器打开字幕预览编辑器 |
-| `oil_burn_subtitles` | 按当前字幕稿烧进成片，立刻返回；完成后出现 `*_subtitled.mp4` |
+| `oil_burn_subtitles` | 用户预览确认后再烧进成片；立刻返回；完成后出现 `*_subtitled.mp4` |
 | `oil_generate_cover` | 一键生成 3:4 / 4:3 / 16:9 封面，立刻返回；完成后出现对应 png |
 | `oil_sync_publish` | 用 Ego 翻完启用平台的已发布列表，按标题或已存 id 写回播放 / 赞 / 评 |
 | `oil_creator_profile` | 读或改 `enabledPlatforms`，即 AI 发布和数据同步使用的平台列表 |
@@ -68,9 +68,9 @@ DeepSeek Harness 打开后，左侧切到「内容」，中间是一条片子的
 
 剪辑在对话里喊 `screen-studio-editor`，对照绑定的工程清理停顿和误讲。工作台只负责打开工程，不替你改时间线。预览满意后，在 Screen Studio 里亲手导出 MP4，导出目标就是这一期的文件夹。
 
-导出开始后说：「等这条的成片落盘，落盘后生成字幕和封面。」`oil_wait_export` 会等到文件大小稳定。成片到了再用 `oil_generate_subtitles` 和 `oil_generate_cover`。封面标题默认用文件夹名，生成后要在对话里核对主标题和错别字，不对就再说一次生成。
+导出开始后说：「等这条的成片落盘，落盘后生成字幕和封面。」`oil_wait_export` 会等到文件大小稳定。成片到了再用 `oil_generate_subtitles` 出字幕稿并打开预览；用户确认后再 `oil_burn_subtitles`。封面用 `oil_generate_cover`，调用前先按 oil-cover 提炼主标题传入 `title`。生成后要在对话里核对标题和错别字，不对就再说一次生成。
 
-字幕生成后用 `oil_open_subtitle_preview` 打开预览，改完专有名词再说烧录。首次 clone `oil-subtitle` 后必须运行 `bash ~/.agents/skills/oil-subtitle/setup.sh`，否则字幕工作流不会就绪。`oil_burn_subtitles` 不会覆盖已经带字幕的成片文件名习惯，产物文件名里带 `_subtitled`。
+首次 clone `oil-subtitle` 后必须运行 `bash ~/.agents/skills/oil-subtitle/setup.sh`，否则字幕工作流不会就绪。不要在预览前烧录。`oil_burn_subtitles` 不会覆盖已经带字幕的成片文件名习惯，产物文件名里带 `_subtitled`。
 
 成片、字幕、封面齐了，阶段会变成「待发布」。四平台上传仍然用 `video-publisher`，但只处理 `enabledPlatforms` 中启用的平台；做到各平台的最终发表按钮前停下，你自己点发表。发表之后可以说：「同步已发布数据。」或在检查器点「同步已发布」。同步只翻启用平台的已发布列表，再对到本地片子；90 秒内再点一次会直接用刚才的结果。每次同步开一个新的 Ego 空间，采完就关掉。平台上有、本地没有文件夹的，不会自动新建一条片子。
 
@@ -99,6 +99,6 @@ DeepSeek Harness 打开后，左侧切到「内容」，中间是一条片子的
 
 ## 设置和目录
 
-第一次用先让 AI 检查环境，再确认影片目录。字幕、封面、Screen Studio 和 Ego Lite 都是可选能力，缺少时不会影响片库和脚本管理。字幕和封面没有 Key 时，对应按钮会提示去设置里填写。有成片后，检查器里可以直接一键生成字幕（转录、排版、烧录）和封面，不用再走对话。
+第一次用先让 AI 检查环境，再确认影片目录。字幕、封面、Screen Studio 和 Ego Lite 都是可选能力，缺少时不会影响片库和脚本管理。字幕和封面没有 Key 时，对应按钮会提示去设置里填写。有成片后，检查器里可以生成字幕稿并打开预览，确认后再烧录；封面也可以在检查器里生成，不用再走对话。
 
 文件夹名被连字符弄乱时，可以说：「预览整理影片目录。」确认后再让它真正重命名。`oil_organize_library` 默认只预览，不会删文件。

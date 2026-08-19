@@ -390,7 +390,8 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   ctx.tools.register(defineTool({
     name: "oil_burn_subtitles",
     description:
-      "Start burning the current subtitle draft onto the raw video with oil-subtitle. "
+      "Burn the current oil-subtitle draft onto the raw video after the user has previewed and confirmed it. "
+      + "Do not call this before oil_open_subtitle_preview (or the preview opened by oil_generate_subtitles). "
       + "Returns immediately. When finished, the episode folder has a *_subtitled.mp4.",
     parameters: {
       id: { type: "string", required: true, description: "Folder id." },
@@ -412,9 +413,10 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   ctx.tools.register(defineTool({
     name: "oil_generate_subtitles",
     description:
-      "Run the oil-subtitle workflow on the episode video: transcribe, lay out, and burn. "
+      "Run the oil-subtitle draft workflow: transcribe, auto-review, and lay out captions. "
+      + "Does not burn. When it finishes, a preview editor opens; wait for the user to proofread, then call oil_burn_subtitles. "
       + "Requires DASHSCOPE_API_KEY in Settings → Plugins → 内容工作台. "
-      + "Does not wait for chat review. Returns immediately. When finished, the folder has *_subtitled.mp4.",
+      + "Returns immediately. Completion is subtitle-transcript.json / subtitle-manifest.json, not *_subtitled.mp4.",
     parameters: {
       id: { type: "string", required: true, description: "Folder id." },
     },
@@ -436,10 +438,12 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
     name: "oil_generate_cover",
     description:
       "Generate 3x4 / 4x3 / 16x9 covers with oil-cover. "
-      + "Requires ZENMUX_API_KEY in Settings → Plugins → 内容工作台. "
+      + "Extract a cover title first from the episode script or subtitles (oil-cover rule: do not leave this to the image model). "
+      + "Pass that title. Requires ZENMUX_API_KEY in Settings → Plugins → 内容工作台. "
       + "Returns immediately. When finished, the episode folder has *_3x4.png / *_4x3.png / *_16x9.png.",
     parameters: {
       id: { type: "string", required: true, description: "Folder id." },
+      title: { type: "string", description: "Cover headline extracted from the episode. Folder name is used only if omitted." },
     },
     output: {
       schema: JSON_VALUE,
@@ -451,7 +455,10 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
     presentCall: (args) => present("Generate cover", args),
     execute: async (args, exec) => {
       if (args.id === "") throw new Error("id is required");
-      return asJson(await service.startCoverGenerate({ id: args.id }, signalOf(exec)));
+      return asJson(await service.startCoverGenerate({
+        id: args.id,
+        ...(typeof args.title === "string" && args.title.trim() !== "" ? { title: args.title } : {}),
+      }, signalOf(exec)));
     },
   }));
 }

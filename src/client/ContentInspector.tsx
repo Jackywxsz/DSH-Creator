@@ -175,6 +175,7 @@ export function ContentInspector({
   setPublish,
   syncPublish,
   startSubtitleGenerate,
+  startSubtitleBurn,
   startCoverGenerate,
   setScript,
   pickDirectory,
@@ -198,7 +199,8 @@ export function ContentInspector({
   const [dragging, setDragging] = useState(false);
   const [actionError, setActionError] = useState<string | undefined>(undefined);
 
-  const [busy, setBusy] = useState<"subtitle" | "cover" | "sync" | undefined>(undefined);
+  const [busy, setBusy] = useState<"subtitle" | "burn" | "cover" | "sync" | undefined>(undefined);
+  const expectSubtitlePreview = useRef(false);
   const [syncHint, setSyncHint] = useState<string | undefined>(undefined);
   const [scriptDraft, setScriptDraft] = useState("");
   const [scriptSaved, setScriptSaved] = useState(true);
@@ -221,6 +223,7 @@ export function ContentInspector({
     setVideoReady(false);
     setArticleOrigin(undefined);
     setBusy(undefined);
+    expectSubtitlePreview.current = false;
     setPublishMenu(null);
     setPublishPending(null);
   }, [selectedId]);
@@ -348,6 +351,18 @@ export function ContentInspector({
     });
   }, [selectedId, detail?.subtitleJob.status]);
 
+  useEffect(() => {
+    if (!expectSubtitlePreview.current || selectedId === null || !ready()) return;
+    if (detail?.subtitleJob.status === "done") {
+      expectSubtitlePreview.current = false;
+      void openSubtitlePreview(selectedId).then(() => undefined, (cause: unknown) => {
+        setActionError(cause instanceof Error ? cause.message : t("empty.error" as CreatorKey));
+      });
+      return;
+    }
+    if (detail?.subtitleJob.status === "error") expectSubtitlePreview.current = false;
+  }, [selectedId, detail?.subtitleJob.status]);
+
   const shownWidth = expanded ? panelWidth : 0;
 
   const applyPublish = (platform: PublishPlatform, status: PublishMark): void => {
@@ -396,7 +411,7 @@ export function ContentInspector({
 
   const hasVideo = detail?.videoRaw !== undefined || detail?.videoSubtitled !== undefined;
   const hasSubtitleDraft = detail?.subtitles.srt !== undefined || detail?.subtitles.transcript !== undefined;
-  const canPreviewSubtitle = detail?.subtitles.srt !== undefined || detail?.subtitleJob.status === "done";
+  const canPreviewSubtitle = hasSubtitleDraft || detail?.subtitleJob.status === "done";
   const hasAnyCover = detail !== undefined
     && (detail.covers["3x4"] !== undefined || detail.covers["4x3"] !== undefined || detail.covers["16x9"] !== undefined);
   const platformSettingsPending = enabledPlatforms === undefined;
@@ -465,7 +480,30 @@ export function ContentInspector({
     }
     setActionError(undefined);
     setBusy("subtitle");
+    expectSubtitlePreview.current = true;
     void startSubtitleGenerate(detail.id).then((next) => {
+      setDetail(next);
+      setBusy(undefined);
+    }, (cause: unknown) => {
+      expectSubtitlePreview.current = false;
+      setActionError(cause instanceof Error ? cause.message : t("empty.error" as CreatorKey));
+      setBusy(undefined);
+    });
+  };
+
+  const onBurnSubtitle = (): void => {
+    if (detail === undefined) return;
+    if (detail.videoRaw === undefined) {
+      setActionError(t("inspector.subtitle.needVideo" as CreatorKey));
+      return;
+    }
+    if (!hasSubtitleDraft && detail.subtitleJob.status !== "done") {
+      setActionError(t("inspector.subtitle.needDraft" as CreatorKey));
+      return;
+    }
+    setActionError(undefined);
+    setBusy("burn");
+    void startSubtitleBurn(detail.id).then((next) => {
       setDetail(next);
       setBusy(undefined);
     }, (cause: unknown) => {
@@ -514,9 +552,15 @@ export function ContentInspector({
     if (detail.subtitleJob.status === "running" || busy === "subtitle") {
       return { status: t("inspector.subtitle.generating" as CreatorKey), tone: "active" };
     }
-    if (detail.subtitleJob.status === "error") {
+    if (detail.burn.status === "running" || busy === "burn") {
+      return { status: t("inspector.subtitle.burning" as CreatorKey), tone: "active" };
+    }
+    if (detail.subtitleJob.status === "error" || detail.burn.status === "error") {
+      const raw = detail.subtitleJob.error ?? detail.burn.error;
       return {
-        status: detail.subtitleJob.error ?? t("inspector.subtitle.failed" as CreatorKey),
+        status: raw !== undefined && raw.includes("process exited")
+          ? t("inspector.subtitle.failed" as CreatorKey)
+          : raw ?? t("inspector.subtitle.failed" as CreatorKey),
         tone: "error",
       };
     }
@@ -668,7 +712,7 @@ export function ContentInspector({
                           </ActionButton>
                         )}
                         <ActionButton
-                          tone={detail.videoSubtitled === undefined ? "primary" : "secondary"}
+                          tone={!hasSubtitleDraft && detail.videoSubtitled === undefined ? "primary" : "secondary"}
                           onClick={onGenerateSubtitle}
                           disabled={
                             busy !== undefined
@@ -677,11 +721,26 @@ export function ContentInspector({
                           }
                         >
                           {t((
-                            detail.videoSubtitled === undefined && !hasSubtitleDraft
+                            !hasSubtitleDraft
                               ? "inspector.subtitle.generate"
                               : "inspector.subtitle.regenerate"
                           ) as CreatorKey)}
                         </ActionButton>
+                        {hasSubtitleDraft && (
+                          <ActionButton
+                            tone={detail.videoSubtitled === undefined ? "primary" : "secondary"}
+                            onClick={onBurnSubtitle}
+                            disabled={
+                              busy !== undefined
+                              || detail.subtitleJob.status === "running"
+                              || detail.burn.status === "running"
+                            }
+                          >
+                            {t((detail.videoSubtitled === undefined
+                              ? "inspector.subtitle.burn"
+                              : "inspector.subtitle.reburn") as CreatorKey)}
+                          </ActionButton>
+                        )}
                       </>
                     )}
                   />
@@ -904,7 +963,7 @@ export function ContentInspector({
                   </ActionButton>
                 )}
                 <ActionButton
-                  tone={detail.videoSubtitled === undefined ? "primary" : "secondary"}
+                  tone={!hasSubtitleDraft && detail.videoSubtitled === undefined ? "primary" : "secondary"}
                   onClick={onGenerateSubtitle}
                   disabled={
                     busy !== undefined
@@ -913,11 +972,26 @@ export function ContentInspector({
                   }
                 >
                   {t((
-                    detail.videoSubtitled === undefined && !hasSubtitleDraft
+                    !hasSubtitleDraft
                       ? "inspector.subtitle.generate"
                       : "inspector.subtitle.regenerate"
                   ) as CreatorKey)}
                 </ActionButton>
+                {hasSubtitleDraft && (
+                  <ActionButton
+                    tone={detail.videoSubtitled === undefined ? "primary" : "secondary"}
+                    onClick={onBurnSubtitle}
+                    disabled={
+                      busy !== undefined
+                      || detail.subtitleJob.status === "running"
+                      || detail.burn.status === "running"
+                    }
+                  >
+                    {t((detail.videoSubtitled === undefined
+                      ? "inspector.subtitle.burn"
+                      : "inspector.subtitle.reburn") as CreatorKey)}
+                  </ActionButton>
+                )}
               </ActionBar>
             )}
             {actionError !== undefined
@@ -933,9 +1007,11 @@ export function ContentInspector({
                 : detail.subtitleJob.status === "error" || detail.burn.status === "error"
                   ? (
                     <JobNote tone="error">
-                      {detail.subtitleJob.error
-                        ?? detail.burn.error
-                        ?? t("inspector.subtitle.burnFailed" as CreatorKey)}
+                      {(detail.subtitleJob.error ?? detail.burn.error ?? "").includes("process exited")
+                        ? t("inspector.subtitle.burnFailed" as CreatorKey)
+                        : detail.subtitleJob.error
+                          ?? detail.burn.error
+                          ?? t("inspector.subtitle.burnFailed" as CreatorKey)}
                     </JobNote>
                   )
                   : null}

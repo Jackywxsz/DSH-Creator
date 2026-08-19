@@ -444,6 +444,25 @@ export function cuesFromTranscript(value: unknown): SubtitleCue[] {
   return text === "" ? [] : [{ text }];
 }
 
+const ASS_DRAWING = /\\p\d/;
+const ASS_VECTOR = /^(?:m|l|b)\s+-?\d/i;
+const ASS_SKIP_STYLES = new Set(["captionbox", "progresslabel", "progressfill"]);
+
+function assCueText(parts: readonly string[]): string | undefined {
+  const style = (parts[3] ?? "").trim().toLowerCase();
+  const name = (parts[4] ?? "").trim().toLowerCase();
+  if (ASS_SKIP_STYLES.has(style) || ASS_SKIP_STYLES.has(name)) return undefined;
+  const original = parts.slice(9).join(",");
+  if (ASS_DRAWING.test(original)) return undefined;
+  const text = original
+    .replace(/\{[^}]*\}/g, "")
+    .replace(/\\N/g, "\n")
+    .replace(/\\n/g, "\n")
+    .trim();
+  if (text === "" || ASS_VECTOR.test(text)) return undefined;
+  return text;
+}
+
 export function cuesFromAss(raw: string): SubtitleCue[] {
   const cues: SubtitleCue[] = [];
   for (const line of raw.replace(/^\uFEFF/, "").split(/\r?\n/)) {
@@ -451,14 +470,9 @@ export function cuesFromAss(raw: string): SubtitleCue[] {
     const payload = line.slice("Dialogue:".length).trim();
     const parts = payload.split(",");
     if (parts.length < 10) continue;
-    const start = parts[1] ?? "";
-    const text = parts.slice(9).join(",")
-      .replace(/\{[^}]*\}/g, "")
-      .replace(/\\N/g, "\n")
-      .replace(/\\n/g, "\n")
-      .trim();
-    if (text === "") continue;
-    const at = formatAssClock(start);
+    const text = assCueText(parts);
+    if (text === undefined) continue;
+    const at = formatAssClock(parts[1] ?? "");
     cues.push(at === undefined ? { text } : { text, at });
   }
   return cues;
@@ -508,8 +522,8 @@ export function cuesFromSrt(raw: string): SubtitleCue[] {
 function subtitlePaths(item: ContentSummary): string[] {
   return [
     item.subtitles.srt,
-    item.subtitles.ass,
     item.subtitles.transcript,
+    item.subtitles.ass,
   ].filter((path): path is string => path !== undefined);
 }
 

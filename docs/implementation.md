@@ -144,7 +144,7 @@ ego-browser nodejs < scripts/collect-publish.mjs
 | 公众号图文 | `oil-video-article` | `~/.agents/skills/oil-video-article` | 识别 `公众号文章/` | 从无头像屏幕轨截图、按 oil-tone 写文章 |
 | 四平台视频草稿 | `video-publisher` | `~/.agents/skills/video-publisher` | 读 `auto-publish.json` 显示状态 | Ego 上传、停在最终发布按钮前、人点发布 |
 
-字幕脚本入口以 skill 文档为准：`preview_editor.py`、`bailian_transcribe.py`、`burn_subtitles.py`（有审过的 SRT 用 `--srt-input`）。封面脚本是 `generate_oil_cover.py`，Key 用环境变量 `ZENMUX_API_KEY`。不要改 skill 仓库里的用户路径和密钥。
+字幕脚本入口以 oil-subtitle 为准：`bailian_transcribe.py` → `review_subtitles.py` → `prepare_subtitles.py` → `preview_editor.py`，用户确认后再 `burn_subtitles.py`（有审过的 SRT 用 `--srt-input`）。不要在预览前烧录。封面脚本是 `generate_oil_cover.py`，主标题由调用方按 oil-cover 提炼后传入 `--title`，Key 用环境变量 `ZENMUX_API_KEY`。不要改 skill 仓库里的用户路径和密钥。
 
 封面还有 Agent 自主模式，依赖执行环境自己的生图工具。Harness 工作台默认走脚本模式，因为这里稳定的是 ZenMux 脚本，不是 Codex 内置 `image_gen`。
 

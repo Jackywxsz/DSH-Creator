@@ -43,7 +43,7 @@ describe("pickTranscribeLaunch", () => {
 });
 
 describe("pickSubtitleWorkflow", () => {
-  it("chains transcribe, prepare, and burn", async () => {
+  it("chains transcribe, review, and prepare without burning", async () => {
     const folder = await mkdtemp(join(tmpdir(), "oil-sub-"));
     const video = join(folder, "demo.mp4");
     await writeFile(video, "v");
@@ -51,27 +51,13 @@ describe("pickSubtitleWorkflow", () => {
     const workflow = await pickSubtitleWorkflow(item(folder, { videoRaw: video }), skill);
     expect(workflow.steps).toHaveLength(3);
     expect(workflow.steps[0]?.script.endsWith("bailian_transcribe.py")).toBe(true);
-    expect(workflow.steps[1]?.script.endsWith("prepare_subtitles.py")).toBe(true);
-    expect(workflow.steps[2]?.script.endsWith("burn_subtitles.py")).toBe(true);
-    expect(workflow.steps[0]?.env).toBe("subtitle");
-    expect(workflow.steps[1]?.env).toBe("none");
-    expect(workflow.steps[2]?.env).toBe("none");
-    expect(workflow.steps[2]?.args).toContain("--chapters");
-    expect(workflow.output.endsWith("demo_subtitled.mp4")).toBe(true);
-  });
-
-  it("skips prepare when asked", async () => {
-    const folder = await mkdtemp(join(tmpdir(), "oil-sub-"));
-    const video = join(folder, "demo.mp4");
-    await writeFile(video, "v");
-    const workflow = await pickSubtitleWorkflow(
-      item(folder, { videoRaw: video }),
-      "/tmp/oil-subtitle",
-      { prepare: false },
-    );
-    expect(workflow.steps).toHaveLength(2);
-    expect(workflow.steps[1]?.script.endsWith("burn_subtitles.py")).toBe(true);
-    expect(workflow.steps[1]?.args.includes("--chapters")).toBe(false);
+    expect(workflow.steps[1]?.script.endsWith("review_subtitles.py")).toBe(true);
+    expect(workflow.steps[2]?.script.endsWith("prepare_subtitles.py")).toBe(true);
+    expect(workflow.steps.map((step) => step.env)).toEqual(["subtitle", "subtitle", "none"]);
+    expect(workflow.steps[1]?.args).toContain("--frames-dir");
+    expect(workflow.steps[2]?.args).toContain("--chapters-output");
+    expect(workflow.output.endsWith("subtitle-transcript.json")).toBe(true);
+    expect(workflow.steps.some((step) => step.script.endsWith("burn_subtitles.py"))).toBe(false);
   });
 });
 
@@ -96,6 +82,16 @@ describe("pickCoverLaunch", () => {
       "--subtitle",
       srt,
     ]);
+    expect(launch.output.endsWith("demo_3x4.png")).toBe(true);
+  });
+
+  it("uses an extracted cover title when provided", async () => {
+    const folder = await mkdtemp(join(tmpdir(), "oil-cover-"));
+    const video = join(folder, "demo.mp4");
+    await writeFile(video, "v");
+    const launch = await pickCoverLaunch(item(folder, { videoRaw: video }), "目前最强的本地工作台");
+    expect(launch.args).toContain("目前最强的本地工作台");
+    expect(launch.args).not.toContain("Demo title");
     expect(launch.output.endsWith("demo_3x4.png")).toBe(true);
   });
 });

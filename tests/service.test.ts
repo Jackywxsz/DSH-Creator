@@ -1,3 +1,4 @@
+import { spawn } from "node:child_process";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -71,10 +72,10 @@ vi.mock("../src/processAlive.ts", async (importOriginal) => {
 
 import { OilCreatorService } from "../src/service.ts";
 import { saveCollectCache } from "../src/collectCache.ts";
-import { emptyOverlay, saveOverlay } from "../src/overlay.ts";
+import { emptyOverlay, loadOverlay, saveOverlay } from "../src/overlay.ts";
 import { emptyBurn, emptyPublish } from "../src/publishStatus.ts";
 import { loadPreviewRegistry } from "../src/previewServers.ts";
-import type { ContentDetail, ContentSummary, CreatorProfile } from "../src/types.ts";
+import type { ContentDetail, ContentSummary, CreatorProfile, OverlayItem } from "../src/types.ts";
 
 function item(folderPath: string, videoRaw: string): ContentSummary {
   return {
@@ -138,8 +139,9 @@ describe("OilCreatorService.startSubtitleGenerate", () => {
 
     expect(launch?.steps).toHaveLength(3);
     expect(launch?.steps[0]?.script.endsWith("bailian_transcribe.py")).toBe(true);
-    expect(launch?.steps[1]?.script.endsWith("prepare_subtitles.py")).toBe(true);
-    expect(launch?.steps[2]?.script.endsWith("burn_subtitles.py")).toBe(true);
+    expect(launch?.steps[1]?.script.endsWith("review_subtitles.py")).toBe(true);
+    expect(launch?.steps[2]?.script.endsWith("prepare_subtitles.py")).toBe(true);
+    expect(launch?.steps.some((step) => step.script.endsWith("burn_subtitles.py"))).toBe(false);
     expect(launch?.env).toEqual({ DASHSCOPE_API_KEY: "subtitle-key" });
   });
 });
@@ -158,16 +160,16 @@ describe("OilCreatorService.startChainedJob", () => {
       env: { DASHSCOPE_API_KEY: "dash", ZENMUX_API_KEY: "zen" },
       steps: [
         { script: "bailian_transcribe.py", args: [], output: "transcript", env: "subtitle" },
+        { script: "review_subtitles.py", args: [], output: "reviewed", env: "subtitle" },
         { script: "prepare_subtitles.py", args: [], output: "prepared", env: "none" },
-        { script: "burn_subtitles.py", args: [], output: "burned", env: "none" },
       ],
     }, new AbortController().signal);
     await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
     expect(chained.calls).toEqual([
       { script: "bailian_transcribe.py", env: { DASHSCOPE_API_KEY: "dash" } },
+      { script: "review_subtitles.py", env: { DASHSCOPE_API_KEY: "dash" } },
       { script: "prepare_subtitles.py" },
-      { script: "burn_subtitles.py" },
     ]);
   });
 });
@@ -276,5 +278,92 @@ describe("OilCreatorService.syncPublish", () => {
     await expect(service.syncPublish({ id: "missing" }, new AbortController().signal))
       .rejects.toThrow("content not found: missing");
     expect(collect.calls).toEqual([]);
+  });
+});
+
+describe("OilCreatorService subtitle job reconcile", () => {
+  async function overlayService(item: OverlayItem) {
+    const dataDir = await mkdtemp(join(tmpdir(), "oil-service-job-"));
+    const libraryRoot = await mkdtemp(join(tmpdir(), "oil-service-lib-"));
+    const overlay = emptyOverlay();
+    overlay.libraryRoot = libraryRoot;
+    overlay.items.demo = item;
+    await saveOverlay(dataDir, overlay);
+    const service = Object.create(OilCreatorService.prototype) as OilCreatorService;
+    const probe = service as unknown as {
+      dataDir: string;
+      libraryRoot: string;
+      cache: undefined;
+      watchedRoot: string;
+      watchClose: () => void;
+      catalogRevision: number;
+      exportWaiters: Map<string, AbortController>;
+    };
+    probe.dataDir = dataDir;
+    probe.libraryRoot = libraryRoot;
+    probe.cache = undefined;
+    probe.watchedRoot = libraryRoot;
+    probe.watchClose = () => undefined;
+    probe.catalogRevision = 0;
+    probe.exportWaiters = new Map();
+    return { dataDir, service };
+  }
+
+  function liveScript(script: string) {
+    const child = spawn(process.execPath, ["-e", "setTimeout(() => {}, 30000)", script], {
+      detached: true,
+      stdio: "ignore",
+    });
+    child.unref();
+    return child;
+  }
+
+  it("keeps subtitleJob running while prepare_subtitles.py is still the pid", async () => {
+    const child = liveScript("prepare_subtitles.py");
+    expect(child.pid).toBeTypeOf("number");
+    try {
+      const { dataDir, service } = await overlayService({
+        subtitleJob: {
+          status: "running",
+          startedAt: 1,
+          output: join(tmpdir(), "missing-transcript.json"),
+          pid: child.pid as number,
+        },
+      });
+      await service.scanned();
+      const overlay = await loadOverlay(dataDir);
+      expect(overlay.items.demo?.subtitleJob?.status).toBe("running");
+    } finally {
+      if (child.pid !== undefined) process.kill(child.pid);
+    }
+  });
+
+  it("recovers a false process-exited error while burn_subtitles.py is still running", async () => {
+    const child = liveScript("burn_subtitles.py");
+    expect(child.pid).toBeTypeOf("number");
+    try {
+      const { dataDir, service } = await overlayService({
+        burn: {
+          status: "running",
+          startedAt: 1,
+          output: join(tmpdir(), "missing-subtitled.mp4"),
+          pid: child.pid as number,
+        },
+        subtitleJob: {
+          status: "error",
+          startedAt: 1,
+          output: join(tmpdir(), "missing-subtitled.mp4"),
+          error: "subtitleJob process exited",
+        },
+      });
+      await service.scanned();
+      const overlay = await loadOverlay(dataDir);
+      expect(overlay.items.demo?.subtitleJob).toMatchObject({
+        status: "running",
+        pid: child.pid,
+      });
+    } finally {
+      if (child.pid !== undefined) process.kill(child.pid);
+    }
   });
 });

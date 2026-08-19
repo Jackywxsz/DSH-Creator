@@ -757,10 +757,10 @@ export class OilCreatorService extends TypertRemoteService {
     signal.throwIfAborted();
     const item = await this.find(request.id);
     if (item === undefined) throw new Error(`content not found: ${request.id}`);
-    if (item.subtitleJob.status === "running" && jobPidMatches(item.subtitleJob.pid, ["bailian_transcribe.py", "prepare_subtitles.py"])) {
+    if (item.subtitleJob.status === "running" && jobPidMatches(item.subtitleJob.pid, JOB_COMMAND.subtitleJob)) {
       return this.getContent({ id: request.id }, signal);
     }
-    if (item.burn.status === "running" && jobPidMatches(item.burn.pid, ["burn_subtitles.py"])) {
+    if (item.burn.status === "running" && jobPidMatches(item.burn.pid, JOB_COMMAND.burn)) {
       return this.getContent({ id: request.id }, signal);
     }
     const subtitleKey = await resolveCreatorSecret(this.ctx, "subtitle");
@@ -775,7 +775,7 @@ export class OilCreatorService extends TypertRemoteService {
     }, signal);
   }
 
-  async startCoverGenerate(request: IdRequest, signal: AbortSignal): Promise<ContentDetail> {
+  async startCoverGenerate(request: IdRequest & { title?: string }, signal: AbortSignal): Promise<ContentDetail> {
     signal.throwIfAborted();
     const item = await this.find(request.id);
     if (item === undefined) throw new Error(`content not found: ${request.id}`);
@@ -785,7 +785,7 @@ export class OilCreatorService extends TypertRemoteService {
     const key = await resolveCreatorSecret(this.ctx, "cover");
     if (key === undefined) throw new Error(missingSecretMessage("cover"));
     const skill = await this.coverSkill();
-    const launch = await pickCoverLaunch(item);
+    const launch = await pickCoverLaunch(item, request.title);
     return this.startTrackedJob(request.id, "coverJob", {
       python: skill.python,
       script: skill.script,
@@ -838,9 +838,6 @@ export class OilCreatorService extends TypertRemoteService {
             const nextPid = runStep(index + 1);
             void this.patchItem(id, (next) => {
               next[field] = { status: "running", startedAt, output: finalOutput, pid: nextPid };
-              if (field === "subtitleJob" && nextStep.script.endsWith("burn_subtitles.py")) {
-                next.burn = { status: "running", startedAt, output: finalOutput, pid: nextPid };
-              }
             }, new AbortController().signal).catch(() => undefined);
           } catch (cause) {
             const message = cause instanceof Error ? cause.message : `${field} failed`;
@@ -852,10 +849,10 @@ export class OilCreatorService extends TypertRemoteService {
         }
         void this.patchItem(id, (next) => {
           next[field] = { status: "done", startedAt, output: finalOutput };
-          if (field === "subtitleJob") {
-            next.burn = { status: "done", startedAt, output: finalOutput };
-          }
-        }, new AbortController().signal).catch(() => undefined);
+        }, new AbortController().signal).then(() => {
+          if (field !== "subtitleJob") return;
+          return this.openSubtitlePreview({ id }, new AbortController().signal);
+        }, () => undefined).catch(() => undefined);
       });
       child.unref();
       return pid;
@@ -1014,9 +1011,51 @@ async function resolveStudioPath(path: string): Promise<string> {
 const JOB_FIELDS = ["burn", "subtitleJob", "coverJob"] as const;
 const JOB_COMMAND = {
   burn: ["burn_subtitles.py"],
-  subtitleJob: ["bailian_transcribe.py", "prepare_subtitles.py"],
+  subtitleJob: ["bailian_transcribe.py", "review_subtitles.py", "prepare_subtitles.py"],
   coverJob: ["generate_oil_cover.py"],
 } as const;
+
+function jobStarted(job: BurnJob): { startedAt?: number } {
+  return job.startedAt === undefined ? {} : { startedAt: job.startedAt };
+}
+
+async function settleFinishedJob(job: BurnJob, field: (typeof JOB_FIELDS)[number]): Promise<BurnJob> {
+  const output = job.output;
+  const started = jobStarted(job);
+  if (output !== undefined && await pathExists(output)) {
+    return { status: "done", ...started, output };
+  }
+  return {
+    status: "error",
+    ...started,
+    ...(output === undefined ? {} : { output }),
+    error: `${field} process exited`,
+  };
+}
+
+function recoverSubtitleJob(item: OverlayItem, job: BurnJob): BurnJob | undefined {
+  if (job.status !== "error" || job.error !== "subtitleJob process exited") return undefined;
+  const burn = item.burn;
+  if (burn?.status === "running" && burn.pid !== undefined && jobPidMatches(burn.pid, JOB_COMMAND.burn)) {
+    return {
+      status: "running",
+      ...jobStarted(job),
+      ...jobStarted(burn),
+      ...(burn.output === undefined ? {} : { output: burn.output }),
+      pid: burn.pid,
+    };
+  }
+  if (burn?.status === "done") {
+    const output = burn.output ?? job.output;
+    return {
+      status: "done",
+      ...jobStarted(job),
+      ...jobStarted(burn),
+      ...(output === undefined ? {} : { output }),
+    };
+  }
+  return undefined;
+}
 
 async function reconcileOverlayBurns(overlay: OverlayStore): Promise<OverlayStore | undefined> {
   let dirty = false;
@@ -1025,22 +1064,18 @@ async function reconcileOverlayBurns(overlay: OverlayStore): Promise<OverlayStor
     let nextItem = items[id] ?? item;
     for (const field of JOB_FIELDS) {
       const job = nextItem[field];
-      if (job === undefined || job.status !== "running") continue;
-      if (jobPidMatches(job.pid, JOB_COMMAND[field])) continue;
-      const output = job.output;
-      const started = job.startedAt === undefined ? {} : { startedAt: job.startedAt };
-      let next: BurnJob;
-      if (output !== undefined && await pathExists(output)) {
-        next = { status: "done", ...started, output };
-      } else {
-        next = {
-          status: "error",
-          ...started,
-          ...(output === undefined ? {} : { output }),
-          error: `${field} process exited`,
-        };
+      if (job === undefined) continue;
+      if (field === "subtitleJob") {
+        const recovered = recoverSubtitleJob(nextItem, job);
+        if (recovered !== undefined) {
+          nextItem = { ...nextItem, subtitleJob: recovered };
+          dirty = true;
+          continue;
+        }
       }
-      nextItem = { ...nextItem, [field]: next };
+      if (job.status !== "running") continue;
+      if (jobPidMatches(job.pid, JOB_COMMAND[field])) continue;
+      nextItem = { ...nextItem, [field]: await settleFinishedJob(job, field) };
       dirty = true;
     }
     items[id] = nextItem;

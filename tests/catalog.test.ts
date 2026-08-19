@@ -169,6 +169,16 @@ describe("subtitle text", () => {
     ]);
   });
 
+  it("skips ass drawing and progress-bar events", () => {
+    const raw = [
+      "[Events]",
+      "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
+      "Dialogue: 1,0:00:00.00,0:00:01.00,CaptionBox,ProgressFill,0,0,0,,{\\an7\\p1}m 0 0 l 12 0 l 12 6 l 0 6",
+      "Dialogue: 5,0:00:00.12,0:00:00.56,CaptionText,,0,0,0,,哈喽大家好",
+    ].join("\n");
+    expect(cuesFromAss(raw)).toEqual([{ text: "哈喽大家好", at: "0:00" }]);
+  });
+
   it("strips srt chrome", () => {
     const raw = "1\n00:00:00,000 --> 00:00:01,000\n你好\n\n2\n00:00:01,000 --> 00:00:02,000\n世界\n";
     expect(stripSubtitleMarkup(raw)).toBe("你好\n世界");

@@ -4,7 +4,7 @@ import { basename, extname, join } from "node:path";
 import { defaultCoverSkillDir } from "./config.ts";
 
 import { pathExists } from "./artifacts.ts";
-import { uniqueSubtitledPath, workDirOf } from "./subtitle.ts";
+import { workDirOf } from "./subtitle.ts";
 import type { ContentSummary } from "./types.ts";
 
 export type GenerateEnvKind = "subtitle" | "cover" | "none";
@@ -51,74 +51,82 @@ export async function pickTranscribeLaunch(item: ContentSummary): Promise<{
 export async function pickSubtitleWorkflow(
   item: ContentSummary,
   skillRoot: string,
-  options: { prepare: boolean } = { prepare: true },
 ): Promise<{ steps: GenerateStep[]; output: string }> {
   const video = item.videoRaw ?? item.videoSubtitled;
   if (video === undefined) throw new Error("no video to transcribe");
-  const rawVideo = item.videoRaw;
-  if (rawVideo === undefined) throw new Error("no raw video to burn");
   const work = workDirOf(item);
   await mkdir(work, { recursive: true });
   const transcript = join(work, "transcript.json");
+  const reviewed = join(work, "reviewed-transcript.json");
   const prepared = join(work, "subtitle-transcript.json");
   const chapters = join(work, "subtitle-chapters.json");
   const manifest = join(work, "subtitle-manifest.json");
   const cache = join(work, "cache");
-  const stem = basename(rawVideo, extname(rawVideo));
-  const output = await uniqueSubtitledPath(item.folderPath, stem);
-  const steps: GenerateStep[] = [
-    {
-      script: join(skillRoot, "scripts/bailian_transcribe.py"),
-      args: [video, "--output", transcript, "--raw-output", join(work, "bailian_asr.json"), "--language", "zh"],
-      output: transcript,
-      env: "subtitle",
-    },
-  ];
-  if (options.prepare) {
-    steps.push({
-      script: join(skillRoot, "scripts/prepare_subtitles.py"),
-      args: [
-        "--transcript",
-        transcript,
-        "--video",
-        rawVideo,
-        "--output",
-        prepared,
-        "--chapters-output",
-        chapters,
-        "--manifest-output",
-        manifest,
-        "--work-dir",
-        cache,
-        "--resume",
-      ],
-      output: prepared,
-      env: "none",
-    });
-  }
-  const burnTranscript = options.prepare ? prepared : transcript;
-  const burnArgs = ["--video", rawVideo, "--transcript", burnTranscript, "--output", output];
-  if (options.prepare) burnArgs.push("--chapters", chapters);
-  steps.push({
-    script: join(skillRoot, "scripts/burn_subtitles.py"),
-    args: burnArgs,
-    output,
-    env: "none",
-  });
-  return { steps, output };
+  return {
+    output: prepared,
+    steps: [
+      {
+        script: join(skillRoot, "scripts/bailian_transcribe.py"),
+        args: [video, "--output", transcript, "--raw-output", join(work, "bailian_asr.json"), "--language", "zh"],
+        output: transcript,
+        env: "subtitle",
+      },
+      {
+        script: join(skillRoot, "scripts/review_subtitles.py"),
+        args: [
+          "--video",
+          video,
+          "--transcript",
+          transcript,
+          "--output",
+          reviewed,
+          "--report",
+          join(work, "subtitle-review.json"),
+          "--frames-dir",
+          join(work, "review-frames"),
+        ],
+        output: reviewed,
+        env: "subtitle",
+      },
+      {
+        script: join(skillRoot, "scripts/prepare_subtitles.py"),
+        args: [
+          "--transcript",
+          reviewed,
+          "--video",
+          video,
+          "--output",
+          prepared,
+          "--chapters-output",
+          chapters,
+          "--manifest-output",
+          manifest,
+          "--work-dir",
+          cache,
+          "--resume",
+        ],
+        output: prepared,
+        env: "none",
+      },
+    ],
+  };
 }
 
-export async function pickCoverLaunch(item: ContentSummary): Promise<{
+export async function pickCoverLaunch(
+  item: ContentSummary,
+  title?: string,
+): Promise<{
   args: string[];
   output: string;
 }> {
   const video = item.videoRaw ?? item.videoSubtitled;
   if (video === undefined) throw new Error("no video to cover");
+  const coverTitle = title?.trim() === "" ? undefined : title?.trim();
   const args = [
     "--video",
     video,
     "--title",
-    item.title,
+    coverTitle ?? item.title,
     "--output-root",
     item.folderPath,
   ];
