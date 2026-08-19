@@ -98,6 +98,7 @@ describe("pipeline and filters", () => {
     folderPath: "/a",
     title: "A",
     recordedAt: 1,
+    createdMs: 1,
     covers: {},
     subtitles: {},
     hasPublishPackage: false,
@@ -191,13 +192,12 @@ describe("subtitle text", () => {
 });
 
 describe("recordedAt precedence", () => {
-  it("uses folder mtime for a freshly created folder, not the name date midnight", async () => {
+  it("keeps the name date even when the folder is touched later", async () => {
     const root = await mkdtemp(join(tmpdir(), "dsh-oil-new-"));
     const created = await createContentFolder(root, "刚建的内容", new Date(2026, 7, 16));
-    const mtime = new Date(2026, 7, 16, 14, 40);
-    await utimes(created.folderPath, mtime, mtime);
+    await utimes(created.folderPath, new Date(2026, 7, 18, 14, 40), new Date(2026, 7, 18, 14, 40));
     const items = await scanLibrary(root, emptyOverlay());
-    expect(items[0]?.recordedAt).toBe(mtime.getTime());
+    expect(items[0]?.recordedAt).toBe(new Date(2026, 7, 16).getTime());
   });
 
   it("keeps the planned name date for an old topic folder", async () => {
@@ -209,16 +209,16 @@ describe("recordedAt precedence", () => {
     expect(items[0]?.recordedAt).toBe(new Date(2026, 8, 1).getTime());
   });
 
-  it("prefers video mtime over both folder dates", async () => {
+  it("ignores video mtime: re-exporting must not move the episode", async () => {
     const root = await mkdtemp(join(tmpdir(), "dsh-oil-vid-"));
     const created = await createContentFolder(root, "有成片", new Date(2026, 7, 16));
     const video = join(created.folderPath, "final.mp4");
     await writeFile(video, "x");
-    const vtime = new Date(2026, 7, 16, 10, 0);
-    await utimes(video, vtime, vtime);
-    await utimes(created.folderPath, new Date(2026, 7, 16, 14, 40), new Date(2026, 7, 16, 14, 40));
+    // Simulate a re-export days later: the video mtime jumps forward.
+    await utimes(video, new Date(2026, 7, 18, 10, 0), new Date(2026, 7, 18, 10, 0));
+    await utimes(created.folderPath, new Date(2026, 7, 18, 14, 40), new Date(2026, 7, 18, 14, 40));
     const items = await scanLibrary(root, emptyOverlay());
-    expect(items[0]?.recordedAt).toBe(vtime.getTime());
+    expect(items[0]?.recordedAt).toBe(new Date(2026, 7, 16).getTime());
   });
 });
 
@@ -254,21 +254,31 @@ describe("scanLibrary", () => {
     expect(items[0]?.tags).toEqual(["AI"]);
   });
 
-  it("sorts by recordedAt: name date when planned, mtime when newer", async () => {
+  it("sorts by recordedAt: the name date decides, not the last touch", async () => {
     const root = await mkdtemp(join(tmpdir(), "dsh-oil-sort-"));
     const older = join(root, "2026-06-27_old video");
     const newer = join(root, "2026-08-15_new video");
     await mkdir(older);
     await mkdir(newer);
-    // "new video" was planned for Aug 15 but last touched in July: the planned
-    // name date wins. "old video" was touched in July, after its June date:
-    // the directory mtime wins.
+    // Both were touched in July; the name date still decides the order.
     await utimes(older, new Date(2026, 6, 1), new Date(2026, 6, 1));
     await utimes(newer, new Date(2026, 6, 2), new Date(2026, 6, 2));
     const items = await scanLibrary(root, emptyOverlay());
     expect(items.map((item) => item.id)).toEqual([
       "2026-08-15_new video",
       "2026-06-27_old video",
+    ]);
+  });
+
+  it("breaks same-date ties by folder creation time", async () => {
+    const root = await mkdtemp(join(tmpdir(), "dsh-oil-tie-"));
+    await mkdir(join(root, "2026-08-18_先做的一期"));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    await mkdir(join(root, "2026-08-18_后做的一期"));
+    const items = await scanLibrary(root, emptyOverlay());
+    expect(items.map((item) => item.id)).toEqual([
+      "2026-08-18_后做的一期",
+      "2026-08-18_先做的一期",
     ]);
   });
 

@@ -83,6 +83,7 @@ export interface ContentSummary {
   title: string;
   date?: string;
   recordedAt: number;
+  createdMs: number;
   videoRaw?: string;
   videoSubtitled?: string;
   covers: ContentCovers;

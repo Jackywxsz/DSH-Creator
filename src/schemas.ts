@@ -80,6 +80,7 @@ export const contentSummarySchema = z.object({
   title: z.string(),
   date: z.string().optional(),
   recordedAt: z.number(),
+  createdMs: z.number(),
   videoRaw: z.string().optional(),
   videoSubtitled: z.string().optional(),
   covers: contentCoversSchema,

@@ -82,6 +82,7 @@ function item(folderPath: string, videoRaw: string): ContentSummary {
     folderPath,
     title: "Demo title",
     recordedAt: 1,
+    createdMs: 1,
     videoRaw,
     covers: {},
     subtitles: {},

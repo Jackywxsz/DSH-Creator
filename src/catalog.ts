@@ -101,6 +101,14 @@ function hasCover(item: ContentSummary): boolean {
     || item.covers["16x9"] !== undefined;
 }
 
+function sameCalendarDay(a: number, b: number): boolean {
+  const left = new Date(a);
+  const right = new Date(b);
+  return left.getFullYear() === right.getFullYear()
+    && left.getMonth() === right.getMonth()
+    && left.getDate() === right.getDate();
+}
+
 function hasSubtitle(item: ContentSummary): boolean {
   return item.subtitles.srt !== undefined
     || item.subtitles.ass !== undefined
@@ -241,16 +249,18 @@ async function scanFolder(
     ...stringArrayField(packageJson, "wechatTags"),
   ].filter((tag, index, all) => all.indexOf(tag) === index);
 
-  const videoMtime = await fileMtime(videoSubtitled ?? videoRaw);
   const folderDate = folderDateMs(date);
-  // A fresh folder is created after its name date's midnight, so the real
-  // directory mtime is the meaningful "recorded at". Older planned topics
-  // keep the name date as the planned day.
-  const recordedAt = videoMtime ?? (
-    folderDate !== undefined && folderDate > info.mtimeMs
-      ? folderDate
-      : info.mtimeMs
-  );
+  // The name date is the episode's stable identity: re-exporting the video or
+  // regenerating covers must not move it in the list or change its displayed
+  // time. Folders created on their name day keep the precise creation time
+  // (birthtime never changes); planned folders named for a future day keep
+  // that date.
+  const createdMs = info.birthtimeMs > 0 ? info.birthtimeMs : info.mtimeMs;
+  const recordedAt = folderDate === undefined
+    ? createdMs
+    : sameCalendarDay(folderDate, createdMs)
+      ? createdMs
+      : folderDate;
 
   const overlayItem = overlay.items[folderName];
   const studioInFolder = names.find((name) => name.endsWith(".screenstudio"));
@@ -269,6 +279,7 @@ async function scanFolder(
     folderPath,
     title,
     recordedAt,
+    createdMs,
     covers,
     subtitles,
     hasPublishPackage: packageJson !== undefined,
@@ -325,6 +336,7 @@ export async function scanLibrary(
   }
   items.sort((left, right) => {
     if (left.recordedAt !== right.recordedAt) return right.recordedAt - left.recordedAt;
+    if (left.createdMs !== right.createdMs) return right.createdMs - left.createdMs;
     return basename(right.folderPath).localeCompare(basename(left.folderPath), "zh");
   });
   return items;

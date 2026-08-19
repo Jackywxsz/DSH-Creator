@@ -29,10 +29,10 @@ export const WORKFLOW_TONE: Record<WorkflowStage, StatusTone> = {
   live: "success",
 };
 
-function sortByProgress(items: ContentSummary[]): ContentSummary[] {
+function sortByRecency(items: ContentSummary[]): ContentSummary[] {
   return [...items].sort((a, b) => {
-    const liveDelta = (a.workflow === "live" ? 1 : 0) - (b.workflow === "live" ? 1 : 0);
-    return liveDelta !== 0 ? liveDelta : b.recordedAt - a.recordedAt;
+    if (a.recordedAt !== b.recordedAt) return b.recordedAt - a.recordedAt;
+    return b.createdMs - a.createdMs;
   });
 }
 
@@ -71,7 +71,7 @@ export function ContentSidebarPanel({
     setError(undefined);
     try {
       const result = await listContents(nextQuery, "all");
-      setItems(sortByProgress(result.items));
+      setItems(sortByRecency(result.items));
       const currentId = selectedIdRef.current;
       if (nextQuery === "" && currentId !== null && !result.items.some((item) => item.id === currentId)) {
         setSelectedId(null);

@@ -23,6 +23,7 @@ function item(folderPath: string, patch: Partial<ContentSummary> = {}): ContentS
     folderPath,
     title: "demo",
     recordedAt: 1,
+    createdMs: 1,
     covers: {},
     subtitles: {},
     hasPublishPackage: false,

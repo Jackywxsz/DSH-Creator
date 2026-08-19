@@ -10,6 +10,7 @@ function detail(patch: Partial<ContentDetail> = {}): ContentDetail {
     folderPath: "/tmp/demo",
     title: "Demo",
     recordedAt: 1,
+    createdMs: 1,
     covers: {},
     subtitles: {},
     hasPublishPackage: false,
