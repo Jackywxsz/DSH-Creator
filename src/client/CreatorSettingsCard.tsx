@@ -1,27 +1,25 @@
 import { useEffect, useState } from "react";
 import { IconChevronDownOutline14 } from "@deepseek-ai/dsh-client-ui-primitives";
 import type { InjectFace, PropsLocale, PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots";
+import type {} from "@deepseek-ai/dsh-client-ui-settings-plugins/client";
 
+import { PUBLISH_PLATFORMS } from "../platforms.ts";
 import { COVER_KEY_REFS, SUBTITLE_KEY_REFS } from "../secrets.ts";
-import type { CreatorProfile, CreatorSecrets } from "../types.ts";
+import type { CreatorCapabilities, CreatorProfile, CreatorSecrets, PublishPlatform } from "../types.ts";
 import type { CredentialsClient, SecretDraft } from "./credentialsApi.ts";
 import { applyDescribed, secretDraftOf } from "./credentialsApi.ts";
 import type { CreatorViewFace } from "./face.ts";
 import type { CreatorKey } from "./locales.ts";
+import { CREATOR_SETTINGS_PLATFORMS } from "./publishPlatforms.ts";
 import { ActionBar, ActionButton } from "./ui/ActionButton.tsx";
+import { StatusPill, type StatusTone } from "./ui/StatusPill.tsx";
 import "./CreatorSettingsCard.css";
-
-declare module "@deepseek-ai/dsh-client-ui-slots" {
-  interface SlotMap {
-    "settings.plugin.item": { kind: "list"; scope: "root"; owner: { children?: never } };
-  }
-}
 
 export type CreatorSettingsCardProps =
   & PropsRuntime<"settings.plugin.item">
   & PropsLocale<"dsh.oil.creator">
   & InjectFace<
-    Pick<CreatorViewFace, "ready" | "getSettings" | "setLibraryRoot" | "setProfile" | "pickDirectory">
+    Pick<CreatorViewFace, "ready" | "getSettings" | "getCapabilities" | "setLibraryRoot" | "setProfile" | "setScriptRules" | "pickDirectory">
     & { credentials: CredentialsClient | undefined }
   >;
 
@@ -30,20 +28,36 @@ const EMPTY_SECRETS: CreatorSecrets = {
   cover: { kind: "cover", ref: COVER_KEY_REFS[0], configured: false, writable: true },
 };
 
-const EMPTY_PROFILE: CreatorProfile = { platforms: {} };
+const EMPTY_PROFILE: CreatorProfile = { enabledPlatforms: [...PUBLISH_PLATFORMS] };
+
+const CAPABILITY_ROWS: ReadonlyArray<{ id: keyof CreatorCapabilities; label: CreatorKey }> = [
+  { id: "library", label: "settings.capability.library" },
+  { id: "screenStudio", label: "settings.capability.screenStudio" },
+  { id: "subtitleSkill", label: "settings.capability.subtitle" },
+  { id: "coverSkill", label: "settings.capability.cover" },
+  { id: "editingSkill", label: "settings.capability.editing" },
+  { id: "publishSkill", label: "settings.capability.publish" },
+  { id: "articleSkill", label: "settings.capability.article" },
+  { id: "publishSync", label: "settings.capability.ego" },
+];
+
+function capabilityTone(state: CreatorCapabilities[keyof CreatorCapabilities]["state"]): StatusTone {
+  return state === "ready" ? "success" : "neutral";
+}
+
+function capabilityStateKey(state: CreatorCapabilities[keyof CreatorCapabilities]["state"]): CreatorKey {
+  if (state === "ready") return "settings.state.ready";
+  if (state === "unsupported") return "settings.state.unsupported";
+  return "settings.state.missing";
+}
 
 function cloneProfile(profile: CreatorProfile): CreatorProfile {
-  return {
-    platforms: { ...profile.platforms },
-  };
+  return { enabledPlatforms: [...profile.enabledPlatforms] };
 }
 
 function sameProfile(left: CreatorProfile, right: CreatorProfile): boolean {
-  return (left.platforms.xiaohongshu ?? "") === (right.platforms.xiaohongshu ?? "")
-    && (left.platforms.douyin ?? "") === (right.platforms.douyin ?? "")
-    && (left.platforms.bilibili ?? "") === (right.platforms.bilibili ?? "")
-    && (left.platforms.wechat ?? "") === (right.platforms.wechat ?? "")
-    && (left.platforms.youtube ?? "") === (right.platforms.youtube ?? "");
+  return left.enabledPlatforms.length === right.enabledPlatforms.length
+    && left.enabledPlatforms.every((platform, index) => platform === right.enabledPlatforms[index]);
 }
 
 export function CreatorSettingsCard({
@@ -52,7 +66,9 @@ export function CreatorSettingsCard({
   getSettings,
   setLibraryRoot,
   setProfile,
+  setScriptRules,
   pickDirectory,
+  getCapabilities,
   credentials,
 }: CreatorSettingsCardProps) {
   const [open, setOpen] = useState(false);
@@ -60,11 +76,14 @@ export function CreatorSettingsCard({
   const [draftRoot, setDraftRoot] = useState("");
   const [savedProfile, setSavedProfile] = useState<CreatorProfile>(EMPTY_PROFILE);
   const [draftProfile, setDraftProfile] = useState<CreatorProfile>(EMPTY_PROFILE);
+  const [savedRules, setSavedRules] = useState("");
+  const [draftRules, setDraftRules] = useState("");
   const [secrets, setSecrets] = useState<SecretDraft[]>([
     secretDraftOf(EMPTY_SECRETS.subtitle),
     secretDraftOf(EMPTY_SECRETS.cover),
   ]);
   const [loaded, setLoaded] = useState(false);
+  const [capabilities, setCapabilities] = useState<CreatorCapabilities | undefined>(undefined);
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -79,6 +98,8 @@ export function CreatorSettingsCard({
       setDraftRoot(settings.libraryRoot);
       setSavedProfile(cloneProfile(settings.profile));
       setDraftProfile(cloneProfile(settings.profile));
+      setSavedRules(settings.scriptRules ?? "");
+      setDraftRules(settings.scriptRules ?? "");
       const nextSecrets = settings.secrets ?? EMPTY_SECRETS;
       setSecrets([
         secretDraftOf(nextSecrets.subtitle),
@@ -114,10 +135,22 @@ export function CreatorSettingsCard({
     };
   }, [open, credentials, secrets.map((item) => item.ref).join(",")]);
 
+  useEffect(() => {
+    if (!open || !ready()) return;
+    let cancelled = false;
+    void getCapabilities().then((next) => {
+      if (!cancelled) setCapabilities(next);
+    }, () => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [open, ready, getCapabilities]);
+
   const dirtyRoot = draftRoot !== savedRoot;
   const dirtyProfile = !sameProfile(draftProfile, savedProfile);
+  const dirtyRules = draftRules !== savedRules;
   const dirtyKeys = secrets.some((item) => item.nextValue.trim() !== "");
-  const dirty = dirtyRoot || dirtyProfile || dirtyKeys;
+  const dirty = dirtyRoot || dirtyProfile || dirtyRules || dirtyKeys;
   const title = t("settings.title" as CreatorKey);
 
   const onPick = async () => {
@@ -128,15 +161,12 @@ export function CreatorSettingsCard({
     setFailed(false);
   };
 
-  const patchProfile = (patch: Partial<CreatorProfile> | { platform: keyof CreatorProfile["platforms"]; value: string }) => {
+  const patchProfile = (platform: PublishPlatform, enabled: boolean) => {
     setDraftProfile((current) => {
-      if ("platform" in patch) {
-        const platforms = { ...current.platforms };
-        if (patch.value.trim() === "") delete platforms[patch.platform];
-        else platforms[patch.platform] = patch.value;
-        return { ...current, platforms };
-      }
-      return { ...current, ...patch };
+      const enabledPlatforms = enabled
+        ? [...new Set([...current.enabledPlatforms, platform])]
+        : current.enabledPlatforms.filter((item) => item !== platform);
+      return { enabledPlatforms };
     });
     setSaved(false);
     setFailed(false);
@@ -177,6 +207,10 @@ export function CreatorSettingsCard({
         await setProfile(draftProfile);
         setSavedProfile(cloneProfile(draftProfile));
       }
+      if (dirtyRules) {
+        await setScriptRules(draftRules);
+        setSavedRules(draftRules);
+      }
       setSaved(true);
     } catch {
       setFailed(true);
@@ -203,6 +237,25 @@ export function CreatorSettingsCard({
       </button>
       {open && (
         <div className="body">
+          {capabilities !== undefined && (
+            <div className="field">
+              <span className="fieldLabel">{t("settings.capabilities" as CreatorKey)}</span>
+              <span className="fieldHint">{t("settings.capabilitiesHint" as CreatorKey)}</span>
+              <div className="capabilityGrid">
+                {CAPABILITY_ROWS.map((row) => {
+                  const item = capabilities[row.id];
+                  return (
+                    <span key={row.id} className="capabilityItem" title={item.detail}>
+                      <span className="capabilityName">{t(row.label)}</span>
+                      <StatusPill tone={capabilityTone(item.state)}>
+                        {t(capabilityStateKey(item.state))}
+                      </StatusPill>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           <label className="field">
             <span className="fieldLabel">{t("settings.libraryRoot" as CreatorKey)}</span>
             <span className="fieldHint">{t("settings.libraryRootHint" as CreatorKey)}</span>
@@ -216,24 +269,35 @@ export function CreatorSettingsCard({
             </span>
           </label>
           <div className="field">
-            <span className="fieldLabel">{t("settings.profile" as CreatorKey)}</span>
-            <span className="fieldHint">{t("settings.profileHint" as CreatorKey)}</span>
-            {([
-              "xiaohongshu",
-              "douyin",
-              "bilibili",
-              "wechat",
-              "youtube",
-            ] as const).map((platform) => (
-              <label className="inputLabel" key={platform}>
-                <span>{t(`settings.platform.${platform}` as CreatorKey)}</span>
-                <input
-                  className="input"
-                  value={draftProfile.platforms[platform] ?? ""}
-                  onChange={(event) => { patchProfile({ platform, value: event.target.value }); }}
-                />
+            <span className="fieldLabel">{t("settings.enabledPlatforms" as CreatorKey)}</span>
+            <span className="fieldHint">{t("settings.enabledPlatformsHint" as CreatorKey)}</span>
+            {CREATOR_SETTINGS_PLATFORMS.map((platform) => (
+              <label className="inputLabel" key={platform.key}>
+                <span>
+                  <input
+                    type="checkbox"
+                    checked={draftProfile.enabledPlatforms.includes(platform.key)}
+                    onChange={(event) => { patchProfile(platform.key, event.target.checked); }}
+                  />
+                  {t(platform.label)}
+                </span>
               </label>
             ))}
+          </div>
+          <div className="field">
+            <span className="fieldLabel">{t("settings.scriptRules" as CreatorKey)}</span>
+            <span className="fieldHint">{t("settings.scriptRulesHint" as CreatorKey)}</span>
+            <textarea
+              className="input textarea"
+              rows={6}
+              placeholder={t("settings.scriptRulesPlaceholder" as CreatorKey)}
+              value={draftRules}
+              onChange={(event) => {
+                setDraftRules(event.target.value);
+                setSaved(false);
+                setFailed(false);
+              }}
+            />
           </div>
           <div className="field">
             <span className="fieldLabel">{t("settings.secrets" as CreatorKey)}</span>
@@ -242,7 +306,7 @@ export function CreatorSettingsCard({
               <label className="inputLabel" key={item.kind}>
                 <span className="secretHead">
                   <span>{t(`settings.secret.${item.kind}` as CreatorKey)}</span>
-                  <span className={`badge ${item.configured ? "ok" : "muted"}`}>
+                  <StatusPill tone={item.loadError ? "error" : item.configured ? "success" : "neutral"}>
                     {t((
                       item.loadError
                         ? "settings.secret.loadFailed"
@@ -250,7 +314,7 @@ export function CreatorSettingsCard({
                           ? "settings.secret.configured"
                           : "settings.secret.missing"
                     ) as CreatorKey)}
-                  </span>
+                  </StatusPill>
                 </span>
                 <span className="fieldHint">{t(`settings.secret.${item.kind}Hint` as CreatorKey)}</span>
                 <input
@@ -286,6 +350,7 @@ export function CreatorSettingsCard({
                 onClick={() => {
                   setDraftRoot(savedRoot);
                   setDraftProfile(cloneProfile(savedProfile));
+                  setDraftRules(savedRules);
                   setSecrets((current) => current.map((item) => ({ ...item, nextValue: "" })));
                   setFailed(false);
                   setKeyFailed(false);

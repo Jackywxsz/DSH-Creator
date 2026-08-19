@@ -1,12 +1,20 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { dirname, resolve } from "node:path";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, relative, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const src = resolve(process.argv[2] ?? "scripts/collect-publish.mjs");
-const dest = resolve(process.argv[3] ?? "lib/collect-publish.mjs");
+const scriptDirectory = dirname(fileURLToPath(import.meta.url));
+const repositoryRoot = resolve(scriptDirectory, "..");
+const src = resolve(repositoryRoot, process.argv[2] ?? "scripts/collect-publish.mjs");
+const dest = resolve(repositoryRoot, process.argv[3] ?? "lib/collect-publish.mjs");
+const libDirectory = resolve(repositoryRoot, "lib");
+
+if (dest !== libDirectory && !dest.startsWith(`${libDirectory}${sep}`)) {
+  throw new Error(
+    `copy-inplace destination must stay inside ${libDirectory}: ${relative(repositoryRoot, dest)}`,
+  );
+}
+
 const body = readFileSync(src);
 mkdirSync(dirname(dest), { recursive: true });
 writeFileSync(dest, body);
-const packed = resolve(homedir(), ".dsh/profiles/web/node_modules/dsh-oil-creator/lib/collect-publish.mjs");
-if (existsSync(packed) && packed !== dest) writeFileSync(packed, body);

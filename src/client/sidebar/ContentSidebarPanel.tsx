@@ -3,7 +3,6 @@ import {
   Button,
   IconBrowseOutline16,
   IconCloseFill14,
-  IconFolderOpenOutline16,
   IconProjectAddOutline16,
   IconRefreshOutline16,
   IconSearchOutline16,
@@ -12,21 +11,36 @@ import {
   Tooltip,
 } from "@deepseek-ai/dsh-client-ui-primitives";
 
-import type { ContentSummary } from "../../types.ts";
+import type { ContentSummary, WorkflowStage } from "../../types.ts";
 import { CoverThumb, coverThumbRevision } from "../CoverThumb.tsx";
 import type { CreatorViewFace } from "../face.ts";
 import { useLibraryEpoch, useSelectedContentId } from "../contentSelection.ts";
 import type { CreatorKey } from "../locales.ts";
 import { formatRelativeTime } from "../relativeTime.ts";
+import { StatusPill, type StatusTone } from "../ui/StatusPill.tsx";
 import "./ContentSidebarPanel.css";
+
+export const WORKFLOW_TONE: Record<WorkflowStage, StatusTone> = {
+  idle: "neutral",
+  record: "pending",
+  cut: "pending",
+  finish: "pending",
+  publish: "active",
+  live: "success",
+};
+
+function sortByProgress(items: ContentSummary[]): ContentSummary[] {
+  return [...items].sort((a, b) => {
+    const liveDelta = (a.workflow === "live" ? 1 : 0) - (b.workflow === "live" ? 1 : 0);
+    return liveDelta !== 0 ? liveDelta : b.recordedAt - a.recordedAt;
+  });
+}
 
 export function ContentSidebarPanel({
   t,
   ready,
   listContents,
   getCoverThumb,
-  pickDirectory,
-  setLibraryRoot,
   refreshCatalog,
   createContent,
 }: CreatorViewFace & {
@@ -57,7 +71,7 @@ export function ContentSidebarPanel({
     setError(undefined);
     try {
       const result = await listContents(nextQuery, "all");
-      setItems(result.items);
+      setItems(sortByProgress(result.items));
       const currentId = selectedIdRef.current;
       if (nextQuery === "" && currentId !== null && !result.items.some((item) => item.id === currentId)) {
         setSelectedId(null);
@@ -102,13 +116,6 @@ export function ContentSidebarPanel({
     setSearchOpen(false);
   };
 
-  const onPick = async () => {
-    const path = await pickDirectory();
-    if (path === null) return;
-    await setLibraryRoot(path);
-    await loadList(query);
-  };
-
   const closeCreate = (): void => {
     if (creating) return;
     setCreateOpen(false);
@@ -137,9 +144,6 @@ export function ContentSidebarPanel({
   return (
     <div className="contentPanel" data-surface="content-panel">
       <div className="contentHeader">
-        <span className={searchOpen ? "sectionLabel hidden" : "sectionLabel"}>
-          {t("tab")}
-        </span>
         <div className={searchOpen ? "searchSlot expanded" : "searchSlot"}>
           <div
             ref={searchRoot}
@@ -188,16 +192,6 @@ export function ContentSidebarPanel({
           </div>
         </div>
         <div className={searchOpen ? "headerActions hidden" : "headerActions"}>
-          <Tooltip label={t("toolbar.pick")} delayMs={500}>
-            <button
-              type="button"
-              className="iconButton"
-              aria-label={t("toolbar.pick")}
-              onClick={() => { void onPick(); }}
-            >
-              <IconFolderOpenOutline16 size={16} />
-            </button>
-          </Tooltip>
           <Tooltip label={t("toolbar.refresh")} delayMs={500}>
             <button
               type="button"
@@ -287,10 +281,11 @@ export function ContentSidebarPanel({
             </span>
             <span className="rowBody">
               <span className="rowTitle">{item.title}</span>
-              <span className="rowDate">
-                {t(`inspector.stage.${item.workflow}` as CreatorKey)}
-                {" · "}
-                {formatRelativeTime(item.recordedAt, Date.now(), t)}
+              <span className="rowMeta">
+                <StatusPill tone={WORKFLOW_TONE[item.workflow]}>
+                  {t(`inspector.stage.${item.workflow}` as CreatorKey)}
+                </StatusPill>
+                <span className="rowDate">{formatRelativeTime(item.recordedAt, Date.now(), t)}</span>
               </span>
             </span>
           </button>

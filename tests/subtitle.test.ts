@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { mkdtemp } from "node:fs/promises";
@@ -10,6 +10,8 @@ import {
   parseSrtClock,
   pickBurnLaunch,
   pickPreviewLaunch,
+  resolveSubtitleSkill,
+  spawnPython,
   srtToSegments,
   uniqueSubtitledPath,
 } from "../src/subtitle.ts";
@@ -109,5 +111,69 @@ describe("pickPreviewLaunch", () => {
     }));
     expect(launch.args[0]).toBe(video);
     expect(launch.args[1]?.endsWith("preview-transcript.json")).toBe(true);
+  });
+});
+
+describe("resolveSubtitleSkill", () => {
+  it("installs into the configured path when that directory is missing", async () => {
+    const root = await mkdtemp(join(tmpdir(), "oil-subtitle-custom-"));
+    const configured = join(root, "custom subtitle");
+
+    await expect(resolveSubtitleSkill(configured)).rejects.toThrow(
+      `git clone https://github.com/oil-oil/oil-subtitle '${configured}' && bash '${join(configured, "setup.sh")}'`,
+    );
+  });
+});
+
+describe("spawnPython", () => {
+  async function childEnv(extraEnv?: Record<string, string>): Promise<{
+    dash?: string;
+    zen?: string;
+    path?: string;
+  }> {
+    const folder = await mkdtemp(join(tmpdir(), "oil-spawn-env-"));
+    const output = join(folder, "env.json");
+    const script = `require("node:fs").writeFileSync(${JSON.stringify(output)}, JSON.stringify({ dash: process.env.DASHSCOPE_API_KEY, zen: process.env.ZENMUX_API_KEY, path: process.env.PATH }));`;
+    const child = spawnPython(process.execPath, "-e", [script], extraEnv);
+    await new Promise<void>((resolve, reject) => {
+      child.once("error", reject);
+      child.once("exit", (code) => {
+        if (code === 0) resolve();
+        else reject(new Error(`child exited with ${String(code)}`));
+      });
+    });
+    return JSON.parse(await readFile(output, "utf8")) as {
+      dash?: string;
+      zen?: string;
+      path?: string;
+    };
+  }
+
+  it("keeps ordinary env, strips global plugin keys, and honors explicit step keys", async () => {
+    const previousDash = process.env.DASHSCOPE_API_KEY;
+    const previousZen = process.env.ZENMUX_API_KEY;
+    process.env.DASHSCOPE_API_KEY = "global-dash";
+    process.env.ZENMUX_API_KEY = "global-zen";
+    try {
+      const none = await childEnv();
+      const preview = await childEnv();
+      const subtitle = await childEnv({ DASHSCOPE_API_KEY: "step-dash" });
+      const cover = await childEnv({ ZENMUX_API_KEY: "step-zen" });
+
+      expect(none.dash).toBeUndefined();
+      expect(none.zen).toBeUndefined();
+      expect(preview.dash).toBeUndefined();
+      expect(preview.zen).toBeUndefined();
+      expect(subtitle).toMatchObject({ dash: "step-dash" });
+      expect(subtitle.zen).toBeUndefined();
+      expect(cover).toMatchObject({ zen: "step-zen" });
+      expect(cover.dash).toBeUndefined();
+      expect(none.path).toBe(process.env.PATH);
+    } finally {
+      if (previousDash === undefined) delete process.env.DASHSCOPE_API_KEY;
+      else process.env.DASHSCOPE_API_KEY = previousDash;
+      if (previousZen === undefined) delete process.env.ZENMUX_API_KEY;
+      else process.env.ZENMUX_API_KEY = previousZen;
+    }
   });
 });

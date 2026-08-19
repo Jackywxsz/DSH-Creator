@@ -1,8 +1,10 @@
 import { defineTool, type ToolDefinition } from "@deepseek-ai/dsh-tools";
 
+import { normalizeEnabledPlatforms } from "./overlay.ts";
+import { PUBLISH_PLATFORMS } from "./platforms.ts";
 import { isPublishMark, isPublishPlatform } from "./publishStatus.ts";
 import type { OilCreatorService } from "./service.ts";
-import type { CreatorProfile } from "./types.ts";
+import type { CreatorProfile, PublishPlatform } from "./types.ts";
 
 interface ToolsContext {
   tools: { register: (tool: ToolDefinition) => void };
@@ -27,6 +29,94 @@ function present(title: string, rawInput: unknown): { card: "generic"; title: st
 const JSON_VALUE = { type: "json" } as const;
 
 export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorService): void {
+  ctx.tools.register(defineTool({
+    name: "oil_creator_guide",
+    description:
+      "Self-bootstrap guide for this plugin. Call this when the user asks what this plugin does, "
+      + "how to use it, or when you are unsure which step comes next. "
+      + "Returns the full workflow (library, script rules, subtitles, covers, publish, data sync) "
+      + "with the live capability status, including whether Ego Browser is available for auto-publish and data collection.",
+    parameters: {},
+    output: {
+      schema: JSON_VALUE,
+      render: (_args, value) => {
+        const result = value as { status?: { capabilities?: Record<string, { state?: string }> } };
+        const capabilities = Object.values(result.status?.capabilities ?? {});
+        const ready = capabilities.filter((item) => item.state === "ready").length;
+        return compactText("Guide", `${ready}/${capabilities.length} capabilities ready`);
+      },
+    },
+    presentCall: (args) => present("Creator guide", args),
+    execute: (_args, exec) => service.getCreatorGuide(signalOf(exec)).then(asJson),
+  }));
+
+  ctx.tools.register(defineTool({
+    name: "oil_script_rules",
+    description:
+      "Read or update the creator's script rules (persona): tone, structure, audience, and taboos "
+      + "that every script.md must follow. Omit text to read. Send text to save. Empty text clears. "
+      + "Ask the user about their persona before writing rules for the first time; merge new long-term "
+      + "preferences into the existing rules instead of replacing them.",
+    parameters: {
+      text: { type: "string", description: "Full script rules text. Omit to read. Empty string clears." },
+    },
+    output: {
+      schema: JSON_VALUE,
+      render: (_args, value) => {
+        const settings = value as { scriptRules?: string };
+        return compactText("Script rules", settings.scriptRules === undefined ? "not set" : "saved");
+      },
+    },
+    presentCall: (args) => present("Script rules", args),
+    async execute(args, exec) {
+      const signal = signalOf(exec);
+      if (typeof args.text !== "string") {
+        return asJson(await service.getSettings({}, signal));
+      }
+      return asJson(await service.setScriptRules({ text: args.text }, signal));
+    },
+  }));
+
+  ctx.tools.register(defineTool({
+    name: "oil_creator_setup",
+    description:
+      "Inspect the creator workspace, optional local capabilities, credential status, and current configuration. "
+      + "Omit fields for a read-only diagnosis. Proposed changes are previewed unless apply=true. "
+      + "Only use apply=true after the user confirms the exact directory and enabled platform changes.",
+    parameters: {
+      apply: { type: "boolean", description: "False previews changes. True saves them after user confirmation." },
+      libraryRoot: { type: "string", description: "Existing absolute content directory, or a path starting with ~/." },
+      enabledPlatforms: {
+        type: "array",
+        items: { type: "string", enum: PUBLISH_PLATFORMS },
+        description: "Complete list of enabled platforms. Empty disables all platforms.",
+      },
+    },
+    output: {
+      schema: JSON_VALUE,
+      render: (_args, value) => {
+        const result = value as {
+          applied?: boolean;
+          status?: { capabilities?: Record<string, { state?: string }> };
+        };
+        const capabilities = Object.values(result.status?.capabilities ?? {});
+        const ready = capabilities.filter((item) => item.state === "ready").length;
+        return compactText(result.applied ? "Setup applied" : "Setup checked", `${ready}/${capabilities.length} capabilities ready`);
+      },
+    },
+    presentCall: (args) => present("Creator setup", args),
+    async execute(args, exec) {
+      const request = {
+        apply: args.apply === true,
+        ...(typeof args.libraryRoot === "string" ? { libraryRoot: args.libraryRoot } : {}),
+        ...(Array.isArray(args.enabledPlatforms)
+          ? { enabledPlatforms: normalizeEnabledPlatforms(args.enabledPlatforms) }
+          : {}),
+      };
+      return asJson(await service.configureCreator(request, signalOf(exec)));
+    },
+  }));
+
   ctx.tools.register(defineTool({
     name: "oil_create_content",
     description:
@@ -64,7 +154,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
       studioPath: { type: "string", description: "Bind a .screenstudio project to this episode." },
       publishPlatform: {
         type: "string",
-        enum: ["xiaohongshu", "douyin", "bilibili", "wechat"],
+        enum: PUBLISH_PLATFORMS,
         description: "Platform to mark. Pair with publishStatus.",
       },
       publishStatus: {
@@ -111,14 +201,14 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   ctx.tools.register(defineTool({
     name: "oil_creator_profile",
     description:
-      "Read or update oil's creator homepage links. "
-      + "Omit fields to read. Send any field to merge-update.",
+      "Read or update the list of enabled publishing platforms. "
+      + "Omit the list to read. Send the complete list to replace it.",
     parameters: {
-      xiaohongshu: { type: "string", description: "Xiaohongshu handle or homepage." },
-      douyin: { type: "string" },
-      bilibili: { type: "string" },
-      wechat: { type: "string", description: "WeChat Channels handle or homepage." },
-      youtube: { type: "string" },
+      enabledPlatforms: {
+        type: "array",
+        items: { type: "string", enum: PUBLISH_PLATFORMS },
+        description: "Complete list of enabled platforms. Empty disables all platforms.",
+      },
     },
     output: {
       schema: JSON_VALUE,
@@ -128,24 +218,10 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
     async execute(args, exec) {
       const signal = signalOf(exec);
       const current = (await service.getSettings({}, signal)).profile;
-      const keys = [
-        "xiaohongshu",
-        "douyin",
-        "bilibili",
-        "wechat",
-        "youtube",
-      ] as const;
-      const touched = keys.some((key) => typeof args[key] === "string");
-      if (!touched) return asJson(current);
+      if (!Array.isArray(args.enabledPlatforms)) return asJson(current);
       const next: CreatorProfile = {
-        platforms: { ...current.platforms },
+        enabledPlatforms: normalizeEnabledPlatforms(args.enabledPlatforms),
       };
-      for (const key of keys) {
-        const value = args[key];
-        if (typeof value !== "string") continue;
-        if (value.trim() === "") delete next.platforms[key];
-        else next.platforms[key] = value.trim();
-      }
       return asJson((await service.setProfile({ profile: next }, signal)).profile);
     },
   }));
@@ -194,8 +270,8 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
       },
       platform: {
         type: "string",
-        enum: ["xiaohongshu", "douyin", "bilibili", "wechat"],
-        description: "Collect only this platform. Omit to visit all four.",
+        enum: PUBLISH_PLATFORMS,
+        description: "Collect only this platform. Omit to visit all enabled platforms.",
       },
       force: {
         type: "boolean",
@@ -218,7 +294,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
     execute: (args, exec) => {
       const request: {
         id?: string;
-        platform?: "xiaohongshu" | "douyin" | "bilibili" | "wechat";
+        platform?: PublishPlatform;
         force?: boolean;
       } = {};
       if (args.id !== undefined && args.id !== "") request.id = args.id;
@@ -337,7 +413,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
     name: "oil_generate_subtitles",
     description:
       "Run the oil-subtitle workflow on the episode video: transcribe, lay out, and burn. "
-      + "Requires DASHSCOPE_API_KEY (and ZENMUX_API_KEY for layout) in Settings → Plugins → 内容工作台. "
+      + "Requires DASHSCOPE_API_KEY in Settings → Plugins → 内容工作台. "
       + "Does not wait for chat review. Returns immediately. When finished, the folder has *_subtitled.mp4.",
     parameters: {
       id: { type: "string", required: true, description: "Folder id." },

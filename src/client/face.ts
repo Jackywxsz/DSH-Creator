@@ -2,6 +2,7 @@ import type {
   ContentDetail,
   ContentFilter,
   CoverThumbResult,
+  CreatorCapabilities,
   CreatorProfile,
   LibrarySettings,
   ListContentsResult,
@@ -26,8 +27,10 @@ export interface CreatorViewFace {
   pickDirectory: () => Promise<string | null>;
   openPath: (path: string) => Promise<void>;
   getSettings: () => Promise<LibrarySettings>;
+  getCapabilities: () => Promise<CreatorCapabilities>;
   setLibraryRoot: (path: string) => Promise<void>;
   setProfile: (profile: CreatorProfile) => Promise<void>;
+  setScriptRules: (text: string) => Promise<void>;
   refreshCatalog: () => Promise<ListContentsResult>;
   createContent: (title: string) => Promise<{ id: string; folderPath: string }>;
   markReadyToRecord: (id: string) => Promise<ContentDetail>;

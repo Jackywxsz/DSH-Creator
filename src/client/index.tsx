@@ -3,8 +3,10 @@ import type {} from "@deepseek-ai/dsh-client-locale/client";
 import type {} from "@deepseek-ai/dsh-client-ui-layout/client";
 import type {} from "@deepseek-ai/dsh-api-remotes/client";
 import type {} from "@deepseek-ai/dsh-client-connection/client";
+import type {} from "@deepseek-ai/dsh-client-ui-settings-plugins/client";
 
 import { TYPERT_REMOTE } from "../remote.ts";
+import { CREATOR_SETTINGS_NAMESPACE } from "../settingsContract.ts";
 import { startLibraryLiveSync } from "./catalogSync.ts";
 import { remountPluginCss, releasePluginCss } from "./pluginCss.ts";
 import { releaseShellChrome } from "./contentSelection.ts";
@@ -14,6 +16,7 @@ import type {
   ContentFilter,
   CoverThumbResult,
   CreateContentResult,
+  CreatorCapabilities,
   CreatorProfile,
   LibrarySettings,
   ListContentsResult,
@@ -27,6 +30,7 @@ import type {
 import { ContentInspector } from "./ContentInspector.tsx";
 import {
   bumpLibrary,
+  bumpProfile,
   getSelectedContentId,
   setSelectedContentId,
   subscribeSelectedContentId,
@@ -35,9 +39,12 @@ import type { CredentialsClient } from "./credentialsApi.ts";
 import { CreatorSettingsCard } from "./CreatorSettingsCard.tsx";
 import type { CreatorViewFace } from "./face.ts";
 import { en, NS, type CreatorKey, zh } from "./locales.ts";
-import { installOilHero } from "./oilHero.ts";
 import { OilSidebarRoot } from "./sidebar/OilSidebarRoot.tsx";
 import type { OilSidebarInjected, OilSidebarSlotProps } from "./sidebar/slots.ts";
+import {
+  registerCreatorSettingsCard,
+  type CompatibleSettingsSlots,
+} from "./settingsSlot.ts";
 
 declare module "@deepseek-ai/dsh-client-ui-slots" {
   interface LocaleNamespaceMap {
@@ -59,9 +66,11 @@ interface OilCreatorRemote {
   getArticleMedia: (request: { id: string }) => Promise<RemoteAnswer<ArticleMediaResult>>;
   getSubtitleText: (request: { id: string }) => Promise<RemoteAnswer<{ text: string; cues: Array<{ text: string; at?: string }> }>>;
   getSettings: (request: Record<string, never>) => Promise<RemoteAnswer<LibrarySettings>>;
+  getCapabilities: (request: Record<string, never>) => Promise<RemoteAnswer<{ capabilities: CreatorCapabilities }>>;
   getRevision: (request: Record<string, never>) => Promise<RemoteAnswer<{ revision: number }>>;
   setLibraryRoot: (request: { path: string }) => Promise<RemoteAnswer<LibrarySettings>>;
   setProfile: (request: { profile: CreatorProfile }) => Promise<RemoteAnswer<LibrarySettings>>;
+  setScriptRules: (request: { text: string }) => Promise<RemoteAnswer<LibrarySettings>>;
   refreshCatalog: (request: Record<string, never>) => Promise<RemoteAnswer<ListContentsResult>>;
   createContent: (request: { title: string }) => Promise<RemoteAnswer<CreateContentResult>>;
   setContentStage: (request: { id: string; readyToRecord: boolean }) => Promise<RemoteAnswer<ContentDetail>>;
@@ -104,8 +113,6 @@ export function apply(ctx: ClientContext): void {
       releaseShellChrome();
     };
   }, "dsh-oil-creator: chrome");
-  ctx.effect(() => installOilHero(), "dsh-oil-creator: hero brand");
-
   const remoteOf = (): OilCreatorRemote | undefined =>
     ctx.get("remote.oilCreator") as OilCreatorRemote | undefined;
 
@@ -158,6 +165,11 @@ export function apply(ctx: ClientContext): void {
       if (remote === undefined) throw new Error("remote unavailable");
       return unwrap(await remote.getSettings({}), "settings failed");
     },
+    getCapabilities: async () => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      return unwrap(await remote.getCapabilities({}), "capabilities failed").capabilities;
+    },
     getRevision: async () => {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
@@ -173,6 +185,13 @@ export function apply(ctx: ClientContext): void {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
       unwrap(await remote.setProfile({ profile }), "set profile failed");
+      bumpProfile();
+    },
+    setScriptRules: async (text) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      unwrap(await remote.setScriptRules({ text }), "set script rules failed");
+      bumpProfile();
     },
     refreshCatalog: async () => {
       const remote = remoteOf();
@@ -314,64 +333,71 @@ export function apply(ctx: ClientContext): void {
     }, BoundSidebar),
   );
 
-  ctx.effect(() => {
-    let cancelled = false;
-    let stopLive = () => {};
-    let stopOverlay = () => {};
-    let stopSettings = () => {};
-    void (async () => {
-      await ctx.remote.$mount(TYPERT_REMOTE);
-      if (cancelled) return;
-      stopOverlay = ctx.slots.inject("shell.overlay", () => {
-        let disposeOccupant: (() => void) | undefined;
-        const release = (): void => {
-          disposeOccupant?.();
-          disposeOccupant = undefined;
-        };
-        const sync = (): void => {
-          if (getSelectedContentId() === null) {
-            release();
-            return;
-          }
-          if (disposeOccupant !== undefined) return;
-          disposeOccupant = ctx.slots.register({
-            name: "shell.overlay",
-            id: "oil-creator-inspector",
-            order: 20,
-            locale: NS,
-            inject: () => ({
-              ...face(),
-              closeDetails: () => {
-                setSelectedContentId(null);
-              },
-            }),
-          }, ContentInspector);
-        };
-        const stop = subscribeSelectedContentId(sync);
-        sync();
-        return () => {
-          stop();
+  ctx.effect(async () => {
+    const disposeRemote = await ctx.remote.$mount(TYPERT_REMOTE);
+    // Cordis waits for async effect setup during unload. Do not install new
+    // slots after the owner has already entered teardown; release the remote
+    // contribution immediately in that race.
+    if (ctx.fiber.state >= 5) {
+      await disposeRemote();
+      return () => {};
+    }
+    bumpProfile();
+
+    const stopOverlay = ctx.slots.inject("shell.overlay", () => {
+      let disposeOccupant: (() => void) | undefined;
+      const release = (): void => {
+        disposeOccupant?.();
+        disposeOccupant = undefined;
+      };
+      const sync = (): void => {
+        if (getSelectedContentId() === null) {
           release();
-        };
-      });
-      stopSettings = ctx.slots.inject("settings.plugin.item", () =>
-        ctx.slots.register({
-          name: "settings.plugin.item",
-          id: "dsh-oil-creator",
-          order: 40,
+          return;
+        }
+        if (disposeOccupant !== undefined) return;
+        disposeOccupant = ctx.slots.register({
+          name: "shell.overlay",
+          id: "oil-creator-inspector",
+          order: 20,
+          locale: NS,
+          inject: () => ({
+            ...face(),
+            closeDetails: () => {
+              setSelectedContentId(null);
+            },
+          }),
+        }, ContentInspector);
+      };
+      const stop = subscribeSelectedContentId(sync);
+      sync();
+      return () => {
+        stop();
+        release();
+      };
+    });
+    const stopSettings = ctx.slots.inject("settings.plugin.item", () =>
+      registerCreatorSettingsCard(
+        ctx.slots as unknown as CompatibleSettingsSlots,
+        CreatorSettingsCard,
+        {
+          namespace: CREATOR_SETTINGS_NAMESPACE,
+          legacyId: "dsh-oil-creator",
+          legacyOrder: 40,
           locale: NS,
           inject: () => ({
             ...face(),
             credentials: credentialsOf(ctx),
           }),
-        }, CreatorSettingsCard));
-      stopLive = startLibraryLiveSync(() => contentFace.getRevision());
-    })();
-    return () => {
-      cancelled = true;
+        },
+      ));
+    const stopLive = startLibraryLiveSync(() => contentFace.getRevision());
+
+    return async () => {
       stopLive();
       stopOverlay();
       stopSettings();
+      await disposeRemote();
     };
   }, "dsh-oil-creator: remote-view");
 }

@@ -37,11 +37,11 @@ function detail(patch: Partial<ContentDetail> = {}): ContentDetail {
 describe("formatContentRef", () => {
   it("is the episode folder path", () => {
     expect(formatContentRef(detail({
-      folderPath: "/Users/linzhihuang/Movies/视频项目/2026-08-10_做海外社媒第一个月经验分享",
+      folderPath: "/Users/example/Movies/视频项目/2026-08-10_示例标题",
       topicNote: "不该出现",
       script: "不该出现",
       tags: ["AI工具"],
       article: "# 不该出现",
-    }))).toBe("/Users/linzhihuang/Movies/视频项目/2026-08-10_做海外社媒第一个月经验分享");
+    }))).toBe("/Users/example/Movies/视频项目/2026-08-10_示例标题");
   });
 });

@@ -4,7 +4,8 @@ export type PipelineStage = "raw" | "subtitled" | "covered" | "packaged";
 
 export type WorkflowStage = "idle" | "record" | "cut" | "finish" | "publish" | "live";
 
-export type PublishPlatform = "xiaohongshu" | "douyin" | "bilibili" | "wechat";
+export type { PublishPlatform } from "./platforms.ts";
+import type { PublishPlatform } from "./platforms.ts";
 
 export type PublishMark = "unpublished" | "draft" | "published";
 
@@ -24,12 +25,7 @@ export interface PlatformPublish extends PublishMetrics {
   remoteId?: string;
 }
 
-export interface ContentPublish {
-  xiaohongshu: PlatformPublish;
-  douyin: PlatformPublish;
-  bilibili: PlatformPublish;
-  wechat: PlatformPublish;
-}
+export type ContentPublish = Record<PublishPlatform, PlatformPublish>;
 
 export type BurnStatus = "idle" | "running" | "done" | "error";
 
@@ -106,22 +102,57 @@ export interface ContentSummary {
   coverJob: MediaJob;
 }
 
-export interface CreatorPlatforms {
-  xiaohongshu?: string;
-  douyin?: string;
-  bilibili?: string;
-  wechat?: string;
-  youtube?: string;
-}
-
 export interface CreatorProfile {
-  platforms: CreatorPlatforms;
+  enabledPlatforms: PublishPlatform[];
 }
 
 export interface LibrarySettings {
   libraryRoot: string;
   profile: CreatorProfile;
   secrets: CreatorSecrets;
+  scriptRules?: string;
+}
+
+export type CreatorCapabilityState = "ready" | "missing" | "unsupported";
+
+export interface CreatorCapability {
+  state: CreatorCapabilityState;
+  required: boolean;
+  detail: string;
+  path?: string;
+}
+
+export interface CreatorCapabilities {
+  library: CreatorCapability;
+  screenStudio: CreatorCapability;
+  subtitleSkill: CreatorCapability;
+  subtitleCredential: CreatorCapability;
+  coverSkill: CreatorCapability;
+  coverCredential: CreatorCapability;
+  publishSync: CreatorCapability;
+  editingSkill: CreatorCapability;
+  publishSkill: CreatorCapability;
+  articleSkill: CreatorCapability;
+}
+
+export interface CreatorSetupStatus {
+  platform: NodeJS.Platform;
+  dataDir: string;
+  settings: LibrarySettings;
+  capabilities: CreatorCapabilities;
+  recommendations: string[];
+}
+
+export interface CreatorSetupRequest {
+  apply: boolean;
+  libraryRoot?: string;
+  enabledPlatforms?: PublishPlatform[];
+}
+
+export interface CreatorSetupResult {
+  applied: boolean;
+  proposal: Omit<CreatorSetupRequest, "apply">;
+  status: CreatorSetupStatus;
 }
 
 export interface LibraryCounts {
@@ -250,6 +281,7 @@ export interface OverlayStore {
   schemaVersion: 1;
   libraryRoot?: string;
   profile?: CreatorProfile;
+  scriptRules?: string;
   items: Record<string, OverlayItem>;
 }
 
@@ -273,6 +305,15 @@ export interface OrganizePreview {
 
 export interface SetProfileRequest {
   profile: CreatorProfile;
+}
+
+export interface SetScriptRulesRequest {
+  text: string;
+}
+
+export interface CreatorGuideResult {
+  guide: string;
+  status: CreatorSetupStatus;
 }
 
 export interface SetTopicNoteRequest {

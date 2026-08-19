@@ -16,6 +16,10 @@ export function previewRegistryPath(root = homedir()): string {
   return join(root, ".dsh-oil-creator", "preview-servers.json");
 }
 
+export function previewRegistryPathForDataDir(dataDir: string): string {
+  return join(dataDir, "preview-servers.json");
+}
+
 export function parsePreviewRegistry(raw: string): PreviewServerRecord[] {
   try {
     const parsed: unknown = JSON.parse(raw);

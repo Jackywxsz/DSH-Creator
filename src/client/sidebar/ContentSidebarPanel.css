@@ -22,32 +22,6 @@
   color: var(--dsw-alias-label-tertiary);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .sectionLabel {
-  flex: none;
-  max-width: 45%;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  line-height: 20px;
-  opacity: 1;
-  visibility: visible;
-  transition:
-    max-width 180ms var(--ds-ease-in-out),
-    margin-right 180ms var(--ds-ease-in-out),
-    opacity 120ms var(--ds-ease-in-out),
-    transform 180ms var(--ds-ease-in-out),
-    visibility 0s linear;
-}
-
-[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .sectionLabel.hidden {
-  max-width: 0;
-  margin-right: -4px;
-  opacity: 0;
-  transform: translateX(-4px);
-  visibility: hidden;
-  transition-delay: 0s, 0s, 0s, 0s, 180ms;
-}
-
 [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .searchSlot {
   flex: 1;
   max-width: 28px;
@@ -177,7 +151,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  max-width: 92px;
+  max-width: 64px;
   opacity: 1;
   overflow: hidden;
   visibility: visible;
@@ -310,6 +284,17 @@
   line-height: 18px;
 }
 
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .rowMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .rowCover .coverFallback {
+  opacity: 0.5;
+}
+
 [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .rowDate {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -320,7 +305,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .sectionLabel,
   [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .searchSlot,
   [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .contentSearch,
   [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .searchInput,

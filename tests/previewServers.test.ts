@@ -8,10 +8,17 @@ import {
   livePreviewRecord,
   loadPreviewRegistry,
   parsePreviewRegistry,
+  previewRegistryPathForDataDir,
   upsertPreviewRecord,
 } from "../src/previewServers.ts";
 
 describe("previewServers", () => {
+  it("keeps the preview registry inside the configured data directory", () => {
+    expect(previewRegistryPathForDataDir("/tmp/oil-data")).toBe(
+      "/tmp/oil-data/preview-servers.json",
+    );
+  });
+
   it("keeps a live preview and drops a dead pid", () => {
     const file = join(mkdtempSync(join(tmpdir(), "oil-preview-")), "preview-servers.json");
     upsertPreviewRecord(file, {

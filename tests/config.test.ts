@@ -8,8 +8,11 @@ import {
   defaultDataDir,
   defaultLibraryRoot,
   defaultSubtitleSkillDir,
+  expandHomePath,
   resolveConfiguredPath,
   resolveDataDir,
+  resolveSkillDir,
+  skillDirCandidates,
 } from "../src/config.ts";
 
 describe("portable config defaults", () => {
@@ -30,5 +33,12 @@ describe("portable config defaults", () => {
     expect(resolveConfiguredPath("", defaultSubtitleSkillDir())).toBe(defaultSubtitleSkillDir());
     expect(resolveConfiguredPath("", defaultCoverSkillDir(), "/tmp/from-env")).toBe("/tmp/from-env");
     expect(resolveConfiguredPath("/opt/oil-cover", defaultCoverSkillDir(), "/tmp/from-env")).toBe("/opt/oil-cover");
+  });
+
+  it("discovers common skill roots without overriding explicit choices", () => {
+    expect(skillDirCandidates("oil-cover")).toContain(join(homedir(), ".codex", "skills", "oil-cover"));
+    expect(resolveSkillDir("/opt/custom-skill", "oil-cover", "/opt/from-env")).toBe("/opt/custom-skill");
+    expect(resolveSkillDir("", "oil-cover", "/opt/from-env")).toBe("/opt/from-env");
+    expect(expandHomePath("~/Movies/content")).toBe(join(homedir(), "Movies", "content"));
   });
 });

@@ -2,6 +2,7 @@ import type { InvocationDescriptor } from "@deepseek-ai/dsh-typert-protocol";
 import { z } from "zod";
 
 import {
+  capabilitiesResultSchema,
   contentDetailSchema,
   coverThumbResultSchema,
   idRequestSchema,
@@ -13,6 +14,7 @@ import {
   createContentResultSchema,
   setContentStageRequestSchema,
   setProfileRequestSchema,
+  setScriptRulesRequestSchema,
   bindStudioRequestSchema,
   setPublishRequestSchema,
   setScriptRequestSchema,
@@ -73,12 +75,14 @@ export const OIL_CREATOR_INVOCATIONS: readonly InvocationDescriptor[] = [
   invocation("getArticleMedia", idRequestSchema, articleMediaResultSchema),
   invocation("getSubtitleText", idRequestSchema, subtitleTextResultSchema),
   invocation("getSettings", emptyObjectSchema, librarySettingsSchema),
+  invocation("getCapabilities", emptyObjectSchema, capabilitiesResultSchema),
   invocation("getRevision", emptyObjectSchema, revisionResultSchema),
   invocation("setLibraryRoot", setLibraryRootRequestSchema, librarySettingsSchema),
   invocation("refreshCatalog", emptyObjectSchema, listContentsResultSchema),
   invocation("createContent", createContentRequestSchema, createContentResultSchema),
   invocation("setContentStage", setContentStageRequestSchema, contentDetailSchema),
   invocation("setProfile", setProfileRequestSchema, librarySettingsSchema),
+  invocation("setScriptRules", setScriptRulesRequestSchema, librarySettingsSchema),
   invocation("bindStudio", bindStudioRequestSchema, contentDetailSchema),
   invocation("openStudio", idRequestSchema, contentDetailSchema),
   invocation("setPublish", setPublishRequestSchema, contentDetailSchema),

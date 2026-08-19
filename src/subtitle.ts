@@ -10,20 +10,34 @@ import type { ContentSummary } from "./types.ts";
 
 export { defaultSubtitleSkillDir } from "./config.ts";
 
+function shellQuote(value: string): string {
+  return `'${value.replaceAll("'", "'\\''")}'`;
+}
+
+export function subtitleInstallCommand(skillDir: string): string {
+  return `git clone https://github.com/oil-oil/oil-subtitle ${shellQuote(skillDir)} && bash ${shellQuote(join(skillDir, "setup.sh"))}`;
+}
+
 export async function resolveSubtitleSkill(
   skillDir = process.env.OIL_SUBTITLE_SKILL ?? defaultSubtitleSkillDir(),
 ): Promise<{ root: string; python: string }> {
+  const root = await stat(skillDir).catch(() => undefined);
+  if (root === undefined || !root.isDirectory()) {
+    throw new Error(`未发现 oil-subtitle。执行 ${subtitleInstallCommand(skillDir)} 后重试。`);
+  }
+  const setup = join(skillDir, "setup.sh");
   const python = join(skillDir, ".venv/bin/python3");
   const preview = join(skillDir, "scripts/preview_editor.py");
   const burn = join(skillDir, "scripts/burn_subtitles.py");
   const prepare = join(skillDir, "scripts/prepare_subtitles.py");
   if (
-    !(await pathExists(python))
+    !(await pathExists(setup))
+    || !(await pathExists(python))
     || !(await pathExists(preview))
     || !(await pathExists(burn))
     || !(await pathExists(prepare))
   ) {
-    throw new Error("oil-subtitle is not installed");
+    throw new Error(`已发现 oil-subtitle 目录，但尚未完成 setup.sh。执行 bash "${setup}" 后重试。`);
   }
   return { root: skillDir, python };
 }
@@ -157,8 +171,12 @@ export function spawnPython(
   args: readonly string[],
   extraEnv?: Record<string, string>,
 ): ChildProcess {
+  const env = { ...process.env };
+  delete env.DASHSCOPE_API_KEY;
+  delete env.ZENMUX_API_KEY;
+  if (extraEnv !== undefined) Object.assign(env, extraEnv);
   return spawn(python, [script, ...args], {
-    env: extraEnv === undefined ? process.env : { ...process.env, ...extraEnv },
+    env,
     stdio: ["ignore", "ignore", "pipe"],
     detached: true,
   });

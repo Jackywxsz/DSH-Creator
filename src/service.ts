@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import { readdir, stat } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { dirname, isAbsolute, join } from "node:path";
 
 import type { Context } from "@deepseek-ai/cordis";
 import { TypertRemoteService } from "@deepseek-ai/dsh-typert-protocol";
@@ -24,12 +24,13 @@ import {
   writeTopicNote,
 } from "./catalog.ts";
 import {
-  defaultCoverSkillDir,
-  defaultSubtitleSkillDir,
-  resolveConfiguredPath,
+  expandHomePath,
+  resolveSkillDir,
   resolveDataDir,
   type Config,
 } from "./config.ts";
+import { inspectCreatorSetup } from "./capabilities.ts";
+import { creatorGuideText } from "./guide.ts";
 import { applyOrganize, previewOrganize, remapOverlayItems } from "./organize.ts";
 import { cacheIsFresh, loadCollectCache, nextCollectCacheScope, saveCollectCache } from "./collectCache.ts";
 import {
@@ -47,7 +48,14 @@ import {
 import { collectScriptPath, runCollectPublish } from "./collectEgo.ts";
 import { pickCoverLaunch, pickSubtitleWorkflow, resolveCoverSkill, type GenerateStep } from "./generate.ts";
 import { startLibraryWatch } from "./libraryWatch.ts";
-import { emptyProfile, loadOverlay, overlayPath, saveOverlay, withOverlayLock } from "./overlay.ts";
+import {
+  emptyProfile,
+  loadOverlay,
+  normalizeEnabledPlatforms,
+  overlayPath,
+  saveOverlay,
+  withOverlayLock,
+} from "./overlay.ts";
 import { patchOverlayPublish } from "./publishStatus.ts";
 import { missingSecretMessage } from "./secrets.ts";
 import { describeCreatorSecrets, resolveCreatorSecret, secretEnv } from "./secretsHost.ts";
@@ -59,15 +67,23 @@ import {
   spawnPython,
   waitHttp,
 } from "./subtitle.ts";
-import { jobPidMatches, pidAlive } from "./processAlive.ts";
+import {
+  jobPidMatches,
+  jobPidStillOurs,
+  pidAlive,
+  pidCommand,
+  terminateOwnedProcess,
+  waitForPidExit,
+} from "./processAlive.ts";
 import {
   livePreviewRecord,
   loadPreviewRegistry,
-  previewRegistryPath,
+  previewRegistryPathForDataDir,
   removePreviewRecord,
   savePreviewRegistry,
   upsertPreviewRecord,
 } from "./previewServers.ts";
+import { collectRegistryPathForDataDir } from "./collectSpaces.ts";
 import { coverThumb } from "./thumbs.ts";
 import { startArticleServer } from "./articleServe.ts";
 import { playbackOf, startVideoServer } from "./videoServe.ts";
@@ -76,8 +92,13 @@ import type {
   BurnJob,
   ContentDetail,
   CoverThumbResult,
+  CreatorCapabilities,
+  CreatorSetupRequest,
+  CreatorSetupResult,
+  CreatorSetupStatus,
   CreateContentRequest,
   CreateContentResult,
+  CreatorGuideResult,
   IdRequest,
   OverlayItem,
   OverlayStore,
@@ -91,6 +112,7 @@ import type {
   SetProfileRequest,
   SetPublishRequest,
   SetScriptRequest,
+  SetScriptRulesRequest,
   SetTopicNoteRequest,
   SubtitlePreviewResult,
   SubtitleTextResult,
@@ -107,9 +129,12 @@ export class OilCreatorService extends TypertRemoteService {
   // Gateway calls methods on a Cordis proxy; `#private` fields throw on that receiver.
   libraryRoot: string;
   readonly dataDir: string;
-  readonly subtitleSkillDir: string;
-  readonly coverSkillDir: string;
+  // Raw config values; skill dirs are re-resolved on each use so a skill the
+  // user installs after Harness started is discovered without a restart.
+  readonly subtitleSkillDirConfig: string;
+  readonly coverSkillDirConfig: string;
   cache: { libraryRoot: string; items: Awaited<ReturnType<typeof scanLibrary>> } | undefined;
+  cachedScriptRules: string | undefined;
   catalogRevision = 0;
   watchClose: (() => void) | undefined;
   watchedRoot: string | undefined;
@@ -120,42 +145,59 @@ export class OilCreatorService extends TypertRemoteService {
 
   constructor(ctx: Context, config: Config) {
     super(ctx, OIL_CREATOR_SERVICE);
-    this.libraryRoot = config.libraryRoot;
-    this.dataDir = resolveDataDir(config);
-    this.subtitleSkillDir = resolveConfiguredPath(
-      config.subtitleSkillDir,
-      defaultSubtitleSkillDir(),
-      process.env.OIL_SUBTITLE_SKILL,
-    );
-    this.coverSkillDir = resolveConfiguredPath(
-      config.coverSkillDir,
-      defaultCoverSkillDir(),
-      process.env.OIL_COVER_SKILL,
-    );
-    ctx.effect(() => () => {
+    this.libraryRoot = resolveUserPath(config.libraryRoot);
+    this.dataDir = resolveUserPath(resolveDataDir(config));
+    this.subtitleSkillDirConfig = config.subtitleSkillDir;
+    this.coverSkillDirConfig = config.coverSkillDir;
+    ctx.effect(() => async () => {
       this.stopWatch();
       this.stopExportWaiters();
-      this.stopServers();
+      await this.stopServers();
     }, "oil-creator: library watch");
   }
 
-  stopServers(): void {
+  subtitleSkillDir(): string {
+    return resolveSkillDir(this.subtitleSkillDirConfig, "oil-subtitle", process.env.OIL_SUBTITLE_SKILL);
+  }
+
+  coverSkillDir(): string {
+    return resolveSkillDir(this.coverSkillDirConfig, "oil-cover", process.env.OIL_COVER_SKILL);
+  }
+
+  async stopServers(): Promise<void> {
     for (const session of this.videos.values()) session.close();
     this.videos.clear();
     for (const session of this.articles.values()) session.close();
     this.articles.clear();
-    const registryPath = previewRegistryPath();
+    const registryPath = previewRegistryPathForDataDir(this.dataDir);
     const recorded = loadPreviewRegistry(registryPath);
+    const recordedByPid = new Map(recorded.map((record) => [record.pid, record]));
+    const remaining = new Map<string, typeof recorded[number]>();
     const seen = new Set<number>();
     for (const preview of [...this.previews.values(), ...recorded]) {
       if (seen.has(preview.pid)) continue;
       seen.add(preview.pid);
-      if (pidAlive(preview.pid)) {
-        try { process.kill(preview.pid, "SIGTERM"); } catch { /* already gone */ }
+      if (jobPidStillOurs(preview.pid, "preview_editor")) {
+        try {
+          process.kill(preview.pid, "SIGTERM");
+          await waitForPidExit(preview.pid, ["preview_editor"]);
+          if (jobPidStillOurs(preview.pid, "preview_editor")) {
+            process.kill(preview.pid, "SIGKILL");
+            await waitForPidExit(preview.pid, ["preview_editor"], 1_000);
+          }
+        } catch {
+          // The process may have exited between ownership check and signal.
+        }
+      }
+      // Keep a live record when ownership could not be established or the
+      // process ignored both signals. A later Harness run can retry safely.
+      if (pidAlive(preview.pid) && (pidCommand(preview.pid) === undefined || jobPidStillOurs(preview.pid, "preview_editor"))) {
+        const record = recordedByPid.get(preview.pid);
+        if (record !== undefined) remaining.set(record.id, record);
       }
     }
     this.previews.clear();
-    savePreviewRegistry(registryPath, []);
+    savePreviewRegistry(registryPath, [...remaining.values()]);
   }
 
   invalidateCatalog(): void {
@@ -175,11 +217,11 @@ export class OilCreatorService extends TypertRemoteService {
   }
 
   subtitleSkill(): Promise<{ root: string; python: string }> {
-    return resolveSubtitleSkill(this.subtitleSkillDir);
+    return resolveSubtitleSkill(this.subtitleSkillDir());
   }
 
   coverSkill(): Promise<{ root: string; python: string; script: string }> {
-    return resolveCoverSkill(this.coverSkillDir);
+    return resolveCoverSkill(this.coverSkillDir());
   }
 
   ensureWatch(libraryRoot: string): void {
@@ -204,6 +246,7 @@ export class OilCreatorService extends TypertRemoteService {
     return withOverlayLock(this.dataDir, async () => {
       let overlay = await loadOverlay(this.dataDir);
       const libraryRoot = overlay.libraryRoot ?? this.libraryRoot;
+      this.cachedScriptRules = overlay.scriptRules;
       this.ensureWatch(libraryRoot);
       const reconciled = await reconcileOverlayBurns(overlay);
       if (reconciled !== undefined) {
@@ -315,6 +358,7 @@ export class OilCreatorService extends TypertRemoteService {
   async getSettings(_request: Record<string, never>, signal: AbortSignal): Promise<LibrarySettings> {
     signal.throwIfAborted();
     const overlay = await loadOverlay(this.dataDir);
+    this.cachedScriptRules = overlay.scriptRules;
     return this.settingsOf(overlay.libraryRoot ?? this.libraryRoot, overlay);
   }
 
@@ -323,18 +367,19 @@ export class OilCreatorService extends TypertRemoteService {
     signal: AbortSignal,
   ): Promise<LibrarySettings> {
     signal.throwIfAborted();
-    const info = await stat(request.path).catch(() => undefined);
+    const libraryRoot = resolveUserPath(request.path);
+    const info = await stat(libraryRoot).catch(() => undefined);
     if (info === undefined || !info.isDirectory()) {
-      throw new Error(`library root is not a directory: ${request.path}`);
+      throw new Error(`library root is not a directory: ${libraryRoot}`);
     }
     return withOverlayLock(this.dataDir, async () => {
       const overlay = await loadOverlay(this.dataDir);
-      overlay.libraryRoot = request.path;
+      overlay.libraryRoot = libraryRoot;
       await saveOverlay(this.dataDir, overlay);
-      this.libraryRoot = request.path;
+      this.libraryRoot = libraryRoot;
       this.stopWatch();
       this.invalidateCatalog();
-      return this.settingsOf(request.path, overlay);
+      return this.settingsOf(libraryRoot, overlay);
     });
   }
 
@@ -342,10 +387,89 @@ export class OilCreatorService extends TypertRemoteService {
     signal.throwIfAborted();
     return withOverlayLock(this.dataDir, async () => {
       const overlay = await loadOverlay(this.dataDir);
-      overlay.profile = request.profile;
+      overlay.profile = {
+        enabledPlatforms: normalizeEnabledPlatforms(request.profile.enabledPlatforms),
+      };
       await saveOverlay(this.dataDir, overlay);
       return this.settingsOf(overlay.libraryRoot ?? this.libraryRoot, overlay);
     });
+  }
+
+  async setScriptRules(request: SetScriptRulesRequest, signal: AbortSignal): Promise<LibrarySettings> {
+    signal.throwIfAborted();
+    return withOverlayLock(this.dataDir, async () => {
+      const overlay = await loadOverlay(this.dataDir);
+      const text = request.text.trim();
+      if (text === "") delete overlay.scriptRules;
+      else overlay.scriptRules = text;
+      this.cachedScriptRules = overlay.scriptRules;
+      await saveOverlay(this.dataDir, overlay);
+      return this.settingsOf(overlay.libraryRoot ?? this.libraryRoot, overlay);
+    });
+  }
+
+  async getCreatorGuide(signal: AbortSignal): Promise<CreatorGuideResult> {
+    signal.throwIfAborted();
+    const status = await this.getCreatorSetupStatus(signal);
+    return { guide: creatorGuideText(status), status };
+  }
+
+  async getCapabilities(
+    _request: Record<string, never>,
+    signal: AbortSignal,
+  ): Promise<{ capabilities: CreatorCapabilities }> {
+    signal.throwIfAborted();
+    const status = await this.getCreatorSetupStatus(signal);
+    return { capabilities: status.capabilities };
+  }
+
+  async getCreatorSetupStatus(signal: AbortSignal): Promise<CreatorSetupStatus> {
+    signal.throwIfAborted();
+    const settings = await this.getSettings({}, signal);
+    return inspectCreatorSetup({
+      libraryRoot: settings.libraryRoot,
+      dataDir: this.dataDir,
+      subtitleSkillDir: this.subtitleSkillDir(),
+      coverSkillDir: this.coverSkillDir(),
+      settings,
+    });
+  }
+
+  async configureCreator(
+    request: CreatorSetupRequest,
+    signal: AbortSignal,
+  ): Promise<CreatorSetupResult> {
+    signal.throwIfAborted();
+    const proposal: CreatorSetupResult["proposal"] = {};
+    if (request.libraryRoot !== undefined) proposal.libraryRoot = resolveUserPath(request.libraryRoot);
+    if (request.enabledPlatforms !== undefined) {
+      proposal.enabledPlatforms = normalizeEnabledPlatforms(request.enabledPlatforms);
+    }
+    if (!request.apply || Object.keys(proposal).length === 0) {
+      return { applied: false, proposal, status: await this.getCreatorSetupStatus(signal) };
+    }
+    if (proposal.libraryRoot !== undefined) {
+      const info = await stat(proposal.libraryRoot).catch(() => undefined);
+      if (info === undefined || !info.isDirectory()) {
+        throw new Error(`library root is not a directory: ${proposal.libraryRoot}`);
+      }
+    }
+    await withOverlayLock(this.dataDir, async () => {
+      const overlay = await loadOverlay(this.dataDir);
+      if (proposal.libraryRoot !== undefined) overlay.libraryRoot = proposal.libraryRoot;
+      const profile = overlay.profile ?? emptyProfile();
+      if (proposal.enabledPlatforms !== undefined) {
+        profile.enabledPlatforms = [...proposal.enabledPlatforms];
+      }
+      overlay.profile = profile;
+      await saveOverlay(this.dataDir, overlay);
+      if (proposal.libraryRoot !== undefined) {
+        this.libraryRoot = proposal.libraryRoot;
+        this.stopWatch();
+      }
+      this.invalidateCatalog();
+    });
+    return { applied: true, proposal, status: await this.getCreatorSetupStatus(signal) };
   }
 
   async setTopicNote(request: SetTopicNoteRequest, signal: AbortSignal): Promise<ContentDetail> {
@@ -435,14 +559,20 @@ export class OilCreatorService extends TypertRemoteService {
 
   async syncPublish(request: SyncPublishRequest, signal: AbortSignal): Promise<SyncPublishResult> {
     signal.throwIfAborted();
-    const platforms = request.platform === undefined ? undefined : [request.platform];
+    const configured = await loadOverlay(this.dataDir);
+    const enabledPlatforms = configured.profile?.enabledPlatforms ?? emptyProfile().enabledPlatforms;
+    if (request.platform !== undefined && !enabledPlatforms.includes(request.platform)) {
+      throw new Error(`publish platform is disabled: ${request.platform}`);
+    }
+    const platforms = request.platform === undefined ? enabledPlatforms : [request.platform];
     const scopedId = request.id === undefined || request.id === "" ? undefined : request.id;
     const cached = await loadCollectCache(this.dataDir);
-    const { overlay, items } = await this.scanned();
+    const { items } = await this.scanned();
     const scoped = filterMatchItems(items, scopedId);
     if (scopedId !== undefined && scoped.length === 0) {
       throw new Error(`content not found: ${scopedId}`);
     }
+    if (platforms.length === 0) return { matched: 0, platforms: [] };
     const targets: CollectTarget[] | undefined = scopedId === undefined
       ? undefined
       : scoped.map((item) => {
@@ -461,10 +591,13 @@ export class OilCreatorService extends TypertRemoteService {
     let collected: CollectResult;
     let fromCache = false;
     const cachedSlice = cached === undefined ? undefined : filterCollected(cached.result, platforms);
+    const cacheCoversPlatforms = cachedSlice !== undefined
+      && platforms.every((platform) => cachedSlice.collected.some((page) => page.platform === platform));
     if (
       request.force !== true
       && cached !== undefined
       && cacheIsFresh(cached.fetchedAt)
+      && cacheCoversPlatforms
       && cacheCoversTargets(cachedSlice ?? cached.result, targets, cached.scope)
     ) {
       collected = cachedSlice ?? cached.result;
@@ -474,6 +607,7 @@ export class OilCreatorService extends TypertRemoteService {
         collected = await runCollectPublish(collectScriptPath(), signal, {
           ...(platforms === undefined ? {} : { platforms }),
           ...(targets === undefined ? {} : { targets }),
+          registryPath: collectRegistryPathForDataDir(this.dataDir),
         });
         const merged = scopedId === undefined
           ? mergeCollected(cached?.result, collected, platforms)
@@ -487,6 +621,7 @@ export class OilCreatorService extends TypertRemoteService {
         if (
           cached === undefined
           || !cacheIsFresh(cached.fetchedAt)
+          || !cacheCoversPlatforms
           || !cacheCoversTargets(cachedSlice ?? cached.result, targets, cached.scope)
         ) {
           throw cause;
@@ -532,7 +667,7 @@ export class OilCreatorService extends TypertRemoteService {
     signal.throwIfAborted();
     const item = await this.find(request.id);
     if (item === undefined) throw new Error(`content not found: ${request.id}`);
-    const registryPath = previewRegistryPath();
+    const registryPath = previewRegistryPathForDataDir(this.dataDir);
     const recorded = livePreviewRecord(loadPreviewRegistry(registryPath), request.id);
     const existing = this.previews.get(request.id);
     const reusable = existing !== undefined && jobPidMatches(existing.pid, ["preview_editor"])
@@ -540,7 +675,7 @@ export class OilCreatorService extends TypertRemoteService {
       : recorded;
     if (reusable !== undefined) {
       this.previews.set(request.id, reusable);
-      await openMacPath(reusable.url);
+      await openExternalPath(reusable.url);
       return { url: reusable.url, port: reusable.port };
     }
     const skill = await this.subtitleSkill();
@@ -562,11 +697,19 @@ export class OilCreatorService extends TypertRemoteService {
     try {
       await waitHttp(url, 8000, signal);
     } catch (cause) {
-      this.previews.delete(request.id);
-      removePreviewRecord(registryPath, request.id);
+      try {
+        await terminateOwnedProcess(pid, ["preview_editor"]);
+      } catch {
+        // Cleanup must still happen if the termination probe itself fails.
+      }
+      try {
+        this.previews.delete(request.id);
+      } finally {
+        removePreviewRecord(registryPath, request.id);
+      }
       throw cause;
     }
-    await openMacPath(url);
+    await openExternalPath(url);
     return { url, port };
   }
 
@@ -622,11 +765,9 @@ export class OilCreatorService extends TypertRemoteService {
     }
     const subtitleKey = await resolveCreatorSecret(this.ctx, "subtitle");
     if (subtitleKey === undefined) throw new Error(missingSecretMessage("subtitle"));
-    const coverKey = await resolveCreatorSecret(this.ctx, "cover");
     const skill = await this.subtitleSkill();
-    const workflow = await pickSubtitleWorkflow(item, skill.root, { prepare: coverKey !== undefined });
+    const workflow = await pickSubtitleWorkflow(item, skill.root);
     const env: Record<string, string> = { ...secretEnv("subtitle", subtitleKey) };
-    if (coverKey !== undefined) Object.assign(env, secretEnv("cover", coverKey));
     return this.startChainedJob(request.id, "subtitleJob", {
       python: skill.python,
       steps: workflow.steps,
@@ -671,7 +812,7 @@ export class OilCreatorService extends TypertRemoteService {
     const runStep = (index: number): number => {
       const step = launch.steps[index];
       if (step === undefined) throw new Error(`${field} step missing`);
-      const child = spawnPython(launch.python, step.script, step.args, launch.env);
+      const child = spawnPython(launch.python, step.script, step.args, envForGenerateStep(step.env, launch.env));
       const pid = child.pid;
       if (pid === undefined) throw new Error(`${field} failed to start`);
       let stderr = "";
@@ -769,7 +910,8 @@ export class OilCreatorService extends TypertRemoteService {
     const item = await this.find(request.id);
     if (item === undefined) throw new Error(`content not found: ${request.id}`);
     if (item.studioPath === undefined) throw new Error("no Screen Studio project bound");
-    await openMacPath(item.studioPath);
+    if (process.platform !== "darwin") throw new Error("Screen Studio is only supported on macOS");
+    await openExternalPath(item.studioPath);
     return this.getContent({ id: request.id }, signal);
   }
 
@@ -813,12 +955,13 @@ export class OilCreatorService extends TypertRemoteService {
 
   async settingsOf(
     libraryRoot: string,
-    overlay: { profile?: LibrarySettings["profile"] },
+    overlay: { profile?: LibrarySettings["profile"]; scriptRules?: string },
   ): Promise<LibrarySettings> {
     return {
       libraryRoot,
       profile: overlay.profile ?? emptyProfile(),
       secrets: await describeCreatorSecrets(this.ctx),
+      ...(overlay.scriptRules === undefined ? {} : { scriptRules: overlay.scriptRules }),
     };
   }
 
@@ -838,6 +981,25 @@ export class OilCreatorService extends TypertRemoteService {
     });
     return this.getContent({ id }, signal);
   }
+}
+
+function resolveUserPath(path: string): string {
+  const expanded = expandHomePath(path);
+  if (!isAbsolute(expanded)) throw new Error(`path must be absolute: ${path}`);
+  return expanded;
+}
+
+function envForGenerateStep(
+  kind: GenerateStep["env"],
+  env: Record<string, string> | undefined,
+): Record<string, string> | undefined {
+  const key = kind === "subtitle"
+    ? "DASHSCOPE_API_KEY"
+    : kind === "cover"
+      ? "ZENMUX_API_KEY"
+      : undefined;
+  if (key === undefined || env === undefined || env[key] === undefined) return undefined;
+  return { [key]: env[key] };
 }
 
 async function resolveStudioPath(path: string): Promise<string> {
@@ -886,13 +1048,18 @@ async function reconcileOverlayBurns(overlay: OverlayStore): Promise<OverlayStor
   return dirty ? { ...overlay, items } : undefined;
 }
 
-function openMacPath(path: string): Promise<void> {
+function openExternalPath(path: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    const child = spawn("open", [path], { stdio: "ignore" });
+    const command = process.platform === "darwin"
+      ? { file: "open", args: [path] }
+      : process.platform === "win32"
+        ? { file: "explorer.exe", args: [path] }
+        : { file: "xdg-open", args: [path] };
+    const child = spawn(command.file, command.args, { stdio: "ignore" });
     child.once("error", reject);
     child.once("exit", (code) => {
       if (code === 0 || code === null) resolve();
-      else reject(new Error(`open failed: ${code}`));
+      else reject(new Error(`${command.file} failed: ${code}`));
     });
   });
 }

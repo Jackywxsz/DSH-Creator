@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { PUBLISH_PLATFORMS } from "./platforms.ts";
 
 const contentCoversSchema = z.object({
   "3x4": z.string().optional(),
@@ -35,12 +36,7 @@ const publishMarkSchema = z.union([
   z.literal("published"),
 ]);
 
-const publishPlatformSchema = z.union([
-  z.literal("xiaohongshu"),
-  z.literal("douyin"),
-  z.literal("bilibili"),
-  z.literal("wechat"),
-]);
+const publishPlatformSchema = z.enum(PUBLISH_PLATFORMS);
 
 const platformPublishSchema = z.object({
   status: publishMarkSchema,
@@ -58,12 +54,12 @@ const platformPublishSchema = z.object({
   syncedAt: z.number().optional(),
 });
 
-const contentPublishSchema = z.object({
-  xiaohongshu: platformPublishSchema,
-  douyin: platformPublishSchema,
-  bilibili: platformPublishSchema,
-  wechat: platformPublishSchema,
-});
+const contentPublishSchema = z.object(
+  Object.fromEntries(PUBLISH_PLATFORMS.map((platform) => [platform, platformPublishSchema])) as Record<
+    (typeof PUBLISH_PLATFORMS)[number],
+    typeof platformPublishSchema
+  >,
+);
 
 const burnJobSchema = z.object({
   status: z.union([
@@ -103,16 +99,8 @@ export const contentSummarySchema = z.object({
   coverJob: burnJobSchema,
 });
 
-const creatorPlatformsSchema = z.object({
-  xiaohongshu: z.string().optional(),
-  douyin: z.string().optional(),
-  bilibili: z.string().optional(),
-  wechat: z.string().optional(),
-  youtube: z.string().optional(),
-});
-
 export const creatorProfileSchema = z.object({
-  platforms: creatorPlatformsSchema,
+  enabledPlatforms: z.array(publishPlatformSchema),
 });
 
 const secretViewSchema = z.object({
@@ -130,6 +118,7 @@ export const librarySettingsSchema = z.object({
     subtitle: secretViewSchema,
     cover: secretViewSchema,
   }),
+  scriptRules: z.string().optional(),
 });
 
 export const listContentsRequestSchema = z.object({
@@ -239,6 +228,32 @@ export const revisionResultSchema = z.object({
   revision: z.number().int().nonnegative(),
 });
 
+const capabilitySchema = z.object({
+  state: z.union([
+    z.literal("ready"),
+    z.literal("missing"),
+    z.literal("unsupported"),
+  ]),
+  required: z.boolean(),
+  detail: z.string(),
+  path: z.string().optional(),
+});
+
+export const capabilitiesResultSchema = z.object({
+  capabilities: z.object({
+    library: capabilitySchema,
+    screenStudio: capabilitySchema,
+    subtitleSkill: capabilitySchema,
+    subtitleCredential: capabilitySchema,
+    coverSkill: capabilitySchema,
+    coverCredential: capabilitySchema,
+    publishSync: capabilitySchema,
+    editingSkill: capabilitySchema,
+    publishSkill: capabilitySchema,
+    articleSkill: capabilitySchema,
+  }),
+});
+
 export const waitExportRequestSchema = z.object({
   id: z.string().min(1),
   timeoutMs: z.number().optional(),
@@ -259,6 +274,10 @@ export const createContentResultSchema = z.object({
 
 export const setProfileRequestSchema = z.object({
   profile: creatorProfileSchema,
+});
+
+export const setScriptRulesRequestSchema = z.object({
+  text: z.string(),
 });
 
 export const setTopicNoteRequestSchema = z.object({

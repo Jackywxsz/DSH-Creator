@@ -1,0 +1,76 @@
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  max-width: 100%;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-module-platform);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 17px;
+  white-space: nowrap;
+}
+
+.statusPill .statusDot {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--dsw-alias-label-tertiary);
+}
+
+.statusPill.pending {
+  color: var(--dsw-alias-state-warn-label);
+}
+
+.statusPill.pending .statusDot {
+  background: var(--dsw-alias-state-warn-primary);
+}
+
+.statusPill.active {
+  color: var(--dsw-alias-state-business-primary);
+}
+
+.statusPill.active .statusDot {
+  background: var(--dsw-alias-state-business-primary);
+}
+
+.statusPill.success {
+  color: var(--dsw-alias-state-success-primary);
+}
+
+.statusPill.success .statusDot {
+  background: var(--dsw-alias-state-success-primary);
+}
+
+.statusPill.error {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.statusPill.error .statusDot {
+  background: var(--dsw-alias-state-error-primary);
+}
+
+/* Interactive pill (button) keeps pill visuals but behaves like a control. */
+button.statusPill {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+button.statusPill:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+button.statusPill:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 2px;
+}
+
+button.statusPill:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

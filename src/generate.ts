@@ -22,7 +22,9 @@ export async function resolveCoverSkill(
   skillDir = process.env.OIL_COVER_SKILL ?? defaultCoverSkillDir(),
 ): Promise<{ root: string; python: string; script: string }> {
   const script = join(skillDir, "scripts/generate_oil_cover.py");
-  if (!(await pathExists(script))) throw new Error("oil-cover is not installed");
+  if (!(await pathExists(script))) {
+    throw new Error("未安装 oil-cover。执行 git clone https://github.com/oil-oil/oil-cover ~/.agents/skills/oil-cover 后重试。");
+  }
   const venv = join(skillDir, ".venv/bin/python3");
   const python = await pathExists(venv) ? venv : "python3";
   return { root: skillDir, python, script };
@@ -91,7 +93,7 @@ export async function pickSubtitleWorkflow(
         "--resume",
       ],
       output: prepared,
-      env: "cover",
+      env: "none",
     });
   }
   const burnTranscript = options.prepare ? prepared : transcript;

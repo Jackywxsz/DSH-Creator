@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import {
   LEGACY_COLLECT_SPACE,
   collectCleanupNames,
+  collectRegistryPathForDataDir,
   defaultCollectSpaceName,
   parseCollectRegistry,
   pidIsAlive,
@@ -15,6 +16,12 @@ import {
 } from "../src/collectSpaces.ts";
 
 describe("collectSpaces", () => {
+  it("keeps the collect registry inside the configured data directory", () => {
+    expect(collectRegistryPathForDataDir("/tmp/oil-data")).toBe(
+      "/tmp/oil-data/collect-spaces.json",
+    );
+  });
+
   it("builds a unique collect space name", () => {
     expect(defaultCollectSpaceName()).toMatch(/^oil-collect-[a-z0-9]+-[a-z0-9]+$/);
     expect(defaultCollectSpaceName()).not.toBe(defaultCollectSpaceName());

@@ -1,14 +1,17 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   bumpLibrary,
+  bumpProfile,
   getLibraryEpoch,
+  getProfileEpoch,
   getSelectedContentId,
   getSidebarTab,
   inspectorIsOpen,
   setSelectedContentId,
   setSidebarTab,
   subscribeLibrary,
+  subscribeProfile,
   subscribeSelectedContentId,
   subscribeSidebarChrome,
 } from "../src/client/contentSelection.ts";
@@ -17,6 +20,7 @@ describe("content selection", () => {
   afterEach(() => {
     setSidebarTab("sessions");
     setSelectedContentId(null);
+    vi.unstubAllGlobals();
   });
 
   it("notifies subscribers and persists", () => {
@@ -62,5 +66,98 @@ describe("content selection", () => {
     bumpLibrary();
     expect(seen).toBe(start + 1);
     stop();
+  });
+
+  it("keeps profile refreshes separate from library refreshes", () => {
+    const profileStart = getProfileEpoch();
+    let profileSeen = profileStart;
+    const stop = subscribeProfile(() => {
+      profileSeen = getProfileEpoch();
+    });
+
+    bumpLibrary();
+    expect(profileSeen).toBe(profileStart);
+    bumpProfile();
+    expect(profileSeen).toBe(profileStart + 1);
+    stop();
+  });
+
+  it("restores the inset host and global chrome on plugin release", async () => {
+    class FakeStyle {
+      private readonly values = new Map<string, { value: string; priority: string }>();
+
+      getPropertyValue(name: string): string {
+        return this.values.get(name)?.value ?? "";
+      }
+
+      getPropertyPriority(name: string): string {
+        return this.values.get(name)?.priority ?? "";
+      }
+
+      setProperty(name: string, value: string, priority = ""): void {
+        this.values.set(name, { value, priority });
+      }
+
+      removeProperty(name: string): void {
+        this.values.delete(name);
+      }
+    }
+
+    class FakeHTMLElement {
+      readonly style = new FakeStyle();
+      parentElement: FakeHTMLElement | null = null;
+    }
+
+    const root = new FakeHTMLElement();
+    const host = new FakeHTMLElement();
+    const scrollport = new FakeHTMLElement();
+    scrollport.parentElement = host;
+    host.style.setProperty("padding-left", "8px", "important");
+    host.style.setProperty("transition", "opacity 1s");
+    root.style.setProperty("--oil-sidebar-width", "11px", "important");
+    vi.stubGlobal("HTMLElement", FakeHTMLElement);
+    vi.stubGlobal("document", {
+      documentElement: root,
+      querySelector: () => scrollport,
+    });
+
+    const { applyConversationInset, clearConversationInset, releaseShellChrome, setSidebarChromeWidth } =
+      await import("../src/client/contentSelection.ts");
+
+    expect(applyConversationInset(640, false)).toBe(host);
+    expect(host.style.getPropertyValue("padding-left")).toBe("640px");
+    expect(host.style.getPropertyValue("transition")).toBe("none");
+    expect(applyConversationInset(720, true)).toBe(host);
+    expect(host.style.getPropertyValue("padding-left")).toBe("720px");
+
+    setSidebarChromeWidth(350);
+    expect(root.style.getPropertyValue("--oil-sidebar-width")).toBe("350px");
+    releaseShellChrome();
+    clearConversationInset();
+    expect(host.style.getPropertyValue("padding-left")).toBe("8px");
+    expect(host.style.getPropertyPriority("padding-left")).toBe("important");
+    expect(host.style.getPropertyValue("transition")).toBe("opacity 1s");
+    expect(root.style.getPropertyValue("--oil-sidebar-width")).toBe("11px");
+    expect(root.style.getPropertyPriority("--oil-sidebar-width")).toBe("important");
+
+    setSidebarChromeWidth(350);
+    expect(root.style.getPropertyValue("--oil-sidebar-width")).toBe("350px");
+    releaseShellChrome();
+    expect(root.style.getPropertyValue("--oil-sidebar-width")).toBe("11px");
+  });
+
+  it("does not touch the document when the conversation seam is absent", async () => {
+    class FakeHTMLElement {
+      readonly style = {};
+      parentElement: FakeHTMLElement | null = null;
+    }
+
+    vi.stubGlobal("HTMLElement", FakeHTMLElement);
+    vi.stubGlobal("document", {
+      documentElement: new FakeHTMLElement(),
+      querySelector: () => null,
+    });
+    const { applyConversationInset } = await import("../src/client/contentSelection.ts");
+    expect(applyConversationInset(640)).toBeNull();
   });
 });

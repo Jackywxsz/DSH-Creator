@@ -1,6 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { PUBLISH_PLATFORMS } from "./platforms.ts";
 import type {
   BurnJob,
   ContentPublish,
@@ -11,32 +12,23 @@ import type {
   PublishPlatform,
 } from "./types.ts";
 
-export const PUBLISH_PLATFORMS = [
-  "xiaohongshu",
-  "douyin",
-  "bilibili",
-  "wechat",
-] as const satisfies readonly PublishPlatform[];
+export { PUBLISH_PLATFORMS } from "./platforms.ts";
 
-const FILE_TO_PLATFORM: Record<string, PublishPlatform> = {
-  xiaohongshu: "xiaohongshu",
-  douyin: "douyin",
-  bilibili: "bilibili",
-  wechat: "wechat",
-  wechat_channels: "wechat",
-};
+const FILE_TO_PLATFORM: Record<string, PublishPlatform> = Object.fromEntries([
+  ...PUBLISH_PLATFORMS.map((platform) => [platform, platform]),
+  ["wechat_channels", "wechat"],
+]) as Record<string, PublishPlatform>;
 
 export function anyPlatformPublished(publish: ContentPublish): boolean {
   return PUBLISH_PLATFORMS.some((key) => publish[key].status === "published");
 }
 
 export function emptyPublish(): ContentPublish {
-  return {
-    xiaohongshu: { status: "unpublished", source: "none" },
-    douyin: { status: "unpublished", source: "none" },
-    bilibili: { status: "unpublished", source: "none" },
-    wechat: { status: "unpublished", source: "none" },
-  };
+  const result = {} as ContentPublish;
+  for (const platform of PUBLISH_PLATFORMS) {
+    result[platform] = { status: "unpublished", source: "none" };
+  }
+  return result;
 }
 
 export function emptyBurn(): BurnJob {
@@ -109,13 +101,9 @@ export function mergePublish(
   overlay?: OverlayItem["publish"],
 ): ContentPublish {
   if (overlay === undefined) return file;
-  const result: ContentPublish = {
-    xiaohongshu: file.xiaohongshu,
-    douyin: file.douyin,
-    bilibili: file.bilibili,
-    wechat: file.wechat,
-  };
+  const result = {} as ContentPublish;
   for (const key of PUBLISH_PLATFORMS) {
+    result[key] = file[key];
     const over = overlay[key];
     if (over === undefined) continue;
     const source = over.syncedAt === undefined ? "overlay" : "sync";

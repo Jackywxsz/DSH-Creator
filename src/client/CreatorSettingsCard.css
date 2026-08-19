@@ -179,28 +179,33 @@
   color: var(--dsw-alias-label-secondary);
 }
 
+[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .capabilityGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  margin-top: 8px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .capabilityItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .capabilityName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 [data-plugin="dsh-oil-creator"][data-surface="settings-card"] .secretHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-}
-
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .badge {
-  flex: none;
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: var(--dsw-alias-bg-module-platform);
-  color: var(--dsw-alias-label-secondary);
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 17px;
-}
-
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .badge.ok {
-  color: var(--dsw-alias-state-success-primary);
-}
-
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .badge.muted {
-  color: var(--dsw-alias-label-tertiary);
 }

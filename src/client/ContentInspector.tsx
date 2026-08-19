@@ -2,11 +2,12 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   IconBrowseOutline16,
   IconCloseOutline16,
+  IconFolderOpenOutline16,
   MarkdownText,
   Menu,
   StateDot,
 } from "@deepseek-ai/dsh-client-ui-primitives";
-import type { InjectFace, PropsLocale } from "@deepseek-ai/dsh-client-ui-slots";
+import type { InjectFace, PropsLocale, PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots";
 
 import { formatCount } from "../collectPublish.ts";
 import { isPublishMark } from "../publishStatus.ts";
@@ -18,16 +19,18 @@ import {
   applyConversationInset,
   clearConversationInset,
   getInspectorWidth,
-  getSelectedContentId,
   setInspectorWidth,
   useLibraryEpoch,
+  useProfileEpoch,
   useSelectedContentId,
-  watchConversationHost,
 } from "./contentSelection.ts";
 import type { CreatorKey } from "./locales.ts";
-import { PlatformMark, type PlatformId } from "./PlatformMark.tsx";
+import { PlatformMark } from "./PlatformMark.tsx";
+import { isPublishSyncDisabled, PUBLISH_UI_PLATFORMS, selectEnabledPublishPlatforms } from "./publishPlatforms.ts";
 import { formatRelativeTime } from "./relativeTime.ts";
+import { WORKFLOW_TONE } from "./sidebar/ContentSidebarPanel.tsx";
 import { ActionBar, ActionButton } from "./ui/ActionButton.tsx";
+import { StatusPill, statusPillClass, type StatusTone } from "./ui/StatusPill.tsx";
 import { Surface } from "./ui/Surface.tsx";
 import "./ContentInspector.css";
 
@@ -53,17 +56,16 @@ const WORKFLOW_INDEX: Record<WorkflowStage, number> = {
   live: 4,
 };
 
-const PLATFORMS: ReadonlyArray<{ id: PlatformId; key: PublishPlatform; label: CreatorKey }> = [
-  { id: "xhs", key: "xiaohongshu", label: "inspector.platform.xhs" },
-  { id: "bilibili", key: "bilibili", label: "inspector.platform.bilibili" },
-  { id: "douyin", key: "douyin", label: "inspector.platform.douyin" },
-  { id: "wechat", key: "wechat", label: "inspector.platform.wechat" },
-];
-
 const PUBLISH_KEY: Record<PublishMark, CreatorKey> = {
   unpublished: "inspector.publish.unpublished",
   draft: "inspector.publish.draft",
   published: "inspector.publish.published",
+};
+
+const PUBLISH_TONE: Record<PublishMark, StatusTone> = {
+  unpublished: "neutral",
+  draft: "pending",
+  published: "success",
 };
 
 const PUBLISH_MARKS: readonly PublishMark[] = ["unpublished", "draft", "published"];
@@ -89,6 +91,14 @@ function cuesFromSubtitle(nextSubtitle: { text: string; cues: SubtitleCue[] }): 
   if (nextSubtitle.cues.length > 0) return nextSubtitle.cues;
   if (nextSubtitle.text === "") return [];
   return nextSubtitle.text.split("\n").filter((line) => line.trim() !== "").map((text) => ({ text }));
+}
+
+function friendlyError(cause: unknown, t: (key: CreatorKey) => string): string {
+  if (cause instanceof Error) {
+    if (cause.message.startsWith("content not found")) return t("empty.gone" as CreatorKey);
+    return cause.message;
+  }
+  return t("empty.error" as CreatorKey);
 }
 
 function metricParts(
@@ -127,14 +137,14 @@ function WorkRow({
 }: {
   name: string;
   status: string;
-  tone?: "pending" | "success" | "error" | "running";
+  tone?: StatusTone;
   actions?: ReactNode;
 }) {
   return (
     <div className="workRow">
       <div className="workMain">
         <span className="workName">{name}</span>
-        <span className={tone === undefined ? "workStatus" : `workStatus ${tone}`}>{status}</span>
+        <StatusPill tone={tone ?? "neutral"}>{status}</StatusPill>
       </div>
       {actions !== undefined && <ActionBar>{actions}</ActionBar>}
     </div>
@@ -142,6 +152,7 @@ function WorkRow({
 }
 
 export type ContentInspectorProps =
+  & PropsRuntime<"shell.overlay">
   & InjectFace<CreatorViewFace>
   & PropsLocale<"dsh.oil.creator">
   & {
@@ -150,12 +161,14 @@ export type ContentInspectorProps =
 
 export function ContentInspector({
   t,
+  useSessions,
   ready,
   getContent,
   getCoverThumb,
   getVideoPlayback,
   getArticleMedia,
   getSubtitleText,
+  getSettings,
   markReadyToRecord,
   bindStudio,
   openStudio,
@@ -165,10 +178,15 @@ export function ContentInspector({
   startCoverGenerate,
   setScript,
   pickDirectory,
+  openSubtitlePreview,
+  openPath,
   closeDetails,
 }: ContentInspectorProps) {
   const [selectedId, setSelectedId] = useSelectedContentId();
+  const currentSessionId = useSessions((sessions) => sessions.current);
   const libraryEpoch = useLibraryEpoch();
+  const profileEpoch = useProfileEpoch();
+  const [enabledPlatforms, setEnabledPlatforms] = useState<readonly PublishPlatform[] | undefined>(undefined);
   const scriptSavedRef = useRef(true);
   const loadedId = useRef<string | null>(null);
   const [detail, setDetail] = useState<ContentDetail | undefined>(undefined);
@@ -208,6 +226,21 @@ export function ContentInspector({
   }, [selectedId]);
 
   useEffect(() => {
+    let cancelled = false;
+    setEnabledPlatforms(undefined);
+    if (!ready()) {
+      setEnabledPlatforms([]);
+      return () => { cancelled = true; };
+    }
+    void getSettings().then((settings) => {
+      if (!cancelled) setEnabledPlatforms(settings.profile.enabledPlatforms);
+    }, () => {
+      if (!cancelled) setEnabledPlatforms([]);
+    });
+    return () => { cancelled = true; };
+  }, [getSettings, profileEpoch, ready]);
+
+  useEffect(() => {
     const frame = window.requestAnimationFrame(() => { setExpanded(true); });
     return () => { window.cancelAnimationFrame(frame); };
   }, []);
@@ -242,7 +275,7 @@ export function ContentInspector({
         if (cancelled) return;
         setDetail(undefined);
         setCues([]);
-        setError(cause instanceof Error ? cause.message : t("empty.error" as CreatorKey));
+        setError(friendlyError(cause, t));
       },
     );
     return () => {
@@ -336,18 +369,9 @@ export function ContentInspector({
       return;
     }
     applyConversationInset(shownWidth, !dragging);
-    const stop = watchConversationHost(() => {
-      if (getSelectedContentId() === null) {
-        clearConversationInset();
-        return;
-      }
-      applyConversationInset(shownWidth, false);
-    });
-    return () => {
-      stop();
-      if (getSelectedContentId() === null) clearConversationInset();
-    };
-  }, [selectedId, shownWidth, dragging]);
+  }, [selectedId, currentSessionId, shownWidth, dragging]);
+
+  useEffect(() => () => { clearConversationInset(); }, []);
 
   useEffect(() => {
     const onMove = (event: PointerEvent): void => {
@@ -372,14 +396,17 @@ export function ContentInspector({
 
   const hasVideo = detail?.videoRaw !== undefined || detail?.videoSubtitled !== undefined;
   const hasSubtitleDraft = detail?.subtitles.srt !== undefined || detail?.subtitles.transcript !== undefined;
+  const canPreviewSubtitle = detail?.subtitles.srt !== undefined || detail?.subtitleJob.status === "done";
   const hasAnyCover = detail !== undefined
     && (detail.covers["3x4"] !== undefined || detail.covers["4x3"] !== undefined || detail.covers["16x9"] !== undefined);
+  const platformSettingsPending = enabledPlatforms === undefined;
+  const visiblePlatforms = platformSettingsPending ? [] : selectEnabledPublishPlatforms(enabledPlatforms);
   const publishedCount = detail === undefined
     ? 0
-    : PLATFORMS.filter((platform) => detail.publish[platform.key].status === "published").length;
+    : visiblePlatforms.filter((platform) => detail.publish[platform.key].status === "published").length;
   const anyPublishMarked = detail !== undefined
-    && PLATFORMS.some((platform) => detail.publish[platform.key].status !== "unpublished");
-  const publishStepDone = publishedCount === PLATFORMS.length;
+    && visiblePlatforms.some((platform) => detail.publish[platform.key].status !== "unpublished");
+  const publishStepDone = visiblePlatforms.length > 0 && publishedCount === visiblePlatforms.length;
   const stageIndex = detail === undefined ? 0 : WORKFLOW_INDEX[detail.workflow];
   const currentStep: PipelineStepId = publishStepDone
     ? "publish"
@@ -447,6 +474,13 @@ export function ContentInspector({
     });
   };
 
+  const onPreviewSubtitle = (): void => {
+    if (detail === undefined) return;
+    void openSubtitlePreview(detail.id).then(() => undefined, (cause: unknown) => {
+      setActionError(cause instanceof Error ? cause.message : t("empty.error" as CreatorKey));
+    });
+  };
+
   const onSyncPublish = (): void => {
     if (detail === undefined) return;
     setActionError(undefined);
@@ -455,7 +489,7 @@ export function ContentInspector({
       const login = result.platforms
         .filter((page) => page.loginRequired === true)
         .map((page) => {
-          const label = PLATFORMS.find((item) => item.key === page.platform);
+          const label = PUBLISH_UI_PLATFORMS.find((item) => item.key === page.platform);
           return label === undefined ? page.platform : t(label.label);
         });
       setSyncHint(t((result.cached === true ? "inspector.publish.cached" : "inspector.publish.synced") as CreatorKey)
@@ -475,10 +509,10 @@ export function ContentInspector({
     });
   };
 
-  const subtitleStatus = (): { status: string; tone?: "pending" | "success" | "error" | "running" } => {
+  const subtitleStatus = (): { status: string; tone?: StatusTone } => {
     if (detail === undefined) return { status: "" };
     if (detail.subtitleJob.status === "running" || busy === "subtitle") {
-      return { status: t("inspector.subtitle.generating" as CreatorKey), tone: "running" };
+      return { status: t("inspector.subtitle.generating" as CreatorKey), tone: "active" };
     }
     if (detail.subtitleJob.status === "error") {
       return {
@@ -495,10 +529,10 @@ export function ContentInspector({
     return { status: t("inspector.track.notGenerated" as CreatorKey) };
   };
 
-  const coverStatus = (): { status: string; tone?: "pending" | "success" | "error" | "running" } => {
+  const coverStatus = (): { status: string; tone?: StatusTone } => {
     if (detail === undefined) return { status: "" };
     if (detail.coverJob.status === "running" || busy === "cover") {
-      return { status: t("inspector.cover.generating" as CreatorKey), tone: "running" };
+      return { status: t("inspector.cover.generating" as CreatorKey), tone: "active" };
     }
     if (detail.coverJob.status === "error") {
       return {
@@ -529,19 +563,31 @@ export function ContentInspector({
       <header className="header">
         <div className="titleRow">
           <div className="title">
-            {detail?.title ?? t("empty.loading" as CreatorKey)}
+            {detail?.title ?? (error === undefined ? t("empty.loading" as CreatorKey) : "")}
           </div>
-          <button
-            type="button"
-            className="close"
-            aria-label={t("inspector.close" as CreatorKey)}
-            onClick={() => {
-              setSelectedId(null);
-              closeDetails();
-            }}
-          >
-            <IconCloseOutline16 size={14} />
-          </button>
+          <div className="titleActions">
+            {detail !== undefined && (
+              <button
+                type="button"
+                className="close"
+                aria-label={t("inspector.openFolder" as CreatorKey)}
+                onClick={() => { void openPath(detail.folderPath); }}
+              >
+                <IconFolderOpenOutline16 size={14} />
+              </button>
+            )}
+            <button
+              type="button"
+              className="close"
+              aria-label={t("inspector.close" as CreatorKey)}
+              onClick={() => {
+                setSelectedId(null);
+                closeDetails();
+              }}
+            >
+              <IconCloseOutline16 size={14} />
+            </button>
+          </div>
         </div>
         <div className="tabs" role="tablist">
           {TABS.map((id) => (
@@ -587,37 +633,56 @@ export function ContentInspector({
                 )}
               </div>
               <div className="ledeText">
-                <span className={`stageTag ${detail.workflow}`}>
+                <StatusPill tone={WORKFLOW_TONE[detail.workflow]}>
                   {t(STAGE_KEY[detail.workflow])}
-                </span>
+                </StatusPill>
                 <div className="time">{formatRelativeTime(detail.recordedAt, Date.now(), t)}</div>
               </div>
             </div>
+            <div className="stepper" aria-hidden="true">
+              {PIPELINE_STEPS.map((step, index) => {
+                const done = index < stageIndex || (step.id === "publish" && publishStepDone);
+                const current = !done && step.id === currentStep;
+                return (
+                  <div
+                    key={step.id}
+                    className={`step ${done ? "done" : current ? "current" : ""}`}
+                  >
+                    <span className="stepDot" />
+                    <span className="stepLabel">{t(step.label as CreatorKey)}</span>
+                  </div>
+                );
+              })}
+            </div>
             {hasVideo && (
-              <Surface
-                title={t("inspector.make" as CreatorKey)}
-                hint={t("inspector.make.hint" as CreatorKey)}
-              >
+              <Surface title={t("inspector.make" as CreatorKey)}>
                 <div className="workList">
                   <WorkRow
                     name={t("inspector.track.subtitle" as CreatorKey)}
                     {...subtitleStatus()}
                     actions={(
-                      <ActionButton
-                        tone={detail.videoSubtitled === undefined ? "primary" : "secondary"}
-                        onClick={onGenerateSubtitle}
-                        disabled={
-                          busy !== undefined
-                          || detail.subtitleJob.status === "running"
-                          || detail.burn.status === "running"
-                        }
-                      >
-                        {t((
-                          detail.videoSubtitled === undefined && !hasSubtitleDraft
-                            ? "inspector.subtitle.generate"
-                            : "inspector.subtitle.regenerate"
-                        ) as CreatorKey)}
-                      </ActionButton>
+                      <>
+                        {canPreviewSubtitle && (
+                          <ActionButton tone="ghost" onClick={onPreviewSubtitle}>
+                            {t("inspector.subtitle.previewEdit" as CreatorKey)}
+                          </ActionButton>
+                        )}
+                        <ActionButton
+                          tone={detail.videoSubtitled === undefined ? "primary" : "secondary"}
+                          onClick={onGenerateSubtitle}
+                          disabled={
+                            busy !== undefined
+                            || detail.subtitleJob.status === "running"
+                            || detail.burn.status === "running"
+                          }
+                        >
+                          {t((
+                            detail.videoSubtitled === undefined && !hasSubtitleDraft
+                              ? "inspector.subtitle.generate"
+                              : "inspector.subtitle.regenerate"
+                          ) as CreatorKey)}
+                        </ActionButton>
+                      </>
                     )}
                   />
                   <WorkRow
@@ -691,81 +756,91 @@ export function ContentInspector({
               <>
                 <Surface
                   title={t("inspector.sync.title" as CreatorKey)}
-                  hint={syncHint}
+                  hint={syncHint ?? t((platformSettingsPending
+                    ? "inspector.publish.platformsLoading"
+                    : "inspector.sync.hint") as CreatorKey)}
                 >
+                  {!platformSettingsPending && visiblePlatforms.length === 0 && (
+                    <div className="empty">{t("inspector.publish.enablePlatforms" as CreatorKey)}</div>
+                  )}
                   <ActionBar>
                     <ActionButton
                       tone="primary"
                       onClick={onSyncPublish}
-                      disabled={busy !== undefined}
+                      disabled={isPublishSyncDisabled(busy, platformSettingsPending, enabledPlatforms ?? [])}
                     >
                       {t((busy === "sync" ? "inspector.publish.syncing" : "inspector.publish.sync") as CreatorKey)}
                     </ActionButton>
                   </ActionBar>
                 </Surface>
-                <Surface title={t("inspector.platforms" as CreatorKey)}>
-                  <div className="publishGrid">
-                    {PLATFORMS.map((platform) => {
-                      const row = detail.publish[platform.key];
-                      const metrics = metricParts(row, t);
-                      return (
-                        <div key={platform.id} className="publishCard">
-                          <div className="publishRow">
-                            <span className="publishName">
-                              <PlatformMark id={platform.id} size={16} />
-                              {t(platform.label)}
-                            </span>
-                            <Menu
-                              portal={true}
-                              align="end"
-                              open={publishMenu === platform.key}
-                              anchor={(
-                                <button
-                                  type="button"
-                                  className={`publishState ${row.status}`}
-                                  disabled={publishPending === platform.key}
-                                  aria-haspopup="menu"
-                                  aria-label={`${t(platform.label)}：${t(PUBLISH_KEY[row.status])}`}
-                                  onClick={() => {
-                                    setPublishMenu(publishMenu === platform.key ? null : platform.key);
-                                  }}
-                                >
-                                  <span className="publishDot" aria-hidden="true" />
-                                  {t(PUBLISH_KEY[row.status])}
-                                </button>
-                              )}
-                              items={PUBLISH_MARKS.map((mark) => ({ id: mark, label: t(PUBLISH_KEY[mark]) }))}
-                              selectedId={row.status}
-                              onSelect={(id) => {
-                                if (isPublishMark(id)) applyPublish(platform.key, id);
-                              }}
-                              onClose={() => { setPublishMenu(null); }}
-                            />
+                {visiblePlatforms.length > 0 && (
+                  <Surface title={t("inspector.platforms" as CreatorKey)}>
+                    <div className="publishGrid">
+                      {visiblePlatforms.map((platform) => {
+                        const row = detail.publish[platform.key];
+                        const metrics = metricParts(row, t);
+                        return (
+                          <div key={platform.id} className="publishCard">
+                            <div className="publishRow">
+                              <span className="publishName">
+                                <PlatformMark id={platform.id} size={16} />
+                                {t(platform.label)}
+                              </span>
+                              <Menu
+                                portal={true}
+                                align="end"
+                                open={publishMenu === platform.key}
+                                anchor={(
+                                  <button
+                                    type="button"
+                                    className={statusPillClass(PUBLISH_TONE[row.status])}
+                                    disabled={publishPending === platform.key}
+                                    aria-haspopup="menu"
+                                    aria-label={`${t(platform.label)}：${t(PUBLISH_KEY[row.status])}`}
+                                    onClick={() => {
+                                      setPublishMenu(publishMenu === platform.key ? null : platform.key);
+                                    }}
+                                  >
+                                    <span className="statusDot" aria-hidden="true" />
+                                    {t(PUBLISH_KEY[row.status])}
+                                  </button>
+                                )}
+                                items={PUBLISH_MARKS.map((mark) => ({ id: mark, label: t(PUBLISH_KEY[mark]) }))}
+                                selectedId={row.status}
+                                onSelect={(id) => {
+                                  if (isPublishMark(id)) applyPublish(platform.key, id);
+                                }}
+                                onClose={() => { setPublishMenu(null); }}
+                              />
+                            </div>
+                            {metrics.length > 0 && (
+                              <div className="publishMetrics">{metrics.join(" · ")}</div>
+                            )}
+                            {row.status === "published" && row.url !== undefined && (
+                              <a className="publishUrl" href={row.url} target="_blank" rel="noreferrer">
+                                {t("inspector.publish.open" as CreatorKey)}
+                              </a>
+                            )}
                           </div>
-                          {metrics.length > 0 && (
-                            <div className="publishMetrics">{metrics.join(" · ")}</div>
-                          )}
-                          {row.status === "published" && row.url !== undefined && (
-                            <a className="publishUrl" href={row.url} target="_blank" rel="noreferrer">
-                              {t("inspector.publish.open" as CreatorKey)}
-                            </a>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </Surface>
+                        );
+                      })}
+                    </div>
+                  </Surface>
+                )}
                 <Surface title={t("inspector.article" as CreatorKey)}>
-                  <div className="publishRow">
+                  <button
+                    type="button"
+                    className="publishRow articleRow"
+                    onClick={() => { setTab("article"); }}
+                  >
                     <span className="publishName">
                       <PlatformMark id="article" size={16} />
-                      {t("inspector.article" as CreatorKey)}
+                      {t("inspector.article.draft" as CreatorKey)}
                     </span>
-                    <span className={`publishState static ${detail.hasArticle ? "published" : "unpublished"}`}>
-                      <span className="publishDot" aria-hidden="true" />
+                    <StatusPill tone={detail.hasArticle ? "success" : "neutral"}>
                       {t((detail.hasArticle ? "inspector.article.ready" : "inspector.article.missing") as CreatorKey)}
-                    </span>
-                  </div>
+                    </StatusPill>
+                  </button>
                 </Surface>
               </>
             )}
@@ -823,6 +898,11 @@ export function ContentInspector({
           <>
             {hasVideo && (
               <ActionBar>
+                {canPreviewSubtitle && (
+                  <ActionButton tone="ghost" onClick={onPreviewSubtitle}>
+                    {t("inspector.subtitle.previewEdit" as CreatorKey)}
+                  </ActionButton>
+                )}
                 <ActionButton
                   tone={detail.videoSubtitled === undefined ? "primary" : "secondary"}
                   onClick={onGenerateSubtitle}
@@ -860,7 +940,7 @@ export function ContentInspector({
                   )
                   : null}
             {cues.length === 0
-              ? <div className="empty">{t("inspector.file.missing" as CreatorKey)}</div>
+              ? <div className="empty">{t("inspector.subtitle.empty" as CreatorKey)}</div>
               : (
                 <ol className="cues">
                   {cues.map((cue, index) => (

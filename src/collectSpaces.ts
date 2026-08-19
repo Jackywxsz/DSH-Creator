@@ -18,6 +18,10 @@ export function collectRegistryPath(root = homedir()): string {
   return join(root, ".dsh-oil-creator", "collect-spaces.json");
 }
 
+export function collectRegistryPathForDataDir(dataDir: string): string {
+  return join(dataDir, "collect-spaces.json");
+}
+
 export function pidIsAlive(pid: number): boolean {
   if (!Number.isInteger(pid) || pid <= 0) return false;
   try {

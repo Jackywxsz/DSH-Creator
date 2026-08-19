@@ -122,6 +122,31 @@ describe("unionCollected", () => {
     );
     expect(merged.collected[0]?.items.map((item) => item.remoteId)).toEqual(["old", "new"]);
   });
+
+  it("lets a scoped scrape replace stale metrics for the same remote post", () => {
+    const merged = unionCollected(
+      {
+        collected: [{
+          platform: "wechat",
+          items: [
+            { platform: "wechat", title: "目标作品", remoteId: "same", views: 10, likes: 2 },
+            { platform: "wechat", title: "历史作品", remoteId: "old", views: 5 },
+          ],
+        }],
+      },
+      {
+        collected: [{
+          platform: "wechat",
+          items: [{ platform: "wechat", title: "目标作品", remoteId: "same", views: 99, likes: 8 }],
+        }],
+      },
+    );
+
+    expect(merged.collected[0]?.items).toEqual([
+      { platform: "wechat", title: "目标作品", remoteId: "same", views: 99, likes: 8 },
+      { platform: "wechat", title: "历史作品", remoteId: "old", views: 5 },
+    ]);
+  });
 });
 
 describe("cacheCoversTargets", () => {

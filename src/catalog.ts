@@ -242,7 +242,15 @@ async function scanFolder(
   ].filter((tag, index, all) => all.indexOf(tag) === index);
 
   const videoMtime = await fileMtime(videoSubtitled ?? videoRaw);
-  const recordedAt = videoMtime ?? folderDateMs(date) ?? info.mtimeMs;
+  const folderDate = folderDateMs(date);
+  // A fresh folder is created after its name date's midnight, so the real
+  // directory mtime is the meaningful "recorded at". Older planned topics
+  // keep the name date as the planned day.
+  const recordedAt = videoMtime ?? (
+    folderDate !== undefined && folderDate > info.mtimeMs
+      ? folderDate
+      : info.mtimeMs
+  );
 
   const overlayItem = overlay.items[folderName];
   const studioInFolder = names.find((name) => name.endsWith(".screenstudio"));

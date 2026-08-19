@@ -52,6 +52,9 @@ describe("pickSubtitleWorkflow", () => {
     expect(workflow.steps[0]?.script.endsWith("bailian_transcribe.py")).toBe(true);
     expect(workflow.steps[1]?.script.endsWith("prepare_subtitles.py")).toBe(true);
     expect(workflow.steps[2]?.script.endsWith("burn_subtitles.py")).toBe(true);
+    expect(workflow.steps[0]?.env).toBe("subtitle");
+    expect(workflow.steps[1]?.env).toBe("none");
+    expect(workflow.steps[2]?.env).toBe("none");
     expect(workflow.steps[2]?.args).toContain("--chapters");
     expect(workflow.output.endsWith("demo_subtitled.mp4")).toBe(true);
   });

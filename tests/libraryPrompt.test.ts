@@ -14,9 +14,21 @@ describe("libraryConventionText", () => {
     expect(text).toContain("script.md");
     expect(text).toContain("公众号文章/");
     expect(text).toContain("系统自带的列文件、读文件、写文件工具");
+    expect(text).toContain("oil_creator_setup");
+    expect(text).toContain("oil_creator_guide");
+    expect(text).toContain("oil_script_rules");
+    expect(text).toContain("Ego Browser");
     expect(text).toContain("/.dsh-oil-creator/overlay.json");
     expect(text).not.toContain("oil_get_content");
     expect(text).not.toContain("oil_list_contents");
+  });
+
+  it("appends the configured script rules", () => {
+    const text = libraryConventionText("/Movies/视频项目", "/.dsh-oil-creator", " 口语化，少用术语。 ");
+    expect(text).toContain("当前脚本规则（人设）：");
+    expect(text).toContain("口语化，少用术语。");
+    const without = libraryConventionText("/Movies/视频项目", "/.dsh-oil-creator", "   ");
+    expect(without).not.toContain("当前脚本规则");
   });
 });
 

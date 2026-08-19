@@ -1,42 +1,31 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
-import { decodeBurnJob, decodeOverlayPublish } from "./publishStatus.ts";
-import type { CreatorPlatforms, CreatorProfile, OverlayItem, OverlayStore } from "./types.ts";
+import { decodeBurnJob, decodeOverlayPublish, isPublishPlatform, PUBLISH_PLATFORMS } from "./publishStatus.ts";
+import type { CreatorProfile, OverlayItem, OverlayStore, PublishPlatform } from "./types.ts";
 
-const PLATFORM_KEYS = [
-  "xiaohongshu",
-  "douyin",
-  "bilibili",
-  "wechat",
-  "youtube",
-] as const;
+export const DEFAULT_ENABLED_PLATFORMS: readonly PublishPlatform[] = PUBLISH_PLATFORMS;
 
 export function emptyProfile(): CreatorProfile {
-  return { platforms: {} };
+  return { enabledPlatforms: [...DEFAULT_ENABLED_PLATFORMS] };
+}
+
+export function normalizeEnabledPlatforms(value: unknown): PublishPlatform[] {
+  if (!Array.isArray(value)) return [...DEFAULT_ENABLED_PLATFORMS];
+  return [...new Set(value.filter(isPublishPlatform))];
 }
 
 export function decodeProfile(value: unknown): CreatorProfile {
-  const profile = emptyProfile();
-  if (typeof value !== "object" || value === null) return profile;
+  if (typeof value !== "object" || value === null) return emptyProfile();
   const raw = value as Record<string, unknown>;
-  if (typeof raw.platforms === "object" && raw.platforms !== null) {
-    const source = raw.platforms as Record<string, unknown>;
-    const platforms: CreatorPlatforms = {};
-    for (const key of PLATFORM_KEYS) {
-      const field = source[key];
-      if (typeof field === "string" && field.trim() !== "") platforms[key] = field.trim();
-    }
-    profile.platforms = platforms;
+  if (Array.isArray(raw.enabledPlatforms)) {
+    return { enabledPlatforms: normalizeEnabledPlatforms(raw.enabledPlatforms) };
   }
-  return profile;
+  return emptyProfile();
 }
 
 export function profileIsEmpty(profile: CreatorProfile): boolean {
-  return PLATFORM_KEYS.every((key) => {
-    const field = profile.platforms[key];
-    return field === undefined || field.trim() === "";
-  });
+  return profile.enabledPlatforms.length === 0;
 }
 
 export function overlayPath(dataDir: string): string {
@@ -81,8 +70,12 @@ export function decodeOverlay(value: unknown): OverlayStore {
   if (typeof raw.libraryRoot === "string" && raw.libraryRoot.length > 0) {
     store.libraryRoot = raw.libraryRoot;
   }
-  const profile = decodeProfile(raw.profile);
-  if (!profileIsEmpty(profile)) store.profile = profile;
+  if (typeof raw.scriptRules === "string" && raw.scriptRules.trim() !== "") {
+    store.scriptRules = raw.scriptRules.trim();
+  }
+  if (typeof raw.profile === "object" && raw.profile !== null) {
+    store.profile = decodeProfile(raw.profile);
+  }
   return store;
 }
 

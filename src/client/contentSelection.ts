@@ -11,10 +11,12 @@ type Listener = () => void;
 
 const listeners = new Set<Listener>();
 const libraryListeners = new Set<Listener>();
+const profileListeners = new Set<Listener>();
 const initialUi = loadCreatorUiState(browserCreatorStorage());
 let selectedId = initialUi.selectedId;
 let sidebarTab: SidebarTab = initialUi.sidebarTab;
 let libraryEpoch = 0;
+let profileEpoch = 0;
 let sidebarWidthPx = 280;
 export const INSPECTOR_MIN = 320;
 export const INSPECTOR_MAX = 800;
@@ -26,6 +28,19 @@ function clampInspectorWidth(px: number): number {
 }
 
 const chromeListeners = new Set<Listener>();
+
+interface InlineStyleSnapshot {
+  paddingLeft: string;
+  paddingLeftPriority: string;
+  transition: string;
+  transitionPriority: string;
+}
+
+let sidebarWidthStyleCaptured = false;
+let previousSidebarWidthStyle = "";
+let previousSidebarWidthPriority = "";
+let insetHost: HTMLElement | null = null;
+let insetStyleSnapshot: InlineStyleSnapshot | null = null;
 
 function emitChrome(): void {
   for (const listener of chromeListeners) listener();
@@ -39,9 +54,14 @@ export function subscribeSidebarChrome(listener: Listener): () => void {
 }
 
 export function setSidebarChromeWidth(px: number): void {
-  if (sidebarWidthPx === px) return;
+  if (sidebarWidthPx === px && (typeof document === "undefined" || sidebarWidthStyleCaptured)) return;
   sidebarWidthPx = px;
   if (typeof document !== "undefined") {
+    if (!sidebarWidthStyleCaptured) {
+      previousSidebarWidthStyle = document.documentElement.style.getPropertyValue("--oil-sidebar-width");
+      previousSidebarWidthPriority = document.documentElement.style.getPropertyPriority("--oil-sidebar-width");
+      sidebarWidthStyleCaptured = true;
+    }
     document.documentElement.style.setProperty("--oil-sidebar-width", `${px}px`);
   }
   emitChrome();
@@ -49,8 +69,21 @@ export function setSidebarChromeWidth(px: number): void {
 
 export function releaseShellChrome(): void {
   if (typeof document !== "undefined") {
-    document.documentElement.style.removeProperty("--oil-sidebar-width");
+    if (sidebarWidthStyleCaptured) {
+      if (previousSidebarWidthStyle === "") {
+        document.documentElement.style.removeProperty("--oil-sidebar-width");
+      } else {
+        document.documentElement.style.setProperty(
+          "--oil-sidebar-width",
+          previousSidebarWidthStyle,
+          previousSidebarWidthPriority,
+        );
+      }
+    }
   }
+  sidebarWidthStyleCaptured = false;
+  previousSidebarWidthStyle = "";
+  previousSidebarWidthPriority = "";
   clearConversationInset();
 }
 
@@ -102,64 +135,98 @@ export function useLibraryEpoch(): number {
   return epoch;
 }
 
+export function bumpProfile(): void {
+  profileEpoch += 1;
+  for (const listener of profileListeners) listener();
+}
+
+export function getProfileEpoch(): number {
+  return profileEpoch;
+}
+
+export function subscribeProfile(listener: Listener): () => void {
+  profileListeners.add(listener);
+  return () => {
+    profileListeners.delete(listener);
+  };
+}
+
+export function useProfileEpoch(): number {
+  const [epoch, setEpoch] = useState(getProfileEpoch);
+  useEffect(() => subscribeProfile(() => {
+    setEpoch(getProfileEpoch());
+  }), []);
+  return epoch;
+}
+
+/**
+ * The rc.7 public layout face exposes panel actions and shell slots, but no
+ * content-column inset. The host's stable scrollport is therefore the only
+ * remaining compatibility seam for keeping the overlay from covering the
+ * conversation. This adapter intentionally has one host, no observer, and a
+ * complete inline-style restore path.
+ */
 function conversationHost(): HTMLElement | null {
-  if (typeof document === "undefined") return null;
-  const host = document.querySelector("[data-conversation-scroll]")?.parentElement;
+  if (typeof document === "undefined" || typeof HTMLElement === "undefined") return null;
+  const scrollport = document.querySelector("[data-conversation-scroll]");
+  const host = scrollport?.parentElement;
   return host instanceof HTMLElement ? host : null;
 }
 
-const INSET_MARK = "data-oil-conversation-inset";
+function restoreInsetHost(): void {
+  if (insetHost === null || insetStyleSnapshot === null) return;
+  if (insetStyleSnapshot.paddingLeft === "") {
+    insetHost.style.removeProperty("padding-left");
+  } else {
+    insetHost.style.setProperty(
+      "padding-left",
+      insetStyleSnapshot.paddingLeft,
+      insetStyleSnapshot.paddingLeftPriority,
+    );
+  }
+  if (insetStyleSnapshot.transition === "") {
+    insetHost.style.removeProperty("transition");
+  } else {
+    insetHost.style.setProperty(
+      "transition",
+      insetStyleSnapshot.transition,
+      insetStyleSnapshot.transitionPriority,
+    );
+  }
+  insetHost = null;
+  insetStyleSnapshot = null;
+}
 
-function resetHostPadding(host: HTMLElement, animate: boolean): void {
-  host.style.transition = animate
-    ? "padding-left var(--ds-transition-duration-slow) var(--ds-ease-in-out)"
-    : "none";
-  host.style.paddingLeft = "0px";
-  host.removeAttribute(INSET_MARK);
+function captureInsetHost(host: HTMLElement): void {
+  if (insetHost === host && insetStyleSnapshot !== null) return;
+  restoreInsetHost();
+  insetHost = host;
+  insetStyleSnapshot = {
+    paddingLeft: host.style.getPropertyValue("padding-left"),
+    paddingLeftPriority: host.style.getPropertyPriority("padding-left"),
+    transition: host.style.getPropertyValue("transition"),
+    transitionPriority: host.style.getPropertyPriority("transition"),
+  };
 }
 
 export function clearConversationInset(): void {
-  if (typeof document === "undefined") return;
-  for (const node of document.querySelectorAll(`[${INSET_MARK}]`)) {
-    if (node instanceof HTMLElement) resetHostPadding(node, true);
-  }
-  const host = conversationHost();
-  if (host !== null) resetHostPadding(host, true);
+  restoreInsetHost();
 }
 
 export function applyConversationInset(width: number, animate = true): HTMLElement | null {
   const host = conversationHost();
   if (host === null) return null;
+  captureInsetHost(host);
   if (width <= 0) {
-    resetHostPadding(host, animate);
+    restoreInsetHost();
     return host;
   }
-  host.style.transition = animate
-    ? "padding-left var(--ds-transition-duration-slow) var(--ds-ease-in-out)"
-    : "none";
-  host.style.paddingLeft = `${width}px`;
-  host.setAttribute(INSET_MARK, "1");
+  host.style.setProperty(
+    "transition",
+    animate ? "padding-left var(--ds-transition-duration-slow) var(--ds-ease-in-out)" : "none",
+  );
+  host.style.setProperty("padding-left", `${width}px`);
   return host;
-}
-
-export function watchConversationHost(onChange: () => void): () => void {
-  let lastHost = conversationHost();
-  let frame = 0;
-  const observer = new MutationObserver(() => {
-    const host = conversationHost();
-    if (host === lastHost) return;
-    lastHost = host;
-    if (frame !== 0) return;
-    frame = window.requestAnimationFrame(() => {
-      frame = 0;
-      onChange();
-    });
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-  return () => {
-    observer.disconnect();
-    if (frame !== 0) window.cancelAnimationFrame(frame);
-  };
 }
 
 export function getSidebarTab(): SidebarTab {

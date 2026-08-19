@@ -1,11 +1,5 @@
+import { PUBLISH_PLATFORM_DEFINITIONS, PUBLISH_PLATFORMS } from "./platforms.ts";
 import type { ContentPublish, OverlayItem, OverlayPublish, PublishPlatform } from "./types.ts";
-
-const COLLECT_PLATFORMS: readonly PublishPlatform[] = [
-  "xiaohongshu",
-  "douyin",
-  "bilibili",
-  "wechat",
-];
 
 export interface CollectedPost {
   platform: PublishPlatform;
@@ -98,7 +92,7 @@ export function knownFromPublish(
   publish: ContentPublish,
 ): Partial<Record<PublishPlatform, { remoteId?: string; url?: string }>> {
   const known: Partial<Record<PublishPlatform, { remoteId?: string; url?: string }>> = {};
-  for (const platform of COLLECT_PLATFORMS) {
+  for (const platform of PUBLISH_PLATFORMS) {
     const row = publish[platform];
     if (row === undefined) continue;
     const next: { remoteId?: string; url?: string } = {};
@@ -109,11 +103,15 @@ export function knownFromPublish(
   return known;
 }
 
+function collectedPostKey(item: CollectedPost): string {
+  return item.remoteId ?? item.url ?? item.title;
+}
+
 export function dedupeCollectedPosts(items: readonly CollectedPost[]): CollectedPost[] {
   const seen = new Set<string>();
   const out: CollectedPost[] = [];
   for (const item of items) {
-    const key = item.remoteId ?? item.url ?? item.title;
+    const key = collectedPostKey(item);
     if (seen.has(key)) continue;
     seen.add(key);
     out.push(item);
@@ -166,9 +164,13 @@ export function unionCollected(previous: CollectResult | undefined, next: Collec
       byPlatform.set(page.platform, page);
       continue;
     }
+    const freshByKey = new Map(page.items.map((item) => [collectedPostKey(item), item]));
     const merged: CollectedPlatform = {
       platform: page.platform,
-      items: dedupeCollectedPosts([...old.items, ...page.items]),
+      items: dedupeCollectedPosts([
+        ...old.items.map((item) => freshByKey.get(collectedPostKey(item)) ?? item),
+        ...page.items,
+      ]),
     };
     if (page.loginRequired === true || old.loginRequired === true) merged.loginRequired = true;
     if (page.error !== undefined && page.error !== "") merged.error = page.error;
@@ -252,12 +254,11 @@ export function copyMetrics(
   return next;
 }
 
-export const COLLECT_PAGES: ReadonlyArray<{ platform: PublishPlatform; url: string }> = [
-  { platform: "xiaohongshu", url: "https://creator.xiaohongshu.com/new/note-manager" },
-  { platform: "douyin", url: "https://creator.douyin.com/creator-micro/content/manage" },
-  { platform: "bilibili", url: "https://member.bilibili.com/platform/upload-manager/article" },
-  { platform: "wechat", url: "https://channels.weixin.qq.com/platform/post/list" },
-];
+export const COLLECT_PAGES: ReadonlyArray<{ platform: PublishPlatform; url: string }> =
+  PUBLISH_PLATFORMS.map((platform) => ({
+    platform,
+    url: PUBLISH_PLATFORM_DEFINITIONS[platform].collectUrl,
+  }));
 
 export function parseCollectOutput(raw: string): CollectResult {
   const lines = raw.split(/\n/).map((line) => line.trim()).filter((line) => line.startsWith("{"));
@@ -274,7 +275,7 @@ export function parseCollectOutput(raw: string): CollectResult {
           if (typeof row !== "object" || row === null) return [];
           const record = row as Record<string, unknown>;
           const platform = record.platform;
-          if (!COLLECT_PLATFORMS.includes(platform as PublishPlatform)) return [];
+          if (!PUBLISH_PLATFORMS.includes(platform as PublishPlatform)) return [];
           const items = Array.isArray(record.items)
             ? record.items.flatMap((item): CollectedPost[] => {
               if (typeof item !== "object" || item === null) return [];
