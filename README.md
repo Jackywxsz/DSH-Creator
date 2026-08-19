@@ -47,14 +47,13 @@
 
 ### 1. 安装插件
 
-仓库公开后，推荐锁定 commit 安装，便于复现：
+使用 DeepSeek Harness 自带的插件管理命令：
 
 ```bash
-npx @deepseek-ai/dsh@0.1.0-rc.7 plugin --profile web add "github:oil-oil/dsh-oil-creator#<commit-sha>"
-npx @deepseek-ai/dsh@0.1.0-rc.7 web
+npx @deepseek-ai/dsh plugin --profile web add github:oil-oil/dsh-oil-creator
 ```
 
-插件会自动构建并登记到 `web` profile，不需要手改 Harness 配置。已经全局安装 `dsh` 时，可以去掉命令里的 `npx @deepseek-ai/dsh@0.1.0-rc.7`。
+重启 `web` profile 后即可使用。插件会登记到配置里，不需要手改 Harness 配置。已经全局安装 `dsh` 时，可以去掉命令里的 `npx @deepseek-ai/dsh`。
 
 Harness 从 GitHub 安装时生成的构建包包含 README 引用的最终 `assets/readme/hero.svg`，不会包含 `assets/readme/source/` 下的源素材。
 
@@ -66,14 +65,14 @@ git clone https://github.com/oil-oil/dsh-oil-creator.git
 cd dsh-oil-creator
 pnpm install --frozen-lockfile
 pnpm build
-npx @deepseek-ai/dsh@0.1.0-rc.7 plugin --profile web add "$PWD"
-npx @deepseek-ai/dsh@0.1.0-rc.7 web
+npx @deepseek-ai/dsh plugin --profile web add "$PWD"
+npx @deepseek-ai/dsh web
 ```
 
 如果 pnpm 明确提示安装期构建被阻止，再带 `--allow-build` 重试；正常安装不需要这一步：
 
 ```bash
-npx @deepseek-ai/dsh@0.1.0-rc.7 plugin --profile web add --allow-build=dsh-oil-creator "github:oil-oil/dsh-oil-creator#<commit-sha>"
+npx @deepseek-ai/dsh plugin --profile web add --allow-build=dsh-oil-creator github:oil-oil/dsh-oil-creator
 ```
 
 </details>
@@ -147,7 +146,7 @@ npx @deepseek-ai/dsh@0.1.0-rc.7 plugin --profile web add --allow-build=dsh-oil-c
 ## 卸载
 
 ```bash
-dsh plugin --profile web remove dsh-oil-creator
+npx @deepseek-ai/dsh plugin --profile web remove dsh-oil-creator
 ```
 
 安装、卸载或更新配置后重启 `dsh web`。不要手动修改 `~/.dsh/profiles/web/package.json`，也不要把项目的 `cordis.patch.yml` 复制到用户 profile；插件自己的 bundle patch 会负责装配和清理侧栏。

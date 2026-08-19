@@ -2,9 +2,9 @@
 
 `dsh-oil-creator` 是挂在 DeepSeek Harness web 配置上的一个插件。它把 oil 从选题到发布的本地工作收进同一块界面：左侧内容列表、中间一条片子的检查器、右边继续对话。
 
-安装：`dsh plugin --profile web add github:<owner>/dsh-oil-creator`（本地开发用目录路径）
+安装：`npx @deepseek-ai/dsh plugin --profile web add github:oil-oil/dsh-oil-creator`（本地开发用目录路径）
 
-卸载：`dsh plugin --profile web remove dsh-oil-creator`
+卸载：`npx @deepseek-ai/dsh plugin --profile web remove dsh-oil-creator`
 
 插件对官方侧栏的替换只写在项目自己的 `cordis.patch.yml`，通过 `package.json` 的 `dsh.bundle.patch` 随包安装。不要把这段配置写进用户的 `~/.dsh/profiles/web/cordis.patch.yml`；用户层不会跟随插件卸载，残留后会把官方侧栏继续关掉。
 
