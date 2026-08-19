@@ -175,6 +175,10 @@ pnpm check
 - [内容文件夹约定](docs/files.md)
 - [插件实现与兼容性说明](docs/implementation.md)
 
+## 使用问题
+
+安装或使用过程中遇到问题，可以到 [oiloil.org](https://www.oiloil.org/#consulting) 联系我。代码缺陷和功能建议仍然欢迎提交 Issue。
+
 ## License
 
 [MIT](LICENSE)
