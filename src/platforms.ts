@@ -39,3 +39,13 @@ export type PublishPlatform = keyof typeof PUBLISH_PLATFORM_DEFINITIONS;
 export const PUBLISH_PLATFORMS = Object.freeze(
   Object.keys(PUBLISH_PLATFORM_DEFINITIONS) as [PublishPlatform, ...PublishPlatform[]],
 );
+
+export function isPublishPlatform(value: unknown): value is PublishPlatform {
+  return typeof value === "string" && value in PUBLISH_PLATFORM_DEFINITIONS;
+}
+
+export function normalizeEnabledPlatforms(value: unknown): PublishPlatform[] {
+  if (!Array.isArray(value)) return [...PUBLISH_PLATFORMS];
+  const enabled = new Set(value.filter(isPublishPlatform));
+  return PUBLISH_PLATFORMS.filter((platform) => enabled.has(platform));
+}

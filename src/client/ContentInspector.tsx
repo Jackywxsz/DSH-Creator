@@ -30,7 +30,7 @@ import { isPublishSyncDisabled, PUBLISH_UI_PLATFORMS, selectEnabledPublishPlatfo
 import { formatRelativeTime } from "./relativeTime.ts";
 import { WORKFLOW_TONE } from "./sidebar/ContentSidebarPanel.tsx";
 import { ActionBar, ActionButton } from "./ui/ActionButton.tsx";
-import { StatusPill, statusPillClass, type StatusTone } from "./ui/StatusPill.tsx";
+import { StatusPill, type StatusTone } from "./ui/StatusPill.tsx";
 import { Surface } from "./ui/Surface.tsx";
 import "./ContentInspector.css";
 
@@ -241,7 +241,7 @@ export function ContentInspector({
       if (!cancelled) setEnabledPlatforms([]);
     });
     return () => { cancelled = true; };
-  }, [getSettings, profileEpoch, ready]);
+  }, [getSettings, libraryEpoch, profileEpoch, ready]);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => { setExpanded(true); });
@@ -704,45 +704,6 @@ export function ContentInspector({
                   <WorkRow
                     name={t("inspector.track.subtitle" as CreatorKey)}
                     {...subtitleStatus()}
-                    actions={(
-                      <>
-                        {canPreviewSubtitle && (
-                          <ActionButton tone="ghost" onClick={onPreviewSubtitle}>
-                            {t("inspector.subtitle.previewEdit" as CreatorKey)}
-                          </ActionButton>
-                        )}
-                        <ActionButton
-                          tone={!hasSubtitleDraft && detail.videoSubtitled === undefined ? "primary" : "secondary"}
-                          onClick={onGenerateSubtitle}
-                          disabled={
-                            busy !== undefined
-                            || detail.subtitleJob.status === "running"
-                            || detail.burn.status === "running"
-                          }
-                        >
-                          {t((
-                            !hasSubtitleDraft
-                              ? "inspector.subtitle.generate"
-                              : "inspector.subtitle.regenerate"
-                          ) as CreatorKey)}
-                        </ActionButton>
-                        {hasSubtitleDraft && (
-                          <ActionButton
-                            tone={detail.videoSubtitled === undefined ? "primary" : "secondary"}
-                            onClick={onBurnSubtitle}
-                            disabled={
-                              busy !== undefined
-                              || detail.subtitleJob.status === "running"
-                              || detail.burn.status === "running"
-                            }
-                          >
-                            {t((detail.videoSubtitled === undefined
-                              ? "inspector.subtitle.burn"
-                              : "inspector.subtitle.reburn") as CreatorKey)}
-                          </ActionButton>
-                        )}
-                      </>
-                    )}
                   />
                   <WorkRow
                     name={t("inspector.track.cover" as CreatorKey)}
@@ -850,9 +811,8 @@ export function ContentInspector({
                                 align="end"
                                 open={publishMenu === platform.key}
                                 anchor={(
-                                  <button
-                                    type="button"
-                                    className={statusPillClass(PUBLISH_TONE[row.status])}
+                                  <StatusPill
+                                    tone={PUBLISH_TONE[row.status]}
                                     disabled={publishPending === platform.key}
                                     aria-haspopup="menu"
                                     aria-label={`${t(platform.label)}：${t(PUBLISH_KEY[row.status])}`}
@@ -860,9 +820,8 @@ export function ContentInspector({
                                       setPublishMenu(publishMenu === platform.key ? null : platform.key);
                                     }}
                                   >
-                                    <span className="statusDot" aria-hidden="true" />
                                     {t(PUBLISH_KEY[row.status])}
-                                  </button>
+                                  </StatusPill>
                                 )}
                                 items={PUBLISH_MARKS.map((mark) => ({ id: mark, label: t(PUBLISH_KEY[mark]) }))}
                                 selectedId={row.status}

@@ -29,10 +29,10 @@ describe("creator profile", () => {
 
   it("deduplicates enabled platforms and filters invalid values", () => {
     expect(normalizeEnabledPlatforms([
-      "douyin",
+      "wechat",
       "invalid",
       "douyin",
-      "wechat",
+      "douyin",
       "youtube",
     ])).toEqual(["douyin", "wechat"]);
   });

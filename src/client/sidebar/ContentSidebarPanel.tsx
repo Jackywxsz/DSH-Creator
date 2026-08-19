@@ -25,7 +25,7 @@ export const WORKFLOW_TONE: Record<WorkflowStage, StatusTone> = {
   record: "pending",
   cut: "pending",
   finish: "pending",
-  publish: "active",
+  publish: "pending",
   live: "success",
 };
 

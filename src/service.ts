@@ -135,6 +135,7 @@ export class OilCreatorService extends TypertRemoteService {
   readonly coverSkillDirConfig: string;
   cache: { libraryRoot: string; items: Awaited<ReturnType<typeof scanLibrary>> } | undefined;
   cachedScriptRules: string | undefined;
+  cachedEnabledPlatforms: string[] | undefined;
   catalogRevision = 0;
   watchClose: (() => void) | undefined;
   watchedRoot: string | undefined;
@@ -149,6 +150,7 @@ export class OilCreatorService extends TypertRemoteService {
     this.dataDir = resolveUserPath(resolveDataDir(config));
     this.subtitleSkillDirConfig = config.subtitleSkillDir;
     this.coverSkillDirConfig = config.coverSkillDir;
+    void loadOverlay(this.dataDir).then((overlay) => { this.rememberOverlay(overlay); });
     ctx.effect(() => async () => {
       this.stopWatch();
       this.stopExportWaiters();
@@ -246,7 +248,7 @@ export class OilCreatorService extends TypertRemoteService {
     return withOverlayLock(this.dataDir, async () => {
       let overlay = await loadOverlay(this.dataDir);
       const libraryRoot = overlay.libraryRoot ?? this.libraryRoot;
-      this.cachedScriptRules = overlay.scriptRules;
+      this.rememberOverlay(overlay);
       this.ensureWatch(libraryRoot);
       const reconciled = await reconcileOverlayBurns(overlay);
       if (reconciled !== undefined) {
@@ -358,7 +360,7 @@ export class OilCreatorService extends TypertRemoteService {
   async getSettings(_request: Record<string, never>, signal: AbortSignal): Promise<LibrarySettings> {
     signal.throwIfAborted();
     const overlay = await loadOverlay(this.dataDir);
-    this.cachedScriptRules = overlay.scriptRules;
+    this.rememberOverlay(overlay);
     return this.settingsOf(overlay.libraryRoot ?? this.libraryRoot, overlay);
   }
 
@@ -391,6 +393,8 @@ export class OilCreatorService extends TypertRemoteService {
         enabledPlatforms: normalizeEnabledPlatforms(request.profile.enabledPlatforms),
       };
       await saveOverlay(this.dataDir, overlay);
+      this.rememberOverlay(overlay);
+      this.invalidateCatalog();
       return this.settingsOf(overlay.libraryRoot ?? this.libraryRoot, overlay);
     });
   }
@@ -402,8 +406,8 @@ export class OilCreatorService extends TypertRemoteService {
       const text = request.text.trim();
       if (text === "") delete overlay.scriptRules;
       else overlay.scriptRules = text;
-      this.cachedScriptRules = overlay.scriptRules;
       await saveOverlay(this.dataDir, overlay);
+      this.rememberOverlay(overlay);
       return this.settingsOf(overlay.libraryRoot ?? this.libraryRoot, overlay);
     });
   }
@@ -463,6 +467,7 @@ export class OilCreatorService extends TypertRemoteService {
       }
       overlay.profile = profile;
       await saveOverlay(this.dataDir, overlay);
+      this.rememberOverlay(overlay);
       if (proposal.libraryRoot !== undefined) {
         this.libraryRoot = proposal.libraryRoot;
         this.stopWatch();
@@ -552,6 +557,11 @@ export class OilCreatorService extends TypertRemoteService {
 
   async setPublish(request: SetPublishRequest, signal: AbortSignal): Promise<ContentDetail> {
     signal.throwIfAborted();
+    const overlay = await loadOverlay(this.dataDir);
+    const enabledPlatforms = overlay.profile?.enabledPlatforms ?? emptyProfile().enabledPlatforms;
+    if (!enabledPlatforms.includes(request.platform)) {
+      throw new Error(`publish platform is disabled: ${request.platform}`);
+    }
     return this.patchItem(request.id, (item) => {
       item.publish = patchOverlayPublish(item.publish, request.platform, request.status, request.url);
     }, signal);
@@ -948,6 +958,11 @@ export class OilCreatorService extends TypertRemoteService {
   async find(id: string) {
     const { items } = await this.scanned();
     return items.find((item) => item.id === id);
+  }
+
+  rememberOverlay(overlay: OverlayStore): void {
+    this.cachedScriptRules = overlay.scriptRules;
+    this.cachedEnabledPlatforms = overlay.profile?.enabledPlatforms ?? emptyProfile().enabledPlatforms;
   }
 
   async settingsOf(

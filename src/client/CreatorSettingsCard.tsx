@@ -3,7 +3,7 @@ import { IconChevronDownOutline14 } from "@deepseek-ai/dsh-client-ui-primitives"
 import type { InjectFace, PropsLocale, PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots";
 import type {} from "@deepseek-ai/dsh-client-ui-settings-plugins/client";
 
-import { PUBLISH_PLATFORMS } from "../platforms.ts";
+import { normalizeEnabledPlatforms, PUBLISH_PLATFORMS } from "../platforms.ts";
 import { COVER_KEY_REFS, SUBTITLE_KEY_REFS } from "../secrets.ts";
 import type { CreatorCapabilities, CreatorProfile, CreatorSecrets, PublishPlatform } from "../types.ts";
 import type { CredentialsClient, SecretDraft } from "./credentialsApi.ts";
@@ -164,9 +164,9 @@ export function CreatorSettingsCard({
   const patchProfile = (platform: PublishPlatform, enabled: boolean) => {
     setDraftProfile((current) => {
       const enabledPlatforms = enabled
-        ? [...new Set([...current.enabledPlatforms, platform])]
+        ? [...current.enabledPlatforms, platform]
         : current.enabledPlatforms.filter((item) => item !== platform);
-      return { enabledPlatforms };
+      return { enabledPlatforms: normalizeEnabledPlatforms(enabledPlatforms) };
     });
     setSaved(false);
     setFailed(false);

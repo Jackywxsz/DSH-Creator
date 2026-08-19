@@ -21,6 +21,14 @@ describe("libraryConventionText", () => {
     expect(text).toContain("/.dsh-oil-creator/overlay.json");
     expect(text).not.toContain("oil_get_content");
     expect(text).not.toContain("oil_list_contents");
+    expect(text).not.toContain("当前启用平台");
+  });
+
+  it("names the enabled publish platforms", () => {
+    const text = libraryConventionText("/Movies/视频项目", "/.dsh-oil-creator", undefined, ["douyin", "wechat"]);
+    expect(text).toContain("当前启用平台：抖音、视频号");
+    expect(libraryConventionText("/Movies/视频项目", "/.dsh-oil-creator", undefined, []))
+      .toContain("当前没有启用发布平台");
   });
 
   it("appends the configured script rules", () => {
