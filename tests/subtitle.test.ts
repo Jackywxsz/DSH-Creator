@@ -116,6 +116,22 @@ describe("pickPreviewLaunch", () => {
 });
 
 describe("resolveSubtitleSkill", () => {
+  it("uses the Windows venv python when present", async () => {
+    const root = await mkdtemp(join(tmpdir(), "oil-subtitle-win-"));
+    await mkdir(join(root, ".venv", "Scripts"), { recursive: true });
+    await mkdir(join(root, "scripts"), { recursive: true });
+    await writeFile(join(root, "setup.sh"), "#!/bin/bash\n");
+    await Promise.all([
+      "preview_editor.py",
+      "burn_subtitles.py",
+      "prepare_subtitles.py",
+      "review_subtitles.py",
+    ].map((name) => writeFile(join(root, "scripts", name), "")));
+    const python = join(root, ".venv", "Scripts", "python.exe");
+    await writeFile(python, "");
+    expect(await resolveSubtitleSkill(root, "win32")).toEqual({ root, python });
+  });
+
   it("installs into the configured path when that directory is missing", async () => {
     const root = await mkdtemp(join(tmpdir(), "oil-subtitle-custom-"));
     const configured = join(root, "custom subtitle");

@@ -108,7 +108,7 @@ export function creatorGuideText(status: CreatorSetupStatus): string {
       : "- 缺 screen-studio-editor：征得用户同意后执行 `git clone https://github.com/oil-oil/screen-studio-editor ~/.agents/skills/screen-studio-editor`；没有它时剪辑由用户自己完成。",
     "",
     "## 自动发布与数据回收",
-    "- 这两项都依赖 Ego Browser（ego-browser 命令，仅 macOS）和已登录的各平台创作者后台。",
+    "- 这两项都依赖 Ego Browser（PATH 里的 ego-browser 命令）和已登录的各平台创作者后台。",
     publishPlatformLine(enabledPlatforms),
     capabilities.publishSync.state === "ready"
       ? enabledPlatforms.length === 0

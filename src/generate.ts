@@ -4,6 +4,7 @@ import { basename, extname, join } from "node:path";
 import { defaultCoverSkillDir } from "./config.ts";
 
 import { pathExists } from "./artifacts.ts";
+import { resolveVenvPython, systemPythonCommand } from "./runtimePaths.ts";
 import { workDirOf } from "./subtitle.ts";
 import type { ContentSummary } from "./types.ts";
 
@@ -20,13 +21,13 @@ export { defaultCoverSkillDir } from "./config.ts";
 
 export async function resolveCoverSkill(
   skillDir = process.env.OIL_COVER_SKILL ?? defaultCoverSkillDir(),
+  platform: NodeJS.Platform = process.platform,
 ): Promise<{ root: string; python: string; script: string }> {
   const script = join(skillDir, "scripts/generate_oil_cover.py");
   if (!(await pathExists(script))) {
     throw new Error("未安装 oil-cover。执行 git clone https://github.com/oil-oil/oil-cover ~/.agents/skills/oil-cover 后重试。");
   }
-  const venv = join(skillDir, ".venv/bin/python3");
-  const python = await pathExists(venv) ? venv : "python3";
+  const python = await resolveVenvPython(skillDir, platform) ?? systemPythonCommand(platform);
   return { root: skillDir, python, script };
 }
 

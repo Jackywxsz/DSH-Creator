@@ -16,8 +16,10 @@ import {
 } from "../src/config.ts";
 
 describe("portable config defaults", () => {
-  it("puts the library under the current home Movies folder", () => {
-    expect(defaultLibraryRoot()).toBe(join(homedir(), "Movies", "视频项目"));
+  it("puts the library under Movies on macOS and Videos elsewhere", () => {
+    expect(defaultLibraryRoot("darwin")).toBe(join(homedir(), "Movies", "视频项目"));
+    expect(defaultLibraryRoot("win32")).toBe(join(homedir(), "Videos", "视频项目"));
+    expect(defaultLibraryRoot("linux")).toBe(join(homedir(), "Videos", "视频项目"));
   });
 
   it("resolves empty dataDir to the home-local store", () => {
@@ -36,9 +38,15 @@ describe("portable config defaults", () => {
   });
 
   it("discovers common skill roots without overriding explicit choices", () => {
-    expect(skillDirCandidates("oil-cover")).toContain(join(homedir(), ".codex", "skills", "oil-cover"));
+    expect(skillDirCandidates("oil-cover")).toEqual([
+      join(homedir(), ".claude", "skills", "oil-cover"),
+      join(homedir(), ".codex", "skills", "oil-cover"),
+      join(homedir(), ".agents", "skills", "oil-cover"),
+      join(homedir(), ".grok", "skills", "oil-cover"),
+    ]);
     expect(resolveSkillDir("/opt/custom-skill", "oil-cover", "/opt/from-env")).toBe("/opt/custom-skill");
     expect(resolveSkillDir("", "oil-cover", "/opt/from-env")).toBe("/opt/from-env");
     expect(expandHomePath("~/Movies/content")).toBe(join(homedir(), "Movies", "content"));
+    expect(expandHomePath("%USERPROFILE%\\Videos\\content")).toBe(join(homedir(), "Videos", "content"));
   });
 });

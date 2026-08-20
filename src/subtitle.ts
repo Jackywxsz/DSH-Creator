@@ -6,6 +6,7 @@ import { basename, dirname, extname, join } from "node:path";
 import { defaultSubtitleSkillDir } from "./config.ts";
 
 import { pathExists } from "./artifacts.ts";
+import { resolveVenvPython } from "./runtimePaths.ts";
 import type { ContentSummary } from "./types.ts";
 
 export { defaultSubtitleSkillDir } from "./config.ts";
@@ -20,20 +21,21 @@ export function subtitleInstallCommand(skillDir: string): string {
 
 export async function resolveSubtitleSkill(
   skillDir = process.env.OIL_SUBTITLE_SKILL ?? defaultSubtitleSkillDir(),
+  platform: NodeJS.Platform = process.platform,
 ): Promise<{ root: string; python: string }> {
   const root = await stat(skillDir).catch(() => undefined);
   if (root === undefined || !root.isDirectory()) {
     throw new Error(`未发现 oil-subtitle。执行 ${subtitleInstallCommand(skillDir)} 后重试。`);
   }
   const setup = join(skillDir, "setup.sh");
-  const python = join(skillDir, ".venv/bin/python3");
+  const python = await resolveVenvPython(skillDir, platform);
   const preview = join(skillDir, "scripts/preview_editor.py");
   const burn = join(skillDir, "scripts/burn_subtitles.py");
   const prepare = join(skillDir, "scripts/prepare_subtitles.py");
   const review = join(skillDir, "scripts/review_subtitles.py");
   if (
-    !(await pathExists(setup))
-    || !(await pathExists(python))
+    python === undefined
+    || !(await pathExists(setup))
     || !(await pathExists(preview))
     || !(await pathExists(burn))
     || !(await pathExists(prepare))

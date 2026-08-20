@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { findExecutable, inspectCreatorSetup } from "../src/capabilities.ts";
+import { defaultFindSkillDir, findExecutable, inspectCreatorSetup } from "../src/capabilities.ts";
 import type { LibrarySettings } from "../src/types.ts";
 
 function settings(libraryRoot: string, configured = true): LibrarySettings {
@@ -78,6 +78,7 @@ describe("creator setup inspection", () => {
       settings: settings(join(root, "missing-library"), false),
       platform: "linux",
       env: { PATH: "" },
+      home: root,
       findSkillDir: () => undefined,
     });
 
@@ -108,6 +109,7 @@ describe("creator setup inspection", () => {
       settings: settings(root),
       platform: "linux",
       env: { PATH: "" },
+      home: root,
       findSkillDir: () => undefined,
     });
 
@@ -122,6 +124,102 @@ describe("creator setup inspection", () => {
 
 describe("findExecutable", () => {
   it("returns undefined when PATH has no matching executable", async () => {
-    expect(await findExecutable("ego-browser", { PATH: "" }, "linux")).toBeUndefined();
+    expect(await findExecutable("ego-browser", { PATH: "" }, "linux", tmpdir())).toBeUndefined();
+  });
+
+  it("finds Windows executables via Path and PATHEXT", async () => {
+    const root = await mkdtemp(join(tmpdir(), "oil-win-bin-"));
+    const exe = join(root, "ego-browser.EXE");
+    await writeFile(exe, "");
+    expect(await findExecutable("ego-browser", {
+      Path: root,
+      PATHEXT: ".EXE;.CMD",
+    }, "win32", root)).toBe(exe);
+  });
+
+  it("looks in user bin dirs even when they are not on PATH", async () => {
+    const home = await mkdtemp(join(tmpdir(), "oil-home-bin-"));
+    const bin = join(home, ".local", "bin");
+    await mkdir(bin, { recursive: true });
+    const cli = join(bin, "ego-browser");
+    await writeFile(cli, "");
+    await chmod(cli, 0o755);
+    expect(await findExecutable("ego-browser", { PATH: "" }, "linux", home)).toBe(cli);
+  });
+});
+
+describe("defaultFindSkillDir", () => {
+  it("requires SKILL.md and searches grok skills", async () => {
+    const home = await mkdtemp(join(tmpdir(), "oil-skill-home-"));
+    const empty = join(home, ".claude", "skills", "video-publisher");
+    const grok = join(home, ".grok", "skills", "video-publisher");
+    await mkdir(empty, { recursive: true });
+    await mkdir(grok, { recursive: true });
+    await writeFile(join(grok, "SKILL.md"), "# video-publisher\n");
+    expect(defaultFindSkillDir("video-publisher", home)).toBe(grok);
+  });
+});
+
+describe("inspectCreatorSetup windows and mac paths", () => {
+  it("accepts a Windows subtitle venv and does not claim Screen Studio", async () => {
+    const root = await mkdtemp(join(tmpdir(), "oil-win-setup-"));
+    const libraryRoot = join(root, "library");
+    const subtitleRoot = join(root, "oil-subtitle");
+    const coverRoot = join(root, "oil-cover");
+    const bin = join(root, "bin");
+    await Promise.all([
+      mkdir(libraryRoot, { recursive: true }),
+      mkdir(join(subtitleRoot, ".venv", "Scripts"), { recursive: true }),
+      mkdir(join(subtitleRoot, "scripts"), { recursive: true }),
+      mkdir(join(coverRoot, "scripts"), { recursive: true }),
+      mkdir(bin, { recursive: true }),
+    ]);
+    await writeFile(join(subtitleRoot, "setup.sh"), "#!/bin/bash\n");
+    await Promise.all([
+      writeFile(join(subtitleRoot, ".venv", "Scripts", "python.exe"), ""),
+      writeFile(join(subtitleRoot, "scripts", "preview_editor.py"), ""),
+      writeFile(join(subtitleRoot, "scripts", "burn_subtitles.py"), ""),
+      writeFile(join(subtitleRoot, "scripts", "prepare_subtitles.py"), ""),
+      writeFile(join(subtitleRoot, "scripts", "review_subtitles.py"), ""),
+      writeFile(join(coverRoot, "scripts", "generate_oil_cover.py"), ""),
+      writeFile(join(bin, "ego-browser.EXE"), ""),
+    ]);
+
+    const result = await inspectCreatorSetup({
+      libraryRoot,
+      dataDir: join(root, "data"),
+      subtitleSkillDir: subtitleRoot,
+      coverSkillDir: coverRoot,
+      settings: settings(libraryRoot),
+      platform: "win32",
+      env: { Path: bin, PATHEXT: ".EXE" },
+      home: root,
+      findSkillDir: () => undefined,
+    });
+
+    expect(result.capabilities.subtitleSkill.state).toBe("ready");
+    expect(result.capabilities.coverSkill.state).toBe("ready");
+    expect(result.capabilities.publishSync.state).toBe("ready");
+    expect(result.capabilities.screenStudio.state).toBe("unsupported");
+  });
+
+  it("does not treat an Ego app without the CLI as ready", async () => {
+    const home = await mkdtemp(join(tmpdir(), "oil-ego-app-"));
+    const app = join(home, "Applications", "ego lite.app");
+    await mkdir(app, { recursive: true });
+    const result = await inspectCreatorSetup({
+      libraryRoot: home,
+      dataDir: join(home, "data"),
+      subtitleSkillDir: join(home, "missing-subtitle"),
+      coverSkillDir: join(home, "missing-cover"),
+      settings: settings(home),
+      platform: "darwin",
+      env: { PATH: "" },
+      home,
+      findSkillDir: () => undefined,
+    });
+    expect(result.capabilities.publishSync.state).toBe("missing");
+    expect(result.capabilities.publishSync.path).toBe(app);
+    expect(result.capabilities.publishSync.detail).toContain("PATH");
   });
 });

@@ -11,8 +11,9 @@ export interface Config {
   coverSkillDir: string;
 }
 
-export function defaultLibraryRoot(): string {
-  return join(homedir(), "Movies", "视频项目");
+export function defaultLibraryRoot(platform: NodeJS.Platform = process.platform): string {
+  const videos = platform === "darwin" ? "Movies" : "Videos";
+  return join(homedir(), videos, "视频项目");
 }
 
 export function defaultDataDir(): string {
@@ -27,18 +28,28 @@ export function defaultCoverSkillDir(): string {
   return join(homedir(), ".claude", "skills", "oil-cover");
 }
 
-export function skillDirCandidates(skillName: string): string[] {
+export function skillDirCandidates(skillName: string, home = homedir()): string[] {
   return [
-    join(homedir(), ".claude", "skills", skillName),
-    join(homedir(), ".codex", "skills", skillName),
-    join(homedir(), ".agents", "skills", skillName),
+    join(home, ".claude", "skills", skillName),
+    join(home, ".codex", "skills", skillName),
+    join(home, ".agents", "skills", skillName),
+    join(home, ".grok", "skills", skillName),
   ];
 }
 
-export function expandHomePath(path: string): string {
+function joinUnderHome(home: string, rest: string): string {
+  return join(home, ...rest.replaceAll("\\", "/").split("/").filter(Boolean));
+}
+
+export function expandHomePath(path: string, home = homedir()): string {
   const trimmed = path.trim();
-  if (trimmed === "~") return homedir();
-  if (trimmed.startsWith("~/")) return join(homedir(), trimmed.slice(2));
+  if (trimmed === "~" || trimmed === "%USERPROFILE%" || trimmed === "%HOME%") return home;
+  if (trimmed.startsWith("~/") || trimmed.startsWith("~\\")) return joinUnderHome(home, trimmed.slice(2));
+  const windowsHome = /^%(?:USERPROFILE|HOME)%([\\/].*)?$/i.exec(trimmed);
+  if (windowsHome !== null) {
+    const rest = windowsHome[1];
+    return rest === undefined || rest === "" ? home : joinUnderHome(home, rest);
+  }
   return trimmed;
 }
 
