@@ -69,11 +69,11 @@ html[data-jacky-creator-brand="paper-growth"] [data-phase="hero"] div:has(> span
 }
 
 .jackyConversationHero {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 14px;
-  width: auto;
+  width: 100%;
   max-width: 100%;
   margin-inline: auto;
   color: var(--jacky-ink);
@@ -81,9 +81,9 @@ html[data-jacky-creator-brand="paper-growth"] [data-phase="hero"] div:has(> span
 
 .jackyConversationHeroMark {
   display: grid;
-  flex: 0 0 62px;
-  width: 62px;
-  height: 62px;
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
   place-items: center;
   overflow: hidden;
   border: 1px solid var(--jacky-line);
@@ -92,13 +92,13 @@ html[data-jacky-creator-brand="paper-growth"] [data-phase="hero"] div:has(> span
   box-shadow: var(--jacky-shadow-raised);
 }
 
-.jackyConversationHeroMark img {
+.jackyConversationHeroMark video {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: 50% 50%;
-  transform: scale(1.02);
+  transform: scale(1.04);
 }
 
 .jackyConversationHero h1 {
@@ -117,9 +117,9 @@ html[data-jacky-creator-brand="paper-growth"] [data-phase="hero"] div:has(> span
 
 .jackyConversationHero h1 strong {
   color: var(--jacky-cobalt);
-  font-size: 0.74em;
+  font-size: 1em;
   font-weight: 850;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
 }
 
 html[data-jacky-creator-brand="paper-growth"] [data-plugin="dsh-oil-creator"][data-surface="sidebar"],

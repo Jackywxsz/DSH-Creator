@@ -101,7 +101,7 @@
   flex: none;
   place-items: center;
   overflow: hidden;
-  border-radius: 50%;
+  border-radius: 0;
   background: transparent;
 }
 
@@ -110,6 +110,8 @@
   height: 100%;
   object-fit: contain;
   object-position: center;
+  transform: scale(1.22);
+  transform-origin: 50% 48%;
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .oilBrandText {
