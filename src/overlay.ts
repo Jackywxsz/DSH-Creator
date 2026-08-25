@@ -51,6 +51,12 @@ export function decodeOverlay(value: unknown): OverlayStore {
       }
       if (record.waitingForExport === true) next.waitingForExport = true;
       if (record.exportTimedOut === true) next.exportTimedOut = true;
+      if (Array.isArray(record.skippedSteps)) {
+        const skippedSteps = record.skippedSteps.filter((step): step is "presentation" | "subtitle" | "article" => (
+          step === "presentation" || step === "subtitle" || step === "article"
+        ));
+        if (skippedSteps.length > 0) next.skippedSteps = [...new Set(skippedSteps)];
+      }
       const publish = decodeOverlayPublish(record.publish);
       if (publish !== undefined) next.publish = publish;
       const burn = decodeBurnJob(record.burn);

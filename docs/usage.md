@@ -21,7 +21,7 @@ DeepSeek Harness 打开后，左侧切到「内容」，中间是一条片子的
 
 左侧列表显示每条片子的阶段和时间。已经在任一视频平台发出去的，显示「已发布」；成片、字幕、封面都齐但还没发出去的，显示「待发布」。
 
-点开一条片子，中间检查器不关右边的对话。检查器有五个页：概览、视频、脚本、字幕、文章。概览用封面旁的状态标明阶段，只展开当前步骤的按钮；封面并排显示 3:4 和 4:3。视频页播放带字幕成片，没有带字幕成片时播放原片。字幕和烧录由对话里的工具完成。文章页用 Markdown 渲染 `公众号文章/` 里的成稿和配图。中间栏可以拖宽，大约到 800 像素。
+点开一条片子，中间检查器不关右边的对话。检查器按真实资产分成：概览、脚本、演示、视频、字幕、封面、文章。概览只显示状态；演示页调用 Jacky Motion 并保留审稿、分镜、选风格三个确认门；封面页通过 ZenMux 生成 Jacky Cover 三画幅；文章页把 script.md 改写成 `公众号文章/<标题>.md` 并用 Markdown 渲染。中间栏可以拖宽，大约到 800 像素。
 
 右边输入 `@`，可以选择「当前详情」或搜以前的片子。发出去的是那一期的文件夹路径，封面、脚本、字幕都在里面，按 [files.md](files.md) 自己去列、去读。`/current content` 同样只带当前打开那条的文件夹路径。
 
@@ -51,7 +51,7 @@ DeepSeek Harness 打开后，左侧切到「内容」，中间是一条片子的
 | `oil_generate_subtitles` | 转录、自动校对、排版；立刻返回；完成后打开预览，出现 `subtitle-transcript.json`，不烧录 |
 | `oil_open_subtitle_preview` | 在浏览器打开字幕预览编辑器 |
 | `oil_burn_subtitles` | 用户预览确认后再烧进成片；立刻返回；完成后出现 `*_subtitled.mp4` |
-| `oil_generate_cover` | 一键生成 3:4 / 4:3 / 16:9 封面，立刻返回；完成后出现对应 png |
+| `oil_generate_cover` | 用 Jacky Cover 品牌补丁和 ZenMux 一键生成 3:4 / 4:3 / 16:9 封面，立刻返回；完成后出现对应 png |
 | `oil_sync_publish` | 用 Ego 翻完启用平台的已发布列表，按标题或已存 id 写回播放 / 赞 / 评 |
 | `oil_creator_profile` | 读或改 `enabledPlatforms`，即 AI 发布和数据同步使用的平台列表 |
 | `oil_organize_library` | 预览或把文件夹改成 `日期_可读标题`，默认只预览 |
@@ -68,13 +68,13 @@ DeepSeek Harness 打开后，左侧切到「内容」，中间是一条片子的
 
 剪辑在对话里喊 `screen-studio-editor`，对照绑定的工程清理停顿和误讲。工作台只负责打开工程，不替你改时间线。预览满意后，在 Screen Studio 里亲手导出 MP4，导出目标就是这一期的文件夹。
 
-导出开始后说：「等这条的成片落盘，落盘后生成字幕和封面。」`oil_wait_export` 会等到文件大小稳定。成片到了再用 `oil_generate_subtitles` 出字幕稿并打开预览；用户确认后再 `oil_burn_subtitles`。封面用 `oil_generate_cover`，调用前先按 oil-cover 提炼主标题传入 `title`。生成后要在对话里核对标题和错别字，不对就再说一次生成。
+导出开始后说：「等这条的成片落盘，落盘后生成字幕和封面。」`oil_wait_export` 会等到文件大小稳定。成片到了再用 `oil_generate_subtitles` 出字幕稿并打开预览；用户确认后再 `oil_burn_subtitles`。封面用 `oil_generate_cover`，调用前按 Jacky Cover / Oil Cover 提炼主标题传入 `title`。生成后核对标题、人物身份和错别字。
 
 首次 clone `oil-subtitle` 后必须运行 `bash ~/.agents/skills/oil-subtitle/setup.sh`，否则字幕工作流不会就绪。不要在预览前烧录。`oil_burn_subtitles` 不会覆盖已经带字幕的成片文件名习惯，产物文件名里带 `_subtitled`。
 
 成片、字幕、封面齐了，阶段会变成「待发布」。四平台上传仍然用 `video-publisher`，但只处理 `enabledPlatforms` 中启用的平台；做到各平台的最终发表按钮前停下，你自己点发表。在右侧输入框 `@` 这条片子，再说用 video-publisher 发布。「已发布，同步数据」从创作者后台回收播放、赞和评论。同步只翻启用平台的已发布列表，再对到本地片子；90 秒内再点一次会直接用刚才的结果。每次同步开一个新的 Ego 空间，采完就关掉。平台上有、本地没有文件夹的，不会自动新建一条片子。
 
-公众号不是第五个视频平台。需要图文时，另外喊 `oil-video-article`。工作台只显示文件夹里有没有 `公众号文章/`。
+公众号不是第五个视频平台。在文章页点击「生成 Markdown 文章」，当前会话会读取 script.md、改写阅读结构并写入 `公众号文章/<标题>.md`。文件使用标准 Markdown 和相对图片路径，可以直接在 Obsidian MDFlow 中排版。
 
 ## 把一条没做完的旧片子收尾
 

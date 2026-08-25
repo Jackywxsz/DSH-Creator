@@ -12,7 +12,7 @@ import type { InjectFace, PropsLocale, PropsRuntime } from "@deepseek-ai/dsh-cli
 import { formatCount } from "../collectPublish.ts";
 import { isPublishMark } from "../publishStatus.ts";
 import { rewriteArticleImages } from "../articleMarkdown.ts";
-import type { ArticleMediaResult, ContentDetail, PublishMark, PublishPlatform, SubtitleCue, VideoPlaybackResult, WorkflowStage } from "../types.ts";
+import type { ArticleMediaResult, ContentDetail, ContentOptionalStep, PublishMark, PublishPlatform, SubtitleCue, VideoPlaybackResult, WorkflowStage } from "../types.ts";
 import { CoverThumb, coverThumbRevision } from "./CoverThumb.tsx";
 import type { CreatorViewFace } from "./face.ts";
 import {
@@ -31,32 +31,50 @@ import { sendCockpitInstruction } from "./operations/sessionBridge.tsx";
 import { PlatformMark } from "./PlatformMark.tsx";
 import { isPublishSyncDisabled, PUBLISH_UI_PLATFORMS, selectEnabledPublishPlatforms } from "./publishPlatforms.ts";
 import { formatRelativeTime } from "./relativeTime.ts";
+import {
+  contentProgress,
+  contentStepHasAsset,
+  contentStepIsSkipped,
+  readTopicSummary,
+  replaceTopicCore,
+  type ContentProgressStep,
+} from "./contentWorkflow.ts";
 import { WORKFLOW_TONE } from "./sidebar/ContentSidebarPanel.tsx";
 import { ActionBar, ActionButton } from "./ui/ActionButton.tsx";
 import { StatusPill, type StatusTone } from "./ui/StatusPill.tsx";
 import { Surface } from "./ui/Surface.tsx";
 import "./ContentInspector.css";
 
-const TABS = ["overview", "video", "script", "subtitle", "article"] as const;
+const TABS = ["overview", "script", "presentation", "video", "subtitle", "cover", "article"] as const;
 type InspectorTab = (typeof TABS)[number];
 
-const PIPELINE_STEPS = [
-  { id: "topic", label: "inspector.step.topic", hint: "inspector.step.topicHint" },
-  { id: "record", label: "inspector.step.record", hint: "inspector.step.recordHint" },
-  { id: "cut", label: "inspector.step.cut", hint: "inspector.step.cutHint" },
-  { id: "finish", label: "inspector.step.finish", hint: "inspector.step.finishHint" },
-  { id: "publish", label: "inspector.step.publish" },
-] as const;
+const PROGRESS_KEY: Record<ContentProgressStep, CreatorKey> = {
+  topic: "inspector.step.topic",
+  script: "inspector.step.script",
+  presentation: "inspector.step.presentation",
+  video: "inspector.step.video",
+  subtitle: "inspector.step.subtitle",
+  cover: "inspector.step.cover",
+  article: "inspector.step.article",
+  publish: "inspector.step.publish",
+};
 
-type PipelineStepId = (typeof PIPELINE_STEPS)[number]["id"];
+const PROGRESS_HINT_KEY: Partial<Record<ContentProgressStep, CreatorKey>> = {
+  script: "inspector.step.scriptHint",
+  presentation: "inspector.step.presentationHint",
+  video: "inspector.step.videoHint",
+  subtitle: "inspector.step.subtitleHint",
+  cover: "inspector.step.coverHint",
+  article: "inspector.step.articleHint",
+};
 
-const WORKFLOW_INDEX: Record<WorkflowStage, number> = {
-  idle: 0,
-  record: 1,
-  cut: 2,
-  finish: 3,
-  publish: 4,
-  live: 4,
+const PROGRESS_TAB: Partial<Record<ContentProgressStep, InspectorTab>> = {
+  script: "script",
+  presentation: "presentation",
+  video: "video",
+  subtitle: "subtitle",
+  cover: "cover",
+  article: "article",
 };
 
 const PUBLISH_KEY: Record<PublishMark, CreatorKey> = {
@@ -84,9 +102,11 @@ const STAGE_KEY: Record<WorkflowStage, CreatorKey> = {
 
 const TAB_KEY: Record<InspectorTab, CreatorKey> = {
   overview: "inspector.tab.overview",
-  video: "inspector.tab.video",
   script: "inspector.tab.script",
+  presentation: "inspector.tab.presentation",
+  video: "inspector.tab.video",
   subtitle: "inspector.tab.subtitle",
+  cover: "inspector.tab.cover",
   article: "inspector.tab.article",
 };
 
@@ -146,25 +166,218 @@ function JobNote({ tone, children }: { tone?: "running" | "done" | "error"; chil
   );
 }
 
-function WorkRow({
-  name,
-  status,
-  tone,
-  actions,
-}: {
-  name: string;
-  status: string;
+interface AssetShelfEntry {
+  label: string;
+  path?: string;
+  expectedPath: string;
+  status?: string;
   tone?: StatusTone;
-  actions?: ReactNode;
+  onReveal?: () => void;
+}
+
+function relativeAssetPath(path: string, folderPath: string): string {
+  const normalizedPath = path.replaceAll("\\", "/");
+  const normalizedFolder = folderPath.replaceAll("\\", "/").replace(/\/$/, "");
+  if (normalizedPath.startsWith(`${normalizedFolder}/`)) {
+    return normalizedPath.slice(normalizedFolder.length + 1);
+  }
+  return normalizedPath.split("/").filter(Boolean).at(-1) ?? normalizedPath;
+}
+
+function AssetShelf({
+  folderPath,
+  entries,
+  openPath,
+  t,
+}: {
+  folderPath: string;
+  entries: AssetShelfEntry[];
+  openPath: (path: string) => Promise<void>;
+  t: (key: CreatorKey) => string;
 }) {
+  const readyCount = entries.filter((entry) => entry.path !== undefined).length;
   return (
-    <div className="workRow">
-      <div className="workMain">
-        <span className="workName">{name}</span>
-        <StatusPill tone={tone ?? "neutral"}>{status}</StatusPill>
+    <section className="assetShelf">
+      <header className="assetShelfHeader">
+        <div>
+          <span className="eyebrow">{t("inspector.assets.eyebrow" as CreatorKey)}</span>
+          <h2>{t("inspector.assets.title" as CreatorKey)}</h2>
+        </div>
+        <span className="assetShelfCount">
+          {t("inspector.assets.count" as CreatorKey)
+            .replace("{ready}", String(readyCount))
+            .replace("{total}", String(entries.length))}
+        </span>
+      </header>
+      <div className="assetShelfRows">
+        {entries.map((entry) => {
+          const ready = entry.path !== undefined;
+          const shownPath = entry.path ?? entry.expectedPath;
+          return (
+            <div className="assetShelfRow" key={`${entry.label}-${entry.expectedPath}`}>
+              <div className="assetShelfIdentity">
+                <strong>{entry.label}</strong>
+                <code title={shownPath}>{relativeAssetPath(shownPath, folderPath)}</code>
+              </div>
+              <div className="assetShelfActions">
+                <StatusPill tone={entry.tone ?? (ready ? "success" : "neutral")}>
+                  {entry.status ?? t((ready ? "inspector.assets.ready" : "inspector.assets.waiting") as CreatorKey)}
+                </StatusPill>
+                {entry.path !== undefined && (
+                  <button
+                    type="button"
+                    className="assetReveal"
+                    onClick={() => {
+                      if (entry.onReveal !== undefined) entry.onReveal();
+                      else void openPath(entry.path!);
+                    }}
+                  >
+                    {t("inspector.assets.reveal" as CreatorKey)}
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
-      {actions !== undefined && <ActionBar>{actions}</ActionBar>}
-    </div>
+    </section>
+  );
+}
+
+function OverviewContentBrief({
+  detail,
+  cockpit,
+  cover,
+  saveCore,
+  t,
+}: {
+  detail: ContentDetail;
+  cockpit: CreatorCockpitFace;
+  cover?: ReactNode;
+  saveCore: (core: string) => Promise<void>;
+  t: (key: CreatorKey) => string;
+}) {
+  const [state, setState] = useState<CockpitState | undefined>(undefined);
+  const summary = readTopicSummary(detail.topicNote, detail.title);
+  const [editingCore, setEditingCore] = useState(false);
+  const [coreDraft, setCoreDraft] = useState(summary.core);
+  const [coreSaving, setCoreSaving] = useState(false);
+  const [coreError, setCoreError] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    let live = true;
+    void cockpit.getCockpitState().then((next) => {
+      if (live) setState(next);
+    }, () => undefined);
+    return () => { live = false; };
+  }, [detail.id, cockpit]);
+
+  useEffect(() => {
+    setCoreDraft(summary.core);
+    setEditingCore(false);
+    setCoreError(undefined);
+  }, [detail.id, detail.topicNote]);
+
+  const meta = state?.contentMeta[detail.id];
+  const core = summary.core || t("inspector.overview.coreEmpty" as CreatorKey);
+  const note = summary.note;
+  const tags = [...new Set([...detail.tags, ...(meta?.tags ?? [])])];
+  const goals = (meta?.goalIds ?? [])
+    .map((id) => state?.goals.find((goal) => goal.id === id)?.name)
+    .filter((name): name is string => name !== undefined);
+  const priority = meta?.priority === undefined
+    ? undefined
+    : t(`inspector.overview.priority.${meta.priority}` as CreatorKey);
+  const strategy = [meta?.contentType, meta?.tier, priority, ...goals]
+    .filter((value): value is string => value !== undefined && value !== "");
+
+  return (
+    <section className={cover === undefined ? "overviewBrief" : "overviewBrief withCover"}>
+      <div className="overviewBriefMain">
+        <div className="overviewBriefTopline">
+          <span className="eyebrow">{t("inspector.overview.eyebrow" as CreatorKey)}</span>
+          <div className="overviewBriefState">
+            <StatusPill tone={WORKFLOW_TONE[detail.workflow]}>{t(STAGE_KEY[detail.workflow])}</StatusPill>
+            <span>{formatRelativeTime(detail.recordedAt, Date.now(), t)}</span>
+          </div>
+        </div>
+        <div className="overviewField topicField">
+          <span>{t("inspector.overview.topic" as CreatorKey)}</span>
+          <h2>{detail.title}</h2>
+        </div>
+        <div className="overviewField coreField">
+          <div className="coreFieldHeader">
+            <span>{t("inspector.overview.core" as CreatorKey)}</span>
+            {!editingCore && (
+              <button type="button" onClick={() => { setCoreDraft(summary.core); setEditingCore(true); }}>
+                {t("inspector.overview.coreEdit" as CreatorKey)}
+              </button>
+            )}
+          </div>
+          {editingCore
+            ? (
+              <div className="coreEditor">
+                <textarea
+                  autoFocus={true}
+                  rows={3}
+                  value={coreDraft}
+                  placeholder={t("inspector.overview.corePlaceholder" as CreatorKey)}
+                  disabled={coreSaving}
+                  onChange={(event) => { setCoreDraft(event.target.value); setCoreError(undefined); }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                      setCoreDraft(summary.core);
+                      setEditingCore(false);
+                    }
+                    if ((event.metaKey || event.ctrlKey) && event.key === "Enter" && coreDraft.trim() !== "") {
+                      event.preventDefault();
+                      setCoreSaving(true);
+                      void saveCore(coreDraft).then(() => {
+                        setEditingCore(false);
+                        setCoreSaving(false);
+                      }, (cause: unknown) => {
+                        setCoreError(cause instanceof Error ? cause.message : t("inspector.overview.coreSaveFailed" as CreatorKey));
+                        setCoreSaving(false);
+                      });
+                    }
+                  }}
+                />
+                <div className="coreEditorActions">
+                  <button type="button" disabled={coreSaving} onClick={() => { setCoreDraft(summary.core); setEditingCore(false); }}>
+                    {t("inspector.overview.coreCancel" as CreatorKey)}
+                  </button>
+                  <button
+                    type="button"
+                    className="primary"
+                    disabled={coreSaving || coreDraft.trim() === ""}
+                    onClick={() => {
+                      setCoreSaving(true);
+                      void saveCore(coreDraft).then(() => {
+                        setEditingCore(false);
+                        setCoreSaving(false);
+                      }, (cause: unknown) => {
+                        setCoreError(cause instanceof Error ? cause.message : t("inspector.overview.coreSaveFailed" as CreatorKey));
+                        setCoreSaving(false);
+                      });
+                    }}
+                  >
+                    {t((coreSaving ? "inspector.overview.coreSaving" : "inspector.overview.coreSave") as CreatorKey)}
+                  </button>
+                </div>
+                {coreError !== undefined && <p className="coreEditorError">{coreError}</p>}
+              </div>
+            )
+            : <p>{core}</p>}
+        </div>
+        {note !== "" && <p className="overviewNote">{note}</p>}
+        {(strategy.length > 0 || tags.length > 0) && (
+          <div className="overviewMeta">
+            {strategy.map((value) => <span className="strategyChip" key={value}>{value}</span>)}
+            {tags.map((tag) => <span className="tagChip" key={tag}>#{tag}</span>)}
+          </div>
+        )}
+      </div>
+      {cover}
+    </section>
   );
 }
 
@@ -238,15 +451,17 @@ export function ContentInspector({
   getArticleMedia,
   getSubtitleText,
   getSettings,
-  markReadyToRecord,
+  setContentSkip,
   bindStudio,
   openStudio,
+  waitForExport,
   setPublish,
   syncPublish,
   startSubtitleGenerate,
   startSubtitleBurn,
   startCoverGenerate,
   setScript,
+  setTopicNote,
   pickDirectory,
   openSubtitlePreview,
   openPath,
@@ -268,6 +483,7 @@ export function ContentInspector({
   const [expanded, setExpanded] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [actionError, setActionError] = useState<string | undefined>(undefined);
+  const [sessionHint, setSessionHint] = useState<string | undefined>(undefined);
 
   const [busy, setBusy] = useState<"subtitle" | "burn" | "cover" | "sync" | undefined>(undefined);
   const expectSubtitlePreview = useRef(false);
@@ -280,11 +496,13 @@ export function ContentInspector({
   const [articleOrigin, setArticleOrigin] = useState<string | undefined>(undefined);
   const [publishMenu, setPublishMenu] = useState<PublishPlatform | null>(null);
   const [publishPending, setPublishPending] = useState<PublishPlatform | null>(null);
+  const [coverPreview, setCoverPreview] = useState<"3x4" | "4x3" | "16x9" | undefined>(undefined);
   const drag = useRef<{ startX: number; startWidth: number } | null>(null);
 
   useEffect(() => {
     setTab("overview");
     setActionError(undefined);
+    setSessionHint(undefined);
 
     setSyncHint(undefined);
     setScriptDraft("");
@@ -296,7 +514,17 @@ export function ContentInspector({
     expectSubtitlePreview.current = false;
     setPublishMenu(null);
     setPublishPending(null);
+    setCoverPreview(undefined);
   }, [selectedId]);
+
+  useEffect(() => {
+    if (coverPreview === undefined) return;
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === "Escape") setCoverPreview(undefined);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => { document.removeEventListener("keydown", onKeyDown); };
+  }, [coverPreview]);
 
   useEffect(() => {
     let cancelled = false;
@@ -507,14 +735,17 @@ export function ContentInspector({
   const anyPublishMarked = detail !== undefined
     && visiblePlatforms.some((platform) => detail.publish[platform.key].status !== "unpublished");
   const publishStepDone = visiblePlatforms.length > 0 && publishedCount === visiblePlatforms.length;
-  const stageIndex = detail === undefined ? 0 : WORKFLOW_INDEX[detail.workflow];
-  const currentStep: PipelineStepId = publishStepDone
-    ? "publish"
-    : (PIPELINE_STEPS[stageIndex]?.id ?? "topic");
+  const progress = detail === undefined ? undefined : contentProgress(detail, publishStepDone);
+  const currentStep = progress?.current ?? "script";
+  const presentationHasAsset = detail !== undefined && contentStepHasAsset(detail, "presentation");
+  const subtitleHasAsset = detail !== undefined && contentStepHasAsset(detail, "subtitle");
+  const articleHasAsset = detail !== undefined && contentStepHasAsset(detail, "article");
 
-  const onReadyToRecord = (): void => {
+  const onSaveCore = async (core: string): Promise<void> => {
     if (detail === undefined) return;
-    void markReadyToRecord(detail.id).then((next) => { setDetail(next); });
+    const nextText = replaceTopicCore(detail.topicNote, detail.title, core);
+    const next = await setTopicNote(detail.id, nextText);
+    setDetail(next);
   };
 
   const onBindStudio = (): void => {
@@ -544,7 +775,32 @@ export function ContentInspector({
 
   const onOpenStudio = (): void => {
     if (detail === undefined) return;
-    void openStudio(detail.id);
+    setActionError(undefined);
+    void openStudio(detail.id)
+      .then(() => waitForExport(detail.id))
+      .then(setDetail, (cause: unknown) => {
+        setActionError(cause instanceof Error ? cause.message : t("inspector.studio.openFailed" as CreatorKey));
+      });
+  };
+
+  const onUseExternalEditor = (): void => {
+    if (detail === undefined) return;
+    setActionError(undefined);
+    void openPath(detail.folderPath).catch((cause: unknown) => {
+      setActionError(cause instanceof Error ? cause.message : t("inspector.video.openFolderFailed" as CreatorKey));
+    });
+    void waitForExport(detail.id).then(setDetail, (cause: unknown) => {
+      setActionError(cause instanceof Error ? cause.message : t("inspector.video.waitFailed" as CreatorKey));
+    });
+  };
+
+  const onToggleSkip = (step: ContentOptionalStep): void => {
+    if (detail === undefined) return;
+    const skipped = !contentStepIsSkipped(detail, step);
+    setActionError(undefined);
+    void setContentSkip(detail.id, step, skipped).then(setDetail, (cause: unknown) => {
+      setActionError(cause instanceof Error ? cause.message : t("empty.error" as CreatorKey));
+    });
   };
 
   const onGenerateCover = (): void => {
@@ -566,6 +822,47 @@ export function ContentInspector({
       setActionError(cause instanceof Error ? cause.message : t("empty.error" as CreatorKey));
       setBusy(undefined);
     });
+  };
+
+  const onGeneratePresentation = (aspect: "16x9" | "3x4"): void => {
+    if (detail === undefined) return;
+    if (detail.script.trim() === "" && scriptDraft.trim() === "") {
+      setActionError(t("inspector.presentation.needScript" as CreatorKey));
+      return;
+    }
+    setActionError(undefined);
+    const instruction = [
+      `请为 contentId=${JSON.stringify(detail.id)} 制作 Jacky Motion 演示动画。`,
+      "必须调用 $jacky-motion2-0，并完整遵循 P1 审稿、P2 分镜、P3 选风格三个确认门，不得直接跳到 HTML。",
+      `画幅选择 ${aspect}。读取这条真实内容的 script.md，最终把单文件 HTML 写入 ${JSON.stringify(`${detail.folderPath}/演示/${detail.id}-${aspect}.html`)}。`,
+      "完成后运行 Skill 自带的静态校验和浏览器布局检查。不要只把 HTML 发在对话里。",
+    ].join("\n");
+    if (!sendCockpitInstruction(instruction)) {
+      setActionError(t("operations.ai.noSession"));
+      return;
+    }
+    setSessionHint(t("inspector.presentation.submitted" as CreatorKey));
+  };
+
+  const onGenerateArticle = (): void => {
+    if (detail === undefined) return;
+    if (detail.script.trim() === "" && scriptDraft.trim() === "") {
+      setActionError(t("inspector.article.needScript" as CreatorKey));
+      return;
+    }
+    setActionError(undefined);
+    const output = detail.articlePath ?? `${detail.folderPath}/公众号文章/${detail.id}.md`;
+    const instruction = [
+      `请把 contentId=${JSON.stringify(detail.id)} 的 script.md 改写为公众号文章。`,
+      "保留核心观点、案例、证据和个人表达，删除口播停顿、重复和舞台提示，按阅读逻辑重组。",
+      "输出必须是纯 Markdown：一个 H1，正文使用 H2/H3；不用 HTML，不使用排版占位文本；图片只用相对路径 images/文件名。",
+      `把成稿写入 ${JSON.stringify(output)}，不要只发在对话里。若文件已存在，先询问我是否覆盖。`,
+    ].join("\n");
+    if (!sendCockpitInstruction(instruction)) {
+      setActionError(t("operations.ai.noSession"));
+      return;
+    }
+    setSessionHint(t("inspector.article.submitted" as CreatorKey));
   };
 
   const onGenerateSubtitle = (): void => {
@@ -647,48 +944,7 @@ export function ContentInspector({
     });
   };
 
-  const subtitleStatus = (): { status: string; tone?: StatusTone } => {
-    if (detail === undefined) return { status: "" };
-    if (detail.subtitleJob.status === "running" || busy === "subtitle") {
-      return { status: t("inspector.subtitle.generating" as CreatorKey), tone: "active" };
-    }
-    if (detail.burn.status === "running" || busy === "burn") {
-      return { status: t("inspector.subtitle.burning" as CreatorKey), tone: "active" };
-    }
-    if (detail.subtitleJob.status === "error" || detail.burn.status === "error") {
-      const raw = detail.subtitleJob.error ?? detail.burn.error;
-      return {
-        status: raw !== undefined && raw.includes("process exited")
-          ? t("inspector.subtitle.failed" as CreatorKey)
-          : raw ?? t("inspector.subtitle.failed" as CreatorKey),
-        tone: "error",
-      };
-    }
-    if (detail.videoSubtitled !== undefined) {
-      return { status: t("inspector.subtitle.burned" as CreatorKey), tone: "success" };
-    }
-    if (hasSubtitleDraft) {
-      return { status: t("inspector.subtitle.proofPending" as CreatorKey), tone: "pending" };
-    }
-    return { status: t("inspector.track.notGenerated" as CreatorKey) };
-  };
-
-  const coverStatus = (): { status: string; tone?: StatusTone } => {
-    if (detail === undefined) return { status: "" };
-    if (detail.coverJob.status === "running" || busy === "cover") {
-      return { status: t("inspector.cover.generating" as CreatorKey), tone: "active" };
-    }
-    if (detail.coverJob.status === "error") {
-      return {
-        status: detail.coverJob.error ?? t("inspector.cover.failed" as CreatorKey),
-        tone: "error",
-      };
-    }
-    if (hasAnyCover) return { status: t("inspector.cover.ready" as CreatorKey), tone: "success" };
-    return { status: t("inspector.track.notGenerated" as CreatorKey) };
-  };
-
-  const currentStepMeta = PIPELINE_STEPS.find((step) => step.id === currentStep);
+  const currentStepTab = PROGRESS_TAB[currentStep];
 
   return (
     <div
@@ -741,7 +997,11 @@ export function ContentInspector({
               role="tab"
               aria-selected={tab === id}
               className={tab === id ? "tab active" : "tab"}
-              onClick={() => { setTab(id); }}
+              onClick={() => {
+                setTab(id);
+                setActionError(undefined);
+                setSessionHint(undefined);
+              }}
             >
               {t(TAB_KEY[id])}
             </button>
@@ -755,124 +1015,52 @@ export function ContentInspector({
         )}
         {detail !== undefined && tab === "overview" && (
           <>
-            <div className="lede">
-              <div className="coverPair">
-                <div className="coverHero">
-                  <CoverThumb
-                    id={detail.id}
-                    load={getCoverThumb}
-                    revision={coverThumbRevision(detail.covers)}
-                    fallback={<IconBrowseOutline16 className="coverFallback" size={22} />}
-                  />
-                </div>
-                {detail.covers["4x3"] !== undefined && (
-                  <div className="coverWide">
+            <OverviewContentBrief
+              detail={detail}
+              cockpit={cockpit}
+              saveCore={onSaveCore}
+              t={t}
+              {...(hasAnyCover ? {
+                cover: (
+                  <button className="overviewCover" type="button" onClick={() => { setTab("cover"); }}>
                     <CoverThumb
-                      id={`${detail.id}::4x3`}
+                      id={detail.id}
                       load={getCoverThumb}
-                      revision={detail.covers["4x3"]}
+                      revision={coverThumbRevision(detail.covers)}
                       fallback={<IconBrowseOutline16 className="coverFallback" size={22} />}
                     />
-                  </div>
-                )}
-              </div>
-              <div className="ledeText">
-                <StatusPill tone={WORKFLOW_TONE[detail.workflow]}>
-                  {t(STAGE_KEY[detail.workflow])}
-                </StatusPill>
-                <div className="time">{formatRelativeTime(detail.recordedAt, Date.now(), t)}</div>
-              </div>
-            </div>
+                    <span>{t("inspector.overview.openCover" as CreatorKey)}</span>
+                  </button>
+                ),
+              } : {})}
+            />
             <div className="stepper" aria-hidden="true">
-              {PIPELINE_STEPS.map((step, index) => {
-                const done = index < stageIndex || (step.id === "publish" && publishStepDone);
-                const current = !done && step.id === currentStep;
-                return (
-                  <div
-                    key={step.id}
-                    className={`step ${done ? "done" : current ? "current" : ""}`}
-                  >
-                    <span className="stepDot" />
-                    <span className="stepLabel">{t(step.label as CreatorKey)}</span>
-                  </div>
-                );
-              })}
-            </div>
-            {hasVideo && (
-              <Surface title={t("inspector.make" as CreatorKey)}>
-                <div className="workList">
-                  <WorkRow
-                    name={t("inspector.track.subtitle" as CreatorKey)}
-                    {...subtitleStatus()}
-                  />
-                  <WorkRow
-                    name={t("inspector.track.cover" as CreatorKey)}
-                    {...coverStatus()}
-                    actions={(
-                      <ActionButton
-                        tone={hasAnyCover ? "secondary" : "primary"}
-                        onClick={onGenerateCover}
-                        disabled={busy !== undefined || detail.coverJob.status === "running"}
-                      >
-                        {t((hasAnyCover ? "inspector.cover.regenerate" : "inspector.cover.generate") as CreatorKey)}
-                      </ActionButton>
-                    )}
-                  />
+              {progress?.steps.map((step) => (
+                <div key={step.id} className={`step ${step.status}`}>
+                  <span className="stepDot" />
+                  <span className="stepLabel">{t(PROGRESS_KEY[step.id])}</span>
                 </div>
-              </Surface>
-            )}
-            {currentStepMeta !== undefined && currentStep !== "publish" && currentStep !== "finish" && (
-              <Surface
-                title={t(currentStepMeta.label as CreatorKey)}
-                hint={"hint" in currentStepMeta ? t(currentStepMeta.hint as CreatorKey) : undefined}
-              >
-                {currentStep === "topic" && (
+              ))}
+            </div>
+            {sessionHint !== undefined && <JobNote tone="done">{sessionHint}</JobNote>}
+            {currentStepTab !== undefined && (
+              <div className="overviewNextAction">
+                <Surface
+                  title={t("inspector.overview.nextAction" as CreatorKey)}
+                  hint={PROGRESS_HINT_KEY[currentStep] === undefined ? undefined : t(PROGRESS_HINT_KEY[currentStep]!)}
+                >
                   <ActionBar>
-                    <ActionButton tone="primary" onClick={onReadyToRecord}>
-                      {t("inspector.readyToRecord" as CreatorKey)}
+                    <ActionButton tone="primary" onClick={() => { setTab(currentStepTab); }}>
+                      {t("inspector.overview.openStep" as CreatorKey).replace("{step}", t(PROGRESS_KEY[currentStep]))}
                     </ActionButton>
                   </ActionBar>
-                )}
-                {currentStep === "record" && (
-                  <ActionBar>
-                    <ActionButton
-                      tone="primary"
-                      onClick={detail.studioPath === undefined ? onBindStudio : onOpenStudio}
-                    >
-                      {t((detail.studioPath === undefined ? "inspector.studio.bind" : "inspector.studio.open") as CreatorKey)}
-                    </ActionButton>
-                  </ActionBar>
-                )}
-                {currentStep === "cut" && (
-                  <>
-                    {detail.waitingForExport && !hasVideo && (
-                      <JobNote tone={detail.exportTimedOut === true ? "error" : "running"}>
-                        {t((detail.exportTimedOut === true
-                          ? "inspector.step.exportTimedOut"
-                          : "inspector.step.waitingExport") as CreatorKey)}
-                      </JobNote>
-                    )}
-                    <ActionBar>
-                      <ActionButton
-                        tone="primary"
-                        onClick={detail.studioPath === undefined ? onBindStudio : onOpenStudio}
-                      >
-                        {t((detail.studioPath === undefined ? "inspector.studio.bind" : "inspector.studio.open") as CreatorKey)}
-                      </ActionButton>
-                      {detail.studioPath !== undefined && (
-                        <ActionButton onClick={onBindStudio}>
-                          {t("inspector.studio.rebind" as CreatorKey)}
-                        </ActionButton>
-                      )}
-                    </ActionBar>
-                  </>
-                )}
-              </Surface>
+                </Surface>
+              </div>
             )}
             {actionError !== undefined && (
               <JobNote tone="error">{actionError}</JobNote>
             )}
-            {(detail.workflow === "publish" || anyPublishMarked || detail.hasArticle) && (
+            {(currentStep === "publish" || detail.workflow === "publish" || anyPublishMarked || detail.hasArticle) && (
               <>
                 <Surface
                   title={t("inspector.sync.title" as CreatorKey)}
@@ -973,35 +1161,87 @@ export function ContentInspector({
                 </Surface>
               </>
             )}
-            {detail.tags.length > 0 && (
-              <Surface title={t("detail.tags" as CreatorKey)}>
-                <div className="tags">
-                  {detail.tags.map((tag) => (
-                    <span key={tag} className="tag">#{tag}</span>
-                  ))}
-                </div>
-              </Surface>
-            )}
           </>
         )}
         {detail !== undefined && tab === "video" && (
-          !videoReady
-            ? <div className="empty">{t("empty.loading" as CreatorKey)}</div>
-            : videoSrc === undefined
-              ? <div className="empty">{t("inspector.video.empty" as CreatorKey)}</div>
-              : (
-                <video
-                  className="videoPlayer"
-                  controls={true}
-                  playsInline={true}
-                  preload="metadata"
-                  src={videoSrc}
-                />
-              )
+          <div className="assetWorkspace">
+            <Surface
+              title={t("inspector.video.projectTitle" as CreatorKey)}
+              hint={t("inspector.video.projectHint" as CreatorKey)}
+            >
+              <ActionBar>
+                <ActionButton
+                  tone="primary"
+                  onClick={detail.studioPath === undefined ? onBindStudio : onOpenStudio}
+                >
+                  {t((detail.studioPath === undefined ? "inspector.studio.bind" : "inspector.studio.open") as CreatorKey)}
+                </ActionButton>
+                {detail.studioPath !== undefined && (
+                  <ActionButton onClick={onBindStudio}>{t("inspector.studio.rebind" as CreatorKey)}</ActionButton>
+                )}
+                <ActionButton tone="secondary" onClick={onUseExternalEditor}>
+                  {t("inspector.video.external" as CreatorKey)}
+                </ActionButton>
+              </ActionBar>
+              {detail.waitingForExport && !hasVideo && (
+                <div className="videoActionState">
+                  <JobNote tone={detail.exportTimedOut === true ? "error" : "running"}>
+                    {t((detail.exportTimedOut === true
+                      ? "inspector.step.exportTimedOut"
+                      : "inspector.step.waitingExport") as CreatorKey)}
+                  </JobNote>
+                  <button type="button" onClick={() => { void openPath(detail.folderPath); }}>
+                    {t("inspector.video.openFolder" as CreatorKey)}
+                  </button>
+                </div>
+              )}
+              {actionError !== undefined && <JobNote tone="error">{actionError}</JobNote>}
+            </Surface>
+            <AssetShelf
+              folderPath={detail.folderPath}
+              openPath={openPath}
+              t={t}
+              entries={[
+                {
+                  label: t("inspector.video.raw" as CreatorKey),
+                  ...(detail.videoRaw === undefined ? {} : { path: detail.videoRaw }),
+                  expectedPath: `${detail.folderPath}/${detail.id}.mp4`,
+                },
+                {
+                  label: t("inspector.video.subtitled" as CreatorKey),
+                  ...(detail.videoSubtitled === undefined ? {} : { path: detail.videoSubtitled }),
+                  expectedPath: `${detail.folderPath}/${detail.id}_subtitled.mp4`,
+                },
+              ]}
+            />
+            {!videoReady
+              ? <div className="empty">{t("empty.loading" as CreatorKey)}</div>
+              : videoSrc === undefined
+                ? <div className="empty">{t("inspector.video.empty" as CreatorKey)}</div>
+                : (
+                  <video
+                    className="videoPlayer"
+                    controls={true}
+                    playsInline={true}
+                    preload="metadata"
+                    src={videoSrc}
+                  />
+                )}
+          </div>
         )}
         {detail !== undefined && tab === "script" && (
           <div className="scriptWorkspace">
             <ScriptOperationsBridge contentId={detail.id} cockpit={cockpit} t={t} />
+            <AssetShelf
+              folderPath={detail.folderPath}
+              openPath={openPath}
+              t={t}
+              entries={[{
+                label: t("inspector.script.asset" as CreatorKey),
+                ...(detail.script.trim() === "" ? {} : { path: `${detail.folderPath}/script.md` }),
+                expectedPath: `${detail.folderPath}/script.md`,
+              }]}
+            />
             <textarea
               className="scriptEditor"
               value={scriptDraft}
@@ -1013,21 +1253,175 @@ export function ContentInspector({
             />
           </div>
         )}
-        {detail !== undefined && tab === "article" && (
-          detail.article.trim() === ""
-            ? <div className="empty">{t("inspector.article.empty" as CreatorKey)}</div>
-            : (
-              <div className="article">
-                <MarkdownText
-                  text={articleOrigin === undefined
-                    ? detail.article
-                    : rewriteArticleImages(detail.article, articleOrigin)}
-                />
+        {detail !== undefined && tab === "presentation" && (
+          <div className="assetWorkspace">
+            <Surface
+              title={t("inspector.presentation.title" as CreatorKey)}
+              hint={t("inspector.presentation.hint" as CreatorKey)}
+            >
+              <ActionBar>
+                <ActionButton
+                  tone="primary"
+                  disabled={detail.script.trim() === ""}
+                  onClick={() => { onGeneratePresentation("16x9"); }}
+                >
+                  {t("inspector.presentation.generate16x9" as CreatorKey)}
+                </ActionButton>
+                <ActionButton
+                  disabled={detail.script.trim() === ""}
+                  onClick={() => { onGeneratePresentation("3x4"); }}
+                >
+                  {t("inspector.presentation.generate3x4" as CreatorKey)}
+                </ActionButton>
+                {!presentationHasAsset && (
+                  <ActionButton tone="ghost" onClick={() => { onToggleSkip("presentation"); }}>
+                    {t((contentStepIsSkipped(detail, "presentation")
+                      ? "inspector.skip.restorePresentation"
+                      : "inspector.skip.presentation") as CreatorKey)}
+                  </ActionButton>
+                )}
+              </ActionBar>
+            </Surface>
+            <AssetShelf
+              folderPath={detail.folderPath}
+              openPath={openPath}
+              t={t}
+              entries={(["16x9", "3x4"] as const).map((aspect) => ({
+                label: `${t("inspector.presentation.asset" as CreatorKey)} ${aspect}`,
+                ...(detail.presentations[aspect] === undefined ? {} : { path: detail.presentations[aspect] }),
+                expectedPath: `${detail.folderPath}/演示/${detail.id}-${aspect}.html`,
+              }))}
+            />
+            {actionError !== undefined && <JobNote tone="error">{actionError}</JobNote>}
+            {sessionHint !== undefined && <JobNote tone="done">{sessionHint}</JobNote>}
+          </div>
+        )}
+        {detail !== undefined && tab === "cover" && (
+          <div className="assetWorkspace">
+            <Surface
+              title={t("inspector.cover.jackyTitle" as CreatorKey)}
+              hint={t("inspector.cover.jackyHint" as CreatorKey)}
+            >
+              <ActionBar>
+                <ActionButton
+                  tone={hasAnyCover ? "secondary" : "primary"}
+                  onClick={onGenerateCover}
+                  disabled={busy !== undefined || detail.coverJob.status === "running"}
+                >
+                  {t((busy === "cover" || detail.coverJob.status === "running"
+                    ? "inspector.cover.generating"
+                    : hasAnyCover
+                      ? "inspector.cover.regenerate"
+                      : "inspector.cover.generate") as CreatorKey)}
+                </ActionButton>
+              </ActionBar>
+              <div className="coverActionState" role="status">
+                {actionError !== undefined
+                  ? <JobNote tone="error">{actionError}</JobNote>
+                  : detail.coverJob.status === "running" || busy === "cover"
+                    ? <JobNote tone="running">{t("inspector.cover.generating" as CreatorKey)}</JobNote>
+                    : detail.coverJob.status === "error"
+                      ? <JobNote tone="error">{detail.coverJob.error ?? t("inspector.cover.failed" as CreatorKey)}</JobNote>
+                      : hasAnyCover
+                        ? <JobNote tone="done">{t("inspector.cover.ready" as CreatorKey)}</JobNote>
+                        : !hasVideo
+                          ? <JobNote>{t("inspector.cover.needVideo" as CreatorKey)}</JobNote>
+                          : !detail.secrets.cover.configured
+                            ? <JobNote>{t("inspector.cover.needKey" as CreatorKey)}</JobNote>
+                            : null}
               </div>
-            )
+            </Surface>
+            <div className="coverGallery">
+              {(["3x4", "4x3", "16x9"] as const).map((aspect) => (
+                <div className="coverAsset" key={aspect}>
+                  <button
+                    type="button"
+                    className={`coverAssetImage ratio-${aspect}`}
+                    disabled={detail.covers[aspect] === undefined}
+                    aria-label={t("inspector.cover.preview" as CreatorKey).replace("{aspect}", aspect)}
+                    onClick={() => { setCoverPreview(aspect); }}
+                  >
+                    <CoverThumb
+                      id={`${detail.id}::${aspect}`}
+                      load={getCoverThumb}
+                      {...(detail.covers[aspect] === undefined ? {} : { revision: detail.covers[aspect] })}
+                      fallback={<span>{aspect}</span>}
+                    />
+                  </button>
+                  <span>{aspect}</span>
+                </div>
+              ))}
+            </div>
+            <AssetShelf
+              folderPath={detail.folderPath}
+              openPath={openPath}
+              t={t}
+              entries={(["3x4", "4x3", "16x9"] as const).map((aspect) => ({
+                label: `${t("inspector.cover.asset" as CreatorKey)} ${aspect}`,
+                ...(detail.covers[aspect] === undefined ? {} : { path: detail.covers[aspect] }),
+                expectedPath: `${detail.folderPath}/${detail.id}_${aspect}.png`,
+                onReveal: () => { setCoverPreview(aspect); },
+              }))}
+            />
+          </div>
+        )}
+        {detail !== undefined && tab === "article" && (
+          <div className="assetWorkspace">
+            <Surface
+              title={t("inspector.article.generateTitle" as CreatorKey)}
+              hint={t("inspector.article.generateHint" as CreatorKey)}
+            >
+              <ActionBar>
+                <ActionButton
+                  tone={detail.article.trim() === "" ? "primary" : "secondary"}
+                  disabled={detail.script.trim() === ""}
+                  onClick={onGenerateArticle}
+                >
+                  {t((detail.article.trim() === ""
+                    ? "inspector.article.generate"
+                    : "inspector.article.regenerate") as CreatorKey)}
+                </ActionButton>
+                {detail.articlePath !== undefined && (
+                  <ActionButton onClick={() => { void openPath(detail.articlePath!); }}>
+                    {t("inspector.article.openMarkdown" as CreatorKey)}
+                  </ActionButton>
+                )}
+                {!articleHasAsset && (
+                  <ActionButton tone="ghost" onClick={() => { onToggleSkip("article"); }}>
+                    {t((contentStepIsSkipped(detail, "article")
+                      ? "inspector.skip.restoreArticle"
+                      : "inspector.skip.article") as CreatorKey)}
+                  </ActionButton>
+                )}
+              </ActionBar>
+            </Surface>
+            <AssetShelf
+              folderPath={detail.folderPath}
+              openPath={openPath}
+              t={t}
+              entries={[{
+                label: t("inspector.article.asset" as CreatorKey),
+                ...(detail.articlePath === undefined ? {} : { path: detail.articlePath }),
+                expectedPath: `${detail.folderPath}/公众号文章/${detail.id}.md`,
+              }]}
+            />
+            {actionError !== undefined && <JobNote tone="error">{actionError}</JobNote>}
+            {sessionHint !== undefined && <JobNote tone="done">{sessionHint}</JobNote>}
+            {detail.article.trim() === ""
+              ? <div className="empty">{t("inspector.article.empty" as CreatorKey)}</div>
+              : (
+                <div className="article">
+                  <MarkdownText
+                    text={articleOrigin === undefined
+                      ? detail.article
+                      : rewriteArticleImages(detail.article, articleOrigin)}
+                  />
+                </div>
+              )}
+          </div>
         )}
         {detail !== undefined && tab === "subtitle" && (
-          <>
+          <div className="assetWorkspace">
             {hasVideo && (
               <ActionBar>
                 {canPreviewSubtitle && (
@@ -1065,6 +1459,24 @@ export function ContentInspector({
                       : "inspector.subtitle.reburn") as CreatorKey)}
                   </ActionButton>
                 )}
+                {!subtitleHasAsset && (
+                  <ActionButton tone="ghost" onClick={() => { onToggleSkip("subtitle"); }}>
+                    {t((contentStepIsSkipped(detail, "subtitle")
+                      ? "inspector.skip.restoreSubtitle"
+                      : "inspector.skip.subtitle") as CreatorKey)}
+                  </ActionButton>
+                )}
+              </ActionBar>
+            )}
+            {!hasVideo && (
+              <ActionBar>
+                {!subtitleHasAsset && (
+                  <ActionButton tone="ghost" onClick={() => { onToggleSkip("subtitle"); }}>
+                    {t((contentStepIsSkipped(detail, "subtitle")
+                      ? "inspector.skip.restoreSubtitle"
+                      : "inspector.skip.subtitle") as CreatorKey)}
+                  </ActionButton>
+                )}
               </ActionBar>
             )}
             {actionError !== undefined
@@ -1088,6 +1500,33 @@ export function ContentInspector({
                     </JobNote>
                   )
                   : null}
+            <AssetShelf
+              folderPath={detail.folderPath}
+              openPath={openPath}
+              t={t}
+              entries={[
+                {
+                  label: t("inspector.subtitle.srtAsset" as CreatorKey),
+                  ...(detail.subtitles.srt === undefined ? {} : { path: detail.subtitles.srt }),
+                  expectedPath: `${detail.folderPath}/${detail.id}.srt`,
+                },
+                {
+                  label: t("inspector.subtitle.assAsset" as CreatorKey),
+                  ...(detail.subtitles.ass === undefined ? {} : { path: detail.subtitles.ass }),
+                  expectedPath: `${detail.folderPath}/${detail.id}.ass`,
+                },
+                {
+                  label: t("inspector.subtitle.transcriptAsset" as CreatorKey),
+                  ...(detail.subtitles.transcript === undefined ? {} : { path: detail.subtitles.transcript }),
+                  expectedPath: `${detail.folderPath}/${detail.id}.subtitle-work/subtitle-transcript.json`,
+                },
+                {
+                  label: t("inspector.video.subtitled" as CreatorKey),
+                  ...(detail.videoSubtitled === undefined ? {} : { path: detail.videoSubtitled }),
+                  expectedPath: `${detail.folderPath}/${detail.id}_subtitled.mp4`,
+                },
+              ]}
+            />
             {cues.length === 0
               ? <div className="empty">{t("inspector.subtitle.empty" as CreatorKey)}</div>
               : (
@@ -1100,9 +1539,59 @@ export function ContentInspector({
                   ))}
                 </ol>
               )}
-          </>
+          </div>
         )}
       </div>
+      {detail !== undefined && coverPreview !== undefined && (
+        <div
+          className="coverPreviewBackdrop"
+          onPointerDown={(event) => {
+            if (event.currentTarget === event.target) setCoverPreview(undefined);
+          }}
+        >
+          <section
+            className={`coverPreviewDialog ratio-${coverPreview}`}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("inspector.cover.previewTitle" as CreatorKey)}
+          >
+            <header>
+              <div>
+                <span className="eyebrow">PREVIEW</span>
+                <strong>{t("inspector.cover.previewTitle" as CreatorKey)} · {coverPreview}</strong>
+              </div>
+              <button
+                type="button"
+                aria-label={t("inspector.cover.previewClose" as CreatorKey)}
+                onClick={() => { setCoverPreview(undefined); }}
+              >
+                <IconCloseOutline16 size={16} />
+              </button>
+            </header>
+            <div className="coverPreviewCanvas">
+              <CoverThumb
+                id={`${detail.id}::${coverPreview}`}
+                load={getCoverThumb}
+                {...(detail.covers[coverPreview] === undefined ? {} : { revision: detail.covers[coverPreview] })}
+                fallback={<span>{t("inspector.cover.previewMissing" as CreatorKey)}</span>}
+              />
+            </div>
+            <div className="coverPreviewRatios" aria-label={t("inspector.cover.previewRatios" as CreatorKey)}>
+              {(["3x4", "4x3", "16x9"] as const).map((aspect) => (
+                <button
+                  key={aspect}
+                  type="button"
+                  className={coverPreview === aspect ? "active" : ""}
+                  disabled={detail.covers[aspect] === undefined}
+                  onClick={() => { setCoverPreview(aspect); }}
+                >
+                  {aspect}
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
       <div
         className="resize"
         onPointerDown={(event) => {

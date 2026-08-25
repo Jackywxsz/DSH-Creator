@@ -139,14 +139,15 @@ ego-browser nodejs < scripts/collect-publish.mjs
 | --- | --- | --- | --- | --- |
 | 剪辑工程 | `screen-studio-editor` | `~/.agents/skills/screen-studio-editor` | 以后可加「按绑定工程开剪辑」；现在只绑定和打开 | 审查删除、Screen Studio 里预览、手动导出 |
 | 字幕 | `oil-subtitle` | `~/.agents/skills/oil-subtitle` | clone 后必须运行 `setup.sh`；已包预览编辑器、转录、按稿烧录 | 校对不确定词、确认预览后再烧 |
-| 封面 | `oil-cover` | `~/.agents/skills/oil-cover` | 已包脚本模式三画幅生成 | 提炼主标题、看错别字、决定是否重跑某一画幅 |
+| 封面 | `jacky-cover` + `oil-cover` | 标准全局 Skill 目录 | 插件内复制的 ZenMux 适配器，整图生成人物融合版三画幅 | 提炼主标题、检查身份和错别字 |
+| 演示 | `jacky-motion2-0` | 标准全局 Skill 目录 | 页签提交逐字稿、画幅和输出路径 | 完成审稿、分镜、风格三个确认门 |
 | 发布文案语气 | `oil-tone` | `~/.agents/skills/oil-tone` | 不执行；写标题简介时读档案 | 成稿必须过 `tone_lint.py` 再通读 |
 | 公众号图文 | `oil-video-article` | `~/.agents/skills/oil-video-article` | 识别 `公众号文章/` | 从无头像屏幕轨截图、按 oil-tone 写文章 |
 | 四平台视频草稿 | `video-publisher` | `~/.agents/skills/video-publisher` | 读 `auto-publish.json` 显示状态 | Ego 上传、停在最终发布按钮前、人点发布 |
 
-字幕脚本入口以 oil-subtitle 为准：`bailian_transcribe.py` → `review_subtitles.py` → `prepare_subtitles.py` → `preview_editor.py`，用户确认后再 `burn_subtitles.py`（有审过的 SRT 用 `--srt-input`）。不要在预览前烧录。封面脚本是 `generate_oil_cover.py`，主标题由调用方按 oil-cover 提炼后传入 `--title`，Key 用环境变量 `ZENMUX_API_KEY`。不要改 skill 仓库里的用户路径和密钥。
+字幕脚本入口以 oil-subtitle 为准：`bailian_transcribe.py` → `review_subtitles.py` → `prepare_subtitles.py` → `preview_editor.py`，用户确认后再 `burn_subtitles.py`。封面调用仓库内 `scripts/generate_jacky_cover.py`，它复用 Oil Cover 的分析与 ZenMux 请求逻辑，注入 Jacky Cover 品牌补丁、Oil gallery 和两张身份参考。全局 Skill 真源不修改。
 
-封面还有 Agent 自主模式，依赖执行环境自己的生图工具。Harness 工作台默认走脚本模式，因为这里稳定的是 ZenMux 脚本，不是 Codex 内置 `image_gen`。
+Harness 不依赖原生 ImageGen。图片分析和生成继续使用设置中已有的 `ZENMUX_API_KEY`，人物与界面由 gpt-image-2 同一次整图生成，不做本地人物贴图。
 
 ## 改代码时的约束
 

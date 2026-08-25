@@ -12,6 +12,8 @@
 | --- | --- |
 | `topic.md` | 选题笔记 |
 | `script.md` | 口播脚本 |
+| `演示/<标题>-16x9.html` | Jacky Motion 横屏录制演示 |
+| `演示/<标题>-3x4.html` | Jacky Motion 竖屏录制演示 |
 | `公众号文章/<标题>.md` | 已转成 Markdown 的文章 |
 | `公众号文章/images/` | 文章配图 |
 | `publish-package.json` | 发布用的标题和 tags，不写平台长文案 |

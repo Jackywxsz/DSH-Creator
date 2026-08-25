@@ -505,3 +505,323 @@ html[data-jacky-creator-brand="paper-growth"] [data-surface="content-inspector"]
     transition-duration: 0.01ms;
   }
 }
+
+/* Keep the Creator Cockpit utility skin isolated from the immersive Jacky surfaces. */
+html[data-jacky-creator-brand="paper-growth"] [data-plugin="dsh-oil-creator"][data-surface="sidebar"].operationsTheme[data-cockpit-theme] {
+  border-right: 1px solid var(--cockpit-stroke);
+  background: var(--cockpit-sidebar-bg);
+  color: var(--cockpit-ink);
+  --dsh-scrollbar-thumb: color-mix(in srgb, var(--cockpit-ink) 28%, transparent);
+  --dsh-scrollbar-thumb-hover: color-mix(in srgb, var(--cockpit-ink) 48%, transparent);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .oilBrandText,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .brandButton,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .iconButton,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .tabButton {
+  color: var(--cockpit-ink);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .tabButton {
+  min-height: 34px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+@media (hover: hover) {
+  html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .tabButton:hover,
+  html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsNavItem:hover {
+    border-color: var(--cockpit-stroke);
+    background: var(--cockpit-surface);
+    color: var(--cockpit-ink);
+    box-shadow: var(--cockpit-shadow-small);
+  }
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .tabButton.active {
+  border-color: var(--cockpit-stroke);
+  background: var(--cockpit-ink);
+  box-shadow: 2px 2px 0 var(--cockpit-surface);
+  color: var(--cockpit-inverse-ink);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .quickIdeaButton {
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 8px;
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow-small);
+  color: var(--cockpit-blue);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .quickIdeaButton:active,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsNavItem:active,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsThemeToggle:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--cockpit-stroke);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsNavCaption,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsVersion {
+  color: var(--cockpit-muted);
+  font-weight: 750;
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsNavItem {
+  min-height: 44px;
+  padding: 9px 11px;
+  border: 2px solid transparent;
+  border-radius: 9px;
+  color: var(--cockpit-ink);
+  font-weight: 800;
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsNavItem.active {
+  border-color: var(--cockpit-stroke);
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow-small);
+  color: var(--cockpit-ink);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsNavItem.active svg {
+  color: var(--cockpit-blue);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .jackySproutIcon {
+  --jacky-sprout-ink: var(--cockpit-ink);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .settingsArea button {
+  color: var(--cockpit-ink);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"][data-cockpit-theme] {
+  --cockpit-paper: #f2f1ec;
+  --cockpit-paper-deep: #e5e7eb;
+  --cockpit-surface: #ffffff;
+  --cockpit-ink: #111111;
+  --cockpit-ink-soft: #283243;
+  --cockpit-muted: #59677c;
+  --cockpit-yellow: #ffdf2b;
+  --cockpit-blue: #1f5fff;
+  --cockpit-green: #008e67;
+  --cockpit-red: #ff4054;
+  --cockpit-stroke: #111111;
+  --cockpit-accent-ink: #ffffff;
+  --cockpit-inverse-ink: #ffffff;
+  --cockpit-hero-muted: #33425a;
+  --cockpit-hover: #fff4a8;
+  --cockpit-danger-soft: #fff0e9;
+  --cockpit-info-soft: #eef3ff;
+  --cockpit-success-soft: #dff6ec;
+  --cockpit-divider: #c8ced8;
+  --cockpit-calendar-muted: #fafaf8;
+  --cockpit-calendar-empty: #e7e7e2;
+  --cockpit-calendar-today: #fff9cf;
+  --cockpit-overdue: #ff875f;
+  --cockpit-overdue-ink: #111111;
+  --cockpit-shadow: 6px 6px 0 #111111;
+  --cockpit-shadow-small: 3px 3px 0 #111111;
+  --cc3-yellow: var(--cockpit-yellow);
+  --cc3-blue: var(--cockpit-blue);
+  --cc3-red: var(--cockpit-red);
+  --cc3-paper: var(--cockpit-paper);
+  --cc3-white: var(--cockpit-surface);
+  --cc3-ink: var(--cockpit-ink);
+  --cc3-muted: var(--cockpit-muted);
+  --cc3-line: 2px solid var(--cockpit-stroke);
+  --cc3-shadow: var(--cockpit-shadow);
+  --cc3-shadow-small: var(--cockpit-shadow-small);
+  background: var(--cockpit-paper);
+  color: var(--cockpit-ink);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"][data-cockpit-theme="dark"] {
+  color-scheme: dark;
+  --cockpit-paper: #0d131d;
+  --cockpit-paper-deep: #080c13;
+  --cockpit-surface: #151d2a;
+  --cockpit-ink: #f4f7fb;
+  --cockpit-ink-soft: #ced7e5;
+  --cockpit-muted: #96a6bb;
+  --cockpit-yellow: #315fd7;
+  --cockpit-blue: #f0ca68;
+  --cockpit-green: #67d6af;
+  --cockpit-red: #ff6c7a;
+  --cockpit-stroke: #63728a;
+  --cockpit-accent-ink: #1a1608;
+  --cockpit-inverse-ink: #111722;
+  --cockpit-hero-muted: #d8e3ff;
+  --cockpit-hover: #243149;
+  --cockpit-danger-soft: #44262c;
+  --cockpit-info-soft: #1d3266;
+  --cockpit-success-soft: #14352f;
+  --cockpit-divider: #334159;
+  --cockpit-calendar-muted: #111824;
+  --cockpit-calendar-empty: #0b1018;
+  --cockpit-calendar-today: #1d3266;
+  --cockpit-overdue: #8f3f49;
+  --cockpit-overdue-ink: #ffffff;
+  --cockpit-shadow: 6px 6px 0 #06090e;
+  --cockpit-shadow-small: 3px 3px 0 #06090e;
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsWorkspaceHeader {
+  margin: 18px 36px 0;
+  padding: 14px 18px;
+  border: var(--cc3-line);
+  border-radius: 12px;
+  background: var(--cc3-yellow);
+  box-shadow: var(--cc3-shadow-small);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsWorkspaceKicker {
+  margin-bottom: 2px;
+  color: var(--cc3-blue);
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.17em;
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsWorkspaceHeader h1,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] h2,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] h3 {
+  color: var(--cockpit-ink);
+  font-family: "Arial Black", "PingFang SC", sans-serif;
+  font-weight: 900;
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsWorkspaceHeader h1 {
+  font-size: 24px;
+  line-height: 1.12;
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsWorkspaceHeader p {
+  max-width: 620px;
+  margin: 0;
+  color: var(--cockpit-hero-muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsWorkspaceBody {
+  padding: 0 36px 52px;
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsSummary,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsContentRow,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .ideaQuickCapture,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .ideaCardSelect,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsMetaCard,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsSettingsCard,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .todayPrimaryPanel {
+  border-color: var(--cockpit-stroke);
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow-small);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsSummary > div:first-child,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .ideaQuickCapture,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .todayPrimaryPanel > header {
+  background: var(--cockpit-yellow);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .todayPrimaryPanel.overdue > header {
+  background: var(--cockpit-overdue);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .todayPrimaryPanel.overdue > header span {
+  color: var(--cockpit-overdue-ink);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsSummary > div + div,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .todayPrimaryPanel > header,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .ideaCardActions {
+  border-color: var(--cockpit-stroke);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] input,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] textarea,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] select {
+  border-width: 2px;
+  border-color: var(--cockpit-stroke);
+  background: var(--cockpit-surface);
+  box-shadow: none;
+  color: var(--cockpit-ink);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] input:focus,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] textarea:focus,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] select:focus {
+  border-color: var(--cockpit-stroke);
+  box-shadow: 3px 3px 0 var(--cockpit-stroke);
+  outline: none;
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .ideaTagChoices button,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .ideaCardActions button {
+  border-color: var(--cockpit-stroke);
+  background: var(--cockpit-surface);
+  box-shadow: 1px 1px 0 var(--cockpit-stroke);
+  color: var(--cockpit-ink-soft);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .ideaTagChoices button.selected,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsRangeSwitch button.active,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .ideaCardNumber {
+  border-color: var(--cockpit-stroke);
+  background: var(--cockpit-blue);
+  color: var(--cockpit-accent-ink);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsPrimaryAction {
+  border: 2px solid var(--cockpit-stroke);
+  background: var(--cockpit-ink);
+  box-shadow: var(--cockpit-shadow-small);
+  color: var(--cockpit-inverse-ink);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsPrimaryAction:disabled {
+  border-color: var(--cockpit-stroke);
+  background: var(--cockpit-surface);
+  color: var(--cockpit-muted);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .ideaReferenceCard,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .ideaReferenceCard.selected {
+  border-width: 2px;
+  border-color: var(--cockpit-stroke);
+  box-shadow: var(--cockpit-shadow-small);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .ideaCardActions {
+  background: var(--cockpit-paper-deep);
+}
+
+@media (hover: hover) {
+  html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsRefresh:hover,
+  html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsContentRow:hover,
+  html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .ideaCardSelect:hover {
+    background: var(--cockpit-hover);
+    box-shadow: 4px 4px 0 var(--cockpit-stroke);
+    transform: translate(-1px, -1px);
+  }
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] button:active {
+  transform: translate(2px, 2px);
+}
+
+@media (max-width: 720px) {
+  html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsWorkspaceHeader {
+    margin: 16px 14px 0;
+    padding: 20px 18px 22px;
+  }
+
+  html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"][data-cockpit-theme] .operationsWorkspaceBody {
+    padding: 0 14px 32px;
+  }
+}

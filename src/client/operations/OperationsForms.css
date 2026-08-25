@@ -785,9 +785,9 @@
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineBoard .operationsContentMetaGroup {
   overflow: hidden;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 1px solid var(--cockpit-stroke);
   border-radius: 9px;
-  background: var(--dsw-alias-bg-base);
+  background: var(--cockpit-surface);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineBoard .operationsMetaEditor {
@@ -1219,7 +1219,7 @@
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPrimaryAction,
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEditorActions button.save {
   background: var(--cockpit-ink);
-  color: #ffffff;
+  color: var(--cockpit-inverse-ink);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEvaluationRow > button,
@@ -1256,10 +1256,10 @@
 [data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] input,
 [data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] textarea {
   min-height: 40px;
-  border: 2px solid #111111;
+  border: 2px solid var(--cockpit-stroke);
   border-radius: 8px;
-  background: #ffffff;
-  color: #111111;
+  background: var(--cockpit-surface);
+  color: var(--cockpit-ink);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] input:focus,
@@ -1268,8 +1268,8 @@
 [data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] input:focus,
 [data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] select:focus,
 [data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] textarea:focus {
-  border-color: #111111;
-  box-shadow: 3px 3px 0 #111111;
+  border-color: var(--cockpit-stroke);
+  box-shadow: 3px 3px 0 var(--cockpit-stroke);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaQuickCapture {
@@ -1301,19 +1301,19 @@
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaTagChoices button,
 [data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] .ideaTagChoices button {
   min-height: 30px;
-  border: 1px solid #111111;
+  border: 1px solid var(--cockpit-stroke);
   border-radius: 6px;
-  background: #ffffff;
-  color: #283243;
+  background: var(--cockpit-surface);
+  color: var(--cockpit-ink-soft);
   font-weight: 800;
-  box-shadow: 1px 1px 0 #111111;
+  box-shadow: 1px 1px 0 var(--cockpit-stroke);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaTagChoices button.selected,
 [data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] .ideaTagChoices button.selected {
-  border-color: #111111;
+  border-color: var(--cockpit-stroke);
   background: var(--cockpit-blue);
-  color: #ffffff;
+  color: var(--cockpit-accent-ink);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaFilters button {
@@ -1353,7 +1353,7 @@
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardSelect:hover {
-  background: #fff4a8;
+  background: var(--cockpit-hover);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardNumber {
@@ -1362,7 +1362,7 @@
   place-items: center;
   padding: 14px 8px;
   background: var(--cockpit-blue);
-  color: #ffffff;
+  color: var(--cockpit-accent-ink);
   font-family: "Arial Black", sans-serif;
   font-size: 19px;
   font-weight: 900;
@@ -1422,7 +1422,7 @@
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch button.active {
   background: var(--cockpit-blue);
-  color: #ffffff;
+  color: var(--cockpit-accent-ink);
   box-shadow: none;
 }
 
@@ -1442,14 +1442,14 @@
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid > article.alert {
   border-color: var(--cockpit-stroke);
-  background: #fff0e9;
+  background: var(--cockpit-danger-soft);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid button,
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid article > div {
   min-height: 46px;
   padding: 9px 0;
-  border-bottom: 1px solid #c8ced8;
+  border-bottom: 1px solid var(--cockpit-divider);
   color: var(--cockpit-ink);
 }
 
@@ -1511,7 +1511,7 @@
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard.overdue {
-  background: #fff0e9;
+  background: var(--cockpit-danger-soft);
   box-shadow: var(--cockpit-shadow-small);
 }
 
@@ -1556,7 +1556,7 @@
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid > article.active {
-  background: #eef3ff;
+  background: var(--cockpit-info-soft);
 }
 
 @media (max-width: 760px) {
@@ -1714,7 +1714,7 @@
   border: 2px solid var(--cockpit-stroke);
   border-radius: 8px;
   background: var(--cockpit-blue);
-  color: #ffffff;
+  color: var(--cockpit-accent-ink);
   font-family: "Arial Black", sans-serif;
 }
 
@@ -1765,7 +1765,7 @@
   border-radius: 8px;
   background: var(--cockpit-blue);
   box-shadow: var(--cockpit-shadow-small);
-  color: #ffffff;
+  color: var(--cockpit-accent-ink);
   font-weight: 900;
 }
 
@@ -1811,7 +1811,7 @@
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsBackupActions button:first-child {
   background: var(--cockpit-blue);
-  color: #ffffff;
+  color: var(--cockpit-accent-ink);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRestoreMessage {
@@ -1819,7 +1819,7 @@
   padding: 10px;
   border: 1px solid var(--cockpit-stroke);
   border-radius: 7px;
-  background: #dff6ec;
+  background: var(--cockpit-success-soft);
   color: var(--cockpit-ink);
   font-size: 12px;
   font-weight: 800;
@@ -2039,7 +2039,7 @@
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch button.active {
   background: var(--cockpit-blue);
-  color: #ffffff;
+  color: var(--cockpit-accent-ink);
   box-shadow: none;
 }
 
@@ -2059,7 +2059,7 @@
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid > article.alert {
   border-color: var(--cockpit-stroke);
-  background: #fff0e9;
+  background: var(--cockpit-danger-soft);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid h2 {
@@ -2072,7 +2072,7 @@
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid article > div {
   min-height: 46px;
   padding: 9px 0;
-  border-bottom: 1px solid #c8ced8;
+  border-bottom: 1px solid var(--cockpit-divider);
   color: var(--cockpit-ink);
 }
 
@@ -2097,7 +2097,7 @@
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard.overdue {
-  background: #fff0e9;
+  background: var(--cockpit-danger-soft);
   box-shadow: var(--cockpit-shadow-small);
 }
 

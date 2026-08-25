@@ -1,14 +1,14 @@
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] {
-  --cc3-yellow: #ffdf2b;
-  --cc3-blue: #1f5fff;
-  --cc3-red: #ff4054;
-  --cc3-paper: #f2f1ec;
-  --cc3-white: #ffffff;
-  --cc3-ink: #111111;
-  --cc3-muted: #59677c;
-  --cc3-line: 2px solid #111111;
-  --cc3-shadow: 5px 5px 0 #111111;
-  --cc3-shadow-small: 3px 3px 0 #111111;
+  --cc3-yellow: var(--cockpit-yellow);
+  --cc3-blue: var(--cockpit-blue);
+  --cc3-red: var(--cockpit-red);
+  --cc3-paper: var(--cockpit-paper);
+  --cc3-white: var(--cockpit-surface);
+  --cc3-ink: var(--cockpit-ink);
+  --cc3-muted: var(--cockpit-muted);
+  --cc3-line: 2px solid var(--cockpit-stroke);
+  --cc3-shadow: var(--cockpit-shadow);
+  --cc3-shadow-small: var(--cockpit-shadow-small);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader {
@@ -48,7 +48,7 @@
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader p {
   max-width: 620px;
   margin: 0;
-  color: #33425a;
+  color: var(--cockpit-hero-muted);
   font-size: 11px;
   font-weight: 700;
   line-height: 1.6;
@@ -112,7 +112,7 @@
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch button.active {
   background: var(--cc3-blue);
-  color: #ffffff;
+  color: var(--cockpit-accent-ink);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch > span {
@@ -147,7 +147,7 @@
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayPrimaryPanel.overdue > header {
-  background: #ff875f;
+  background: var(--cockpit-overdue);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayPrimaryPanel header span,
@@ -174,7 +174,7 @@
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayPrimaryPanel header p {
   margin: 4px 0 0;
-  color: #33425a;
+  color: var(--cockpit-hero-muted);
   font-size: 11px;
 }
 
@@ -198,7 +198,7 @@
   align-items: center;
   gap: 8px;
   min-height: 66px;
-  border-bottom: 1px solid #b9bfca;
+  border-bottom: 1px solid var(--cockpit-divider);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTask.complete {
@@ -293,7 +293,7 @@
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid > section:nth-child(2) {
-  background: #eaf0ff;
+  background: var(--cockpit-info-soft);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid h2 {
@@ -307,7 +307,7 @@
   gap: 3px;
   padding: 9px 0;
   border: 0;
-  border-bottom: 1px solid #c8ced8;
+  border-bottom: 1px solid var(--cockpit-divider);
   background: transparent;
   color: var(--cc3-ink);
   text-align: left;
@@ -384,7 +384,7 @@
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleMode button.active {
   background: var(--cc3-blue);
-  color: #ffffff;
+  color: var(--cockpit-accent-ink);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleLayout {
@@ -512,9 +512,9 @@
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCell {
   min-height: 128px;
   padding: 6px;
-  border-right: 1px solid #9da5b1;
-  border-bottom: 1px solid #9da5b1;
-  background: #fafaf8;
+  border-right: 1px solid var(--cockpit-divider);
+  border-bottom: 1px solid var(--cockpit-divider);
+  background: var(--cockpit-calendar-muted);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCalendar.week .scheduleCell {
@@ -522,11 +522,11 @@
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCell.blank {
-  background: #e7e7e2;
+  background: var(--cockpit-calendar-empty);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCell.current {
-  background: #fff9cf;
+  background: var(--cockpit-calendar-today);
   box-shadow: inset 0 0 0 2px var(--cc3-blue);
 }
 
@@ -592,7 +592,7 @@
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCell article > div button {
   min-height: 21px;
   padding: 2px 5px;
-  border: 1px solid #7d8490;
+  border: 1px solid var(--cockpit-muted);
   border-radius: 4px;
   background: var(--cc3-white);
 }
@@ -730,7 +730,7 @@
   border-radius: 6px;
   background: var(--cc3-blue);
   box-shadow: 2px 2px 0 var(--cc3-ink);
-  color: #ffffff;
+  color: var(--cockpit-accent-ink);
   font-weight: 850;
 }
 
@@ -798,7 +798,7 @@
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalFollowerChart line {
-  stroke: #c7cbd2;
+  stroke: var(--cockpit-divider);
   stroke-width: 0.6;
   vector-effect: non-scaling-stroke;
 }
@@ -844,7 +844,7 @@
   border: 0;
   border-bottom: 1px solid var(--cc3-ink);
   background: transparent;
-  color: #812d21;
+  color: var(--cockpit-red);
   font-weight: 800;
 }
 
@@ -881,7 +881,7 @@
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewKpis article.risk {
-  background: #fff0e9;
+  background: var(--cockpit-danger-soft);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewKpis span,
@@ -921,7 +921,7 @@
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewLedgers > section:nth-child(2) > header {
-  background: #eaf0ff;
+  background: var(--cockpit-info-soft);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewLedgers h2 {
@@ -1004,7 +1004,7 @@
   border: 2px solid var(--cc3-ink);
   border-radius: 6px;
   background: var(--cc3-blue);
-  color: #ffffff;
+  color: var(--cockpit-accent-ink);
   font-weight: 900;
 }
 
@@ -1045,7 +1045,7 @@
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .settingsChipEditor > div button {
   border: 0;
   background: transparent;
-  color: #a02f25;
+  color: var(--cockpit-red);
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .settingsChipEditor > label,

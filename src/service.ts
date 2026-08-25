@@ -103,6 +103,7 @@ import type {
   OverlayItem,
   OverlayStore,
   SetContentStageRequest,
+  SetContentSkipRequest,
   LibrarySettings,
   ListContentsRequest,
   ListContentsResult,
@@ -222,7 +223,7 @@ export class OilCreatorService extends TypertRemoteService {
     return resolveSubtitleSkill(this.subtitleSkillDir());
   }
 
-  coverSkill(): Promise<{ root: string; python: string; script: string }> {
+  coverSkill(): Promise<{ root: string; jackyRoot: string; python: string; script: string }> {
     return resolveCoverSkill(this.coverSkillDir());
   }
 
@@ -535,6 +536,23 @@ export class OilCreatorService extends TypertRemoteService {
     return this.getContent({ id: request.id }, signal);
   }
 
+  async setContentSkip(
+    request: SetContentSkipRequest,
+    signal: AbortSignal,
+  ): Promise<ContentDetail> {
+    signal.throwIfAborted();
+    if (await this.find(request.id) === undefined) {
+      throw new Error(`content not found: ${request.id}`);
+    }
+    return this.patchItem(request.id, (item) => {
+      const skipped = new Set(item.skippedSteps ?? []);
+      if (request.skipped) skipped.add(request.step);
+      else skipped.delete(request.step);
+      if (skipped.size === 0) delete item.skippedSteps;
+      else item.skippedSteps = [...skipped];
+    }, signal);
+  }
+
   async createContent(
     request: CreateContentRequest,
     signal: AbortSignal,
@@ -789,7 +807,7 @@ export class OilCreatorService extends TypertRemoteService {
     signal.throwIfAborted();
     const item = await this.find(request.id);
     if (item === undefined) throw new Error(`content not found: ${request.id}`);
-    if (item.coverJob.status === "running" && jobPidMatches(item.coverJob.pid, ["generate_oil_cover.py"])) {
+    if (item.coverJob.status === "running" && jobPidMatches(item.coverJob.pid, ["generate_jacky_cover.py", "generate_oil_cover.py"])) {
       return this.getContent({ id: request.id }, signal);
     }
     const key = await resolveCreatorSecret(this.ctx, "cover");
@@ -801,7 +819,11 @@ export class OilCreatorService extends TypertRemoteService {
       script: skill.script,
       args: launch.args,
       output: launch.output,
-      env: secretEnv("cover", key),
+      env: {
+        ...secretEnv("cover", key),
+        OIL_COVER_SKILL_DIR: skill.root,
+        JACKY_COVER_SKILL_DIR: skill.jackyRoot,
+      },
     }, signal);
   }
 
@@ -939,7 +961,9 @@ export class OilCreatorService extends TypertRemoteService {
     const timeoutMs = request.timeoutMs ?? 7_200_000;
     void waitForStableVideo(item.folderPath, timeoutMs, waiter.signal).then((found) => {
       if (waiter.signal.aborted) return;
-      this.exportWaiters.delete(request.id);
+      if (this.exportWaiters.get(request.id) === waiter) {
+        this.exportWaiters.delete(request.id);
+      }
       return this.patchItem(request.id, (next) => {
         if (found) {
           delete next.waitingForExport;
@@ -950,7 +974,9 @@ export class OilCreatorService extends TypertRemoteService {
         next.exportTimedOut = true;
       }, new AbortController().signal);
     }, () => {
-      this.exportWaiters.delete(request.id);
+      if (this.exportWaiters.get(request.id) === waiter) {
+        this.exportWaiters.delete(request.id);
+      }
     });
     return started;
   }
@@ -1040,7 +1066,7 @@ const JOB_FIELDS = ["burn", "subtitleJob", "coverJob"] as const;
 const JOB_COMMAND = {
   burn: ["burn_subtitles.py"],
   subtitleJob: ["bailian_transcribe.py", "review_subtitles.py", "prepare_subtitles.py"],
-  coverJob: ["generate_oil_cover.py"],
+  coverJob: ["generate_jacky_cover.py", "generate_oil_cover.py"],
 } as const;
 
 function jobStarted(job: BurnJob): { startedAt?: number } {

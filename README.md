@@ -122,10 +122,11 @@ npx @deepseek-ai/dsh plugin --profile web add --allow-build=dsh-oil-creator gith
 | 能力 | 可选依赖 | 说明 |
 | --- | --- | --- |
 | 字幕转录、排版、预览和烧录 | [oil-subtitle](https://github.com/oil-oil/oil-subtitle) + `DASHSCOPE_API_KEY` | 首次 clone 后必须运行 `bash ~/.agents/skills/oil-subtitle/setup.sh`；Key 在[百炼控制台](https://bailian.console.aliyun.com)申请 |
-| 三画幅封面 | [oil-cover](https://github.com/oil-oil/oil-cover) + `ZENMUX_API_KEY` | Key 在 [ZenMux](https://zenmux.ai) 申请 |
+| Jacky 三画幅封面 | `jacky-cover` + [oil-cover](https://github.com/oil-oil/oil-cover) + `ZENMUX_API_KEY` | 插件内适配器保留 Oil Cover 分析骨架，通过 ZenMux 整图生成人物融合版 |
+| 演示动画 | `jacky-motion2-0` | 从脚本进入三次确认门，输出可录屏的 16:9 或 3:4 单文件 HTML |
 | Screen Studio 自动剪辑 | [screen-studio-editor](https://github.com/oil-oil/screen-studio-editor) | 仅 macOS；录制和导出仍在 Screen Studio 完成 |
 | 多平台草稿与数据回收 | [Ego Lite](https://lite.ego.app/) + [video-publisher](https://github.com/oil-oil/video-publisher-skill) | 仅 macOS；需要提前登录各平台创作者后台 |
-| 公众号图文 | [oil-video-article](https://github.com/oil-oil/oil-video-article) | 独立工作流，工作台负责展示已有文章 |
+| 公众号图文 | 当前 Harness 会话 | 基于 script.md 改写为纯 Markdown，直接保存到 `公众号文章/` |
 
 字幕和封面 Skill 留空时，插件会依次从 `~/.claude/skills`、`~/.codex/skills`、`~/.agents/skills` 自动发现；只有非标准安装位置才需要填写高级路径。
 

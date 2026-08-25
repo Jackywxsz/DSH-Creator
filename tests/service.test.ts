@@ -93,6 +93,7 @@ function item(folderPath: string, videoRaw: string): ContentSummary {
     videoRaw,
     covers: {},
     subtitles: {},
+    presentations: {},
     hasPublishPackage: false,
     hasArticle: false,
     waitingForExport: false,
@@ -410,5 +411,49 @@ describe("OilCreatorService.bindStudio", () => {
     } finally {
       await rm(root, { recursive: true, force: true });
     }
+  });
+});
+
+describe("OilCreatorService.setContentSkip", () => {
+  it("adds and removes only the requested optional step", async () => {
+    const service = Object.create(OilCreatorService.prototype) as OilCreatorService;
+    const overlayItem: OverlayItem = { skippedSteps: ["subtitle"] };
+    const probe = service as unknown as {
+      find: () => Promise<ContentSummary | undefined>;
+      patchItem: (
+        id: string,
+        mutate: (item: OverlayItem) => void,
+        signal: AbortSignal,
+      ) => Promise<ContentDetail>;
+    };
+    probe.find = async () => ({} as ContentSummary);
+    probe.patchItem = async (_id, mutate) => {
+      mutate(overlayItem);
+      return undefined as never;
+    };
+
+    const signal = new AbortController().signal;
+    await service.setContentSkip({ id: "demo", step: "presentation", skipped: true }, signal);
+    expect(overlayItem.skippedSteps).toEqual(["subtitle", "presentation"]);
+
+    await service.setContentSkip({ id: "demo", step: "subtitle", skipped: false }, signal);
+    expect(overlayItem.skippedSteps).toEqual(["presentation"]);
+  });
+
+  it("does not create overlay state for content that no longer exists", async () => {
+    const service = Object.create(OilCreatorService.prototype) as OilCreatorService;
+    const patchItem = vi.fn();
+    const probe = service as unknown as {
+      find: () => Promise<ContentSummary | undefined>;
+      patchItem: typeof patchItem;
+    };
+    probe.find = async () => undefined;
+    probe.patchItem = patchItem;
+
+    await expect(service.setContentSkip(
+      { id: "missing", step: "article", skipped: true },
+      new AbortController().signal,
+    )).rejects.toThrow("content not found: missing");
+    expect(patchItem).not.toHaveBeenCalled();
   });
 });

@@ -18,6 +18,7 @@ import { registerContentTriggers } from "./contentTriggers.ts";
 import type {
   ContentDetail,
   ContentFilter,
+  ContentOptionalStep,
   CoverThumbResult,
   CreateContentResult,
   CreatorCapabilities,
@@ -103,8 +104,10 @@ interface OilCreatorRemote {
   refreshCatalog: (request: Record<string, never>) => Promise<RemoteAnswer<ListContentsResult>>;
   createContent: (request: { title: string }) => Promise<RemoteAnswer<CreateContentResult>>;
   setContentStage: (request: { id: string; readyToRecord: boolean }) => Promise<RemoteAnswer<ContentDetail>>;
+  setContentSkip: (request: { id: string; step: ContentOptionalStep; skipped: boolean }) => Promise<RemoteAnswer<ContentDetail>>;
   bindStudio: (request: { id: string; path: string }) => Promise<RemoteAnswer<ContentDetail>>;
   openStudio: (request: { id: string }) => Promise<RemoteAnswer<ContentDetail>>;
+  waitForExport: (request: { id: string }) => Promise<RemoteAnswer<ContentDetail>>;
   setPublish: (request: {
     id: string;
     platform: PublishPlatform;
@@ -117,6 +120,7 @@ interface OilCreatorRemote {
   startSubtitleGenerate: (request: { id: string }) => Promise<RemoteAnswer<ContentDetail>>;
   startCoverGenerate: (request: { id: string }) => Promise<RemoteAnswer<ContentDetail>>;
   setScript: (request: { id: string; text: string }) => Promise<RemoteAnswer<ContentDetail>>;
+  setTopicNote: (request: { id: string; text: string }) => Promise<RemoteAnswer<ContentDetail>>;
 }
 
 interface CreatorCockpitRemote {
@@ -386,6 +390,13 @@ export function apply(ctx: ClientContext): void {
       bumpLibrary();
       return next;
     },
+    setContentSkip: async (id, step, skipped) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      const next = unwrap(await remote.setContentSkip({ id, step, skipped }), "skip failed");
+      bumpLibrary();
+      return next;
+    },
     bindStudio: async (id, path) => {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
@@ -397,6 +408,13 @@ export function apply(ctx: ClientContext): void {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
       return unwrap(await remote.openStudio({ id }), "open failed");
+    },
+    waitForExport: async (id) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      const next = unwrap(await remote.waitForExport({ id }), "wait export failed");
+      bumpLibrary();
+      return next;
     },
     setPublish: async (id, platform, status, url, publishedAt) => {
       const remote = remoteOf();
@@ -448,6 +466,13 @@ export function apply(ctx: ClientContext): void {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
       return unwrap(await remote.setScript({ id, text }), "script failed");
+    },
+    setTopicNote: async (id, text) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      const next = unwrap(await remote.setTopicNote({ id, text }), "topic failed");
+      bumpLibrary();
+      return next;
     },
   });
 

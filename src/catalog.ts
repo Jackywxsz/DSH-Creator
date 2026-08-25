@@ -217,6 +217,20 @@ async function scanFolder(
     else if (await fileExists(fallback)) subtitles.transcript = fallback;
   }
 
+  const presentations: ContentSummary["presentations"] = {};
+  const presentationDir = join(folderPath, "演示");
+  const presentationNames = names.includes("演示")
+    ? await readdir(presentationDir).catch(() => [])
+    : [];
+  presentationNames.sort((left, right) => right.localeCompare(left, "zh-CN"));
+  const presentation16x9 = presentationNames.find((name) => name === `${folderName}-16x9.html`)
+    ?? presentationNames.find((name) => name.endsWith("-16x9.html"))
+    ?? presentationNames.find((name) => name.endsWith(".html") && !name.endsWith("-3x4.html"));
+  const presentation3x4 = presentationNames.find((name) => name === `${folderName}-3x4.html`)
+    ?? presentationNames.find((name) => name.endsWith("-3x4.html"));
+  if (presentation16x9 !== undefined) presentations["16x9"] = join(presentationDir, presentation16x9);
+  if (presentation3x4 !== undefined) presentations["3x4"] = join(presentationDir, presentation3x4);
+
   let videoRaw: string | undefined;
   let videoRawMtime = Number.NEGATIVE_INFINITY;
   let videoSubtitled: string | undefined;
@@ -282,6 +296,7 @@ async function scanFolder(
     createdMs,
     covers,
     subtitles,
+    presentations,
     hasPublishPackage: packageJson !== undefined,
     hasArticle: articlePath !== undefined,
     waitingForExport: overlayItem?.waitingForExport === true,
@@ -292,6 +307,7 @@ async function scanFolder(
     ...(videoSubtitled === undefined ? {} : { videoSubtitled }),
     ...(studioPath === undefined ? {} : { studioPath }),
     ...(articlePath === undefined ? {} : { articlePath }),
+    ...(overlayItem?.skippedSteps === undefined ? {} : { skippedSteps: overlayItem.skippedSteps }),
     publish: mergePublish(await readFolderPublish(folderPath, names), overlayItem?.publish),
     burn: overlayItem?.burn ?? emptyBurn(),
     subtitleJob: overlayItem?.subtitleJob ?? emptyBurn(),

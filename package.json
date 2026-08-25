@@ -36,6 +36,7 @@
     "lib/collect-publish.mjs",
     "cordis.patch.yml",
     "scripts/collect-publish.mjs",
+    "scripts/generate_jacky_cover.py",
     "README.md",
     "assets/readme/hero.svg",
     "docs/*.md",

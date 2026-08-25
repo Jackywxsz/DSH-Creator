@@ -106,9 +106,9 @@ async function coverCapability(
 ): Promise<CreatorCapability> {
   try {
     const resolved = await resolveCoverSkill(path, platform);
-    return capability("ready", false, "已发现封面工作流。", resolved.root);
+    return capability("ready", false, "已发现 Jacky Cover + ZenMux 封面工作流。", resolved.jackyRoot);
   } catch {
-    return capability("missing", false, "未发现 oil-cover；封面生成不可用。", path);
+    return capability("missing", false, "未发现 Jacky Cover 或 Oil Cover 依赖；封面生成不可用。", path);
   }
 }
 
@@ -198,7 +198,7 @@ function recommendationsOf(capabilities: CreatorCapabilities): string[] {
     );
   }
   if (capabilities.subtitleCredential.state !== "ready") recommendations.push("字幕 Key：到百炼控制台（https://bailian.console.aliyun.com）申请 DASHSCOPE_API_KEY，在设置页填写。");
-  if (capabilities.coverSkill.state !== "ready") recommendations.push("封面：git clone https://github.com/oil-oil/oil-cover ~/.agents/skills/oil-cover");
+  if (capabilities.coverSkill.state !== "ready") recommendations.push("封面：需要同时安装 jacky-cover 与 oil-cover。");
   if (capabilities.coverCredential.state !== "ready") recommendations.push("封面 Key：到 ZenMux（https://zenmux.ai）控制台申请 ZENMUX_API_KEY，在设置页填写。");
   if (capabilities.publishSync.state !== "ready") {
     recommendations.push(
@@ -209,7 +209,6 @@ function recommendationsOf(capabilities: CreatorCapabilities): string[] {
   }
   if (capabilities.editingSkill.state !== "ready") recommendations.push("自动剪辑：git clone https://github.com/oil-oil/screen-studio-editor ~/.agents/skills/screen-studio-editor");
   if (capabilities.publishSkill.state !== "ready") recommendations.push("自动发布：git clone https://github.com/oil-oil/video-publisher-skill ~/.agents/skills/video-publisher");
-  if (capabilities.articleSkill.state !== "ready") recommendations.push("公众号图文：git clone https://github.com/oil-oil/oil-video-article ~/.agents/skills/oil-video-article");
   return recommendations;
 }
 
@@ -230,7 +229,7 @@ export async function inspectCreatorSetup(
     publishSync: egoCapability(await findEgo(platform, env, home)),
     editingSkill: skillCapability(findSkillDir, "screen-studio-editor"),
     publishSkill: skillCapability(findSkillDir, "video-publisher"),
-    articleSkill: skillCapability(findSkillDir, "oil-video-article"),
+    articleSkill: capability("ready", false, "当前会话可基于 script.md 生成标准 Markdown 文章。"),
   };
   return {
     platform,

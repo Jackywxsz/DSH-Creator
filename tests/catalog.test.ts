@@ -101,6 +101,7 @@ describe("pipeline and filters", () => {
     createdMs: 1,
     covers: {},
     subtitles: {},
+    presentations: {},
     hasPublishPackage: false,
     hasArticle: false,
     waitingForExport: false,
@@ -302,6 +303,17 @@ describe("scanLibrary", () => {
     expect(items[0]?.articlePath?.endsWith("一篇文章.md")).toBe(true);
     expect(matchesFilter(items[0]!, "article")).toBe(true);
     expect(countsOf(items).article).toBe(1);
+  });
+
+  it("reads 16x9 and 3x4 Jacky Motion HTML from 演示", async () => {
+    const root = await mkdtemp(join(tmpdir(), "dsh-oil-motion-"));
+    const folder = join(root, "2026-04-07_motion");
+    await mkdir(join(folder, "演示"), { recursive: true });
+    await writeFile(join(folder, "演示", "motion-16x9.html"), "<html></html>");
+    await writeFile(join(folder, "演示", "motion-3x4.html"), "<html></html>");
+    const items = await scanLibrary(root, emptyOverlay());
+    expect(items[0]?.presentations["16x9"]?.endsWith("motion-16x9.html")).toBe(true);
+    expect(items[0]?.presentations["3x4"]?.endsWith("motion-3x4.html")).toBe(true);
   });
 
   it("reads publisher draft status from auto-publish.json", async () => {

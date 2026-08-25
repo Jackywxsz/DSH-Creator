@@ -30,6 +30,7 @@ describe("creator setup inspection", () => {
       mkdir(join(subtitleRoot, ".venv", "bin"), { recursive: true }),
       mkdir(join(subtitleRoot, "scripts"), { recursive: true }),
       mkdir(join(coverRoot, "scripts"), { recursive: true }),
+      mkdir(join(coverRoot, "docs", "showcase"), { recursive: true }),
       mkdir(bin, { recursive: true }),
     ]);
     await writeFile(join(subtitleRoot, "setup.sh"), "#!/bin/bash\n");
@@ -40,6 +41,7 @@ describe("creator setup inspection", () => {
       join(subtitleRoot, "scripts", "prepare_subtitles.py"),
       join(subtitleRoot, "scripts", "review_subtitles.py"),
       join(coverRoot, "scripts", "generate_oil_cover.py"),
+      join(coverRoot, "docs", "showcase", "gallery.png"),
       join(bin, "ego-browser"),
     ];
     await Promise.all(files.map((path) => writeFile(path, "")));
@@ -91,7 +93,7 @@ describe("creator setup inspection", () => {
     expect(result.capabilities.publishSync.state).toBe("missing");
     expect(result.capabilities.editingSkill.state).toBe("missing");
     expect(result.capabilities.publishSkill.state).toBe("missing");
-    expect(result.capabilities.articleSkill.state).toBe("missing");
+    expect(result.capabilities.articleSkill.state).toBe("ready");
     expect(result.recommendations.length).toBeGreaterThan(3);
   });
 
@@ -172,6 +174,7 @@ describe("inspectCreatorSetup windows and mac paths", () => {
       mkdir(join(subtitleRoot, ".venv", "Scripts"), { recursive: true }),
       mkdir(join(subtitleRoot, "scripts"), { recursive: true }),
       mkdir(join(coverRoot, "scripts"), { recursive: true }),
+      mkdir(join(coverRoot, "docs", "showcase"), { recursive: true }),
       mkdir(bin, { recursive: true }),
     ]);
     await writeFile(join(subtitleRoot, "setup.sh"), "#!/bin/bash\n");
@@ -182,6 +185,7 @@ describe("inspectCreatorSetup windows and mac paths", () => {
       writeFile(join(subtitleRoot, "scripts", "prepare_subtitles.py"), ""),
       writeFile(join(subtitleRoot, "scripts", "review_subtitles.py"), ""),
       writeFile(join(coverRoot, "scripts", "generate_oil_cover.py"), ""),
+      writeFile(join(coverRoot, "docs", "showcase", "gallery.png"), ""),
       writeFile(join(bin, "ego-browser.EXE"), ""),
     ]);
 

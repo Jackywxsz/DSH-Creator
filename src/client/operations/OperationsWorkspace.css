@@ -336,8 +336,9 @@
   }
 }
 
-/* Creator Cockpit parity layer: exact visual tokens from f87820f. */
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] {
+/* Creator Cockpit parity layer: exact light and dark tokens from f87820f. */
+[data-plugin="dsh-oil-creator"][data-cockpit-theme],
+html[data-creator-cockpit-theme] [data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] {
   --cockpit-paper: #f2f1ec;
   --cockpit-paper-deep: #e5e7eb;
   --cockpit-surface: #ffffff;
@@ -349,8 +350,57 @@
   --cockpit-green: #008e67;
   --cockpit-red: #ff4054;
   --cockpit-stroke: #111111;
+  --cockpit-accent-ink: #ffffff;
+  --cockpit-inverse-ink: #ffffff;
+  --cockpit-hero-muted: #33425a;
+  --cockpit-hover: #fff4a8;
+  --cockpit-danger-soft: #fff0e9;
+  --cockpit-info-soft: #eef3ff;
+  --cockpit-success-soft: #dff6ec;
+  --cockpit-divider: #c8ced8;
+  --cockpit-calendar-muted: #fafaf8;
+  --cockpit-calendar-empty: #e7e7e2;
+  --cockpit-calendar-today: #fff9cf;
+  --cockpit-overdue: #ff875f;
+  --cockpit-overdue-ink: #111111;
+  --cockpit-sidebar-bg: #ffdf2b;
   --cockpit-shadow: 6px 6px 0 #111111;
   --cockpit-shadow-small: 3px 3px 0 #111111;
+}
+
+[data-plugin="dsh-oil-creator"][data-cockpit-theme="dark"],
+html[data-creator-cockpit-theme="dark"] [data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] {
+  color-scheme: dark;
+  --cockpit-paper: #0d131d;
+  --cockpit-paper-deep: #080c13;
+  --cockpit-surface: #151d2a;
+  --cockpit-ink: #f4f7fb;
+  --cockpit-ink-soft: #ced7e5;
+  --cockpit-muted: #96a6bb;
+  --cockpit-yellow: #315fd7;
+  --cockpit-blue: #f0ca68;
+  --cockpit-green: #67d6af;
+  --cockpit-red: #ff6c7a;
+  --cockpit-stroke: #63728a;
+  --cockpit-accent-ink: #1a1608;
+  --cockpit-inverse-ink: #111722;
+  --cockpit-hero-muted: #d8e3ff;
+  --cockpit-hover: #243149;
+  --cockpit-danger-soft: #44262c;
+  --cockpit-info-soft: #1d3266;
+  --cockpit-success-soft: #14352f;
+  --cockpit-divider: #334159;
+  --cockpit-calendar-muted: #111824;
+  --cockpit-calendar-empty: #0b1018;
+  --cockpit-calendar-today: #1d3266;
+  --cockpit-overdue: #8f3f49;
+  --cockpit-overdue-ink: #ffffff;
+  --cockpit-sidebar-bg: #101722;
+  --cockpit-shadow: 6px 6px 0 #06090e;
+  --cockpit-shadow-small: 3px 3px 0 #06090e;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] {
   background: var(--cockpit-paper);
   color: var(--cockpit-ink);
   font-family: -apple-system, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
@@ -393,7 +443,7 @@
 [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader p {
   max-width: 820px;
   margin-top: 12px;
-  color: #33425a;
+  color: var(--cockpit-hero-muted);
   font-size: 13px;
   font-weight: 650;
   line-height: 1.75;
@@ -427,7 +477,7 @@
 @media (hover: hover) {
   [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRefresh:hover,
   [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsContentRow:hover {
-    background: #fff4a8;
+    background: var(--cockpit-hover);
     color: var(--cockpit-ink);
     transform: translate(-1px, -1px);
     box-shadow: 4px 4px 0 var(--cockpit-stroke);

@@ -75,6 +75,15 @@ function npmPack(root, args) {
   }
 }
 
+function parsePackMetadata(output) {
+  const jsonMatch = output.match(/(?:^|\n)\[\s*\{/);
+  if (!jsonMatch || jsonMatch.index === undefined) {
+    throw new Error("npm pack did not return a JSON array");
+  }
+  const jsonStart = jsonMatch.index + (output[jsonMatch.index] === "\n" ? 1 : 0);
+  return JSON.parse(output.slice(jsonStart));
+}
+
 function parseRootArgument() {
   const index = process.argv.indexOf("--root");
   return index === -1 ? undefined : process.argv[index + 1];
@@ -207,7 +216,7 @@ function runReleasePipeline(root) {
 
   let metadata;
   try {
-    metadata = JSON.parse(output);
+    metadata = parsePackMetadata(output);
   } catch (error) {
     return [`npm pack --dry-run 输出不可解析：${error.message}`];
   }

@@ -13,11 +13,13 @@ import {
   createContentRequestSchema,
   createContentResultSchema,
   setContentStageRequestSchema,
+  setContentSkipRequestSchema,
   setProfileRequestSchema,
   setScriptRulesRequestSchema,
   bindStudioRequestSchema,
   setPublishRequestSchema,
   setScriptRequestSchema,
+  setTopicNoteRequestSchema,
   subtitlePreviewResultSchema,
   subtitleTextResultSchema,
   revisionResultSchema,
@@ -25,6 +27,7 @@ import {
   syncPublishResultSchema,
   videoPlaybackResultSchema,
   articleMediaResultSchema,
+  waitExportRequestSchema,
 } from "./schemas.ts";
 
 export const PACKAGE_NAME = "dsh-oil-creator";
@@ -81,6 +84,7 @@ export const OIL_CREATOR_INVOCATIONS: readonly InvocationDescriptor[] = [
   invocation("refreshCatalog", emptyObjectSchema, listContentsResultSchema),
   invocation("createContent", createContentRequestSchema, createContentResultSchema),
   invocation("setContentStage", setContentStageRequestSchema, contentDetailSchema),
+  invocation("setContentSkip", setContentSkipRequestSchema, contentDetailSchema),
   invocation("setProfile", setProfileRequestSchema, librarySettingsSchema),
   invocation("setScriptRules", setScriptRulesRequestSchema, librarySettingsSchema),
   invocation("bindStudio", bindStudioRequestSchema, contentDetailSchema),
@@ -88,6 +92,8 @@ export const OIL_CREATOR_INVOCATIONS: readonly InvocationDescriptor[] = [
   invocation("setPublish", setPublishRequestSchema, contentDetailSchema),
   invocation("syncPublish", syncPublishRequestSchema, syncPublishResultSchema),
   invocation("setScript", setScriptRequestSchema, contentDetailSchema),
+  invocation("setTopicNote", setTopicNoteRequestSchema, contentDetailSchema),
+  invocation("waitForExport", waitExportRequestSchema, contentDetailSchema),
   invocation("openSubtitlePreview", idRequestSchema, subtitlePreviewResultSchema),
   invocation("startSubtitleBurn", idRequestSchema, contentDetailSchema),
   invocation("startSubtitleGenerate", idRequestSchema, contentDetailSchema),

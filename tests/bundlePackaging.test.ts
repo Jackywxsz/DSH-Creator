@@ -157,6 +157,7 @@ describe("DeepSeek Harness bundle packaging", () => {
         "lib/client.js",
         "lib/typert.host.js",
         "lib/collect-publish.mjs",
+        "scripts/generate_jacky_cover.py",
       ]));
       expect(
         [...packedFiles].some((entry) => entry.startsWith("assets/readme/source/")),
