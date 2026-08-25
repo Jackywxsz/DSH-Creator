@@ -7,5 +7,3 @@ output/playwright/
 .DS_Store
 __pycache__/
 *.pyc
-assets/readme/hero.png
-assets/readme/source/

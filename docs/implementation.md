@@ -1,14 +1,14 @@
 # 内容工作台：现阶段实现
 
-`dsh-oil-creator` 是挂在 DeepSeek Harness web 配置上的一个插件。它把 oil 从选题到发布的本地工作收进同一块界面：左侧内容列表、中间一条片子的检查器、右边继续对话。
+Jacky Creator 的内部包名暂时保留为 `dsh-oil-creator`。它是挂在 DeepSeek Harness 配置上的单一插件，把对话、内容生产和运营沉淀收进同一块界面，同时保留本地文件夹作为正文真源。
 
-安装：`npx @deepseek-ai/dsh plugin --profile web add github:oil-oil/dsh-oil-creator`（本地开发用目录路径）
+Beta 安装：`dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.1/dsh-oil-creator-0.1.0-beta.1.tgz`。预构建包避免 pnpm 10 对 Git 源码 `prepare` 的构建授权门槛。外部 CLI 必须显式选择目标 Profile；本地开发使用目录路径。
 
 卸载：`npx @deepseek-ai/dsh plugin --profile web remove dsh-oil-creator`
 
 插件对官方侧栏的替换只写在项目自己的 `cordis.patch.yml`，通过 `package.json` 的 `dsh.bundle.patch` 随包安装。不要把这段配置写进用户的 `~/.dsh/profiles/web/cordis.patch.yml`；用户层不会跟随插件卸载，残留后会把官方侧栏继续关掉。
 
-Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最终 `assets/readme/hero.svg`，不包含 `assets/readme/source/` 下的源素材。
+Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最终 `assets/readme/hero.png`，不包含 `assets/readme/source/` 下的源素材。
 
 本文写当前设计，不是变更记录。实现新功能时先读这里，再打开对应 skill 或官方文档。
 
@@ -70,7 +70,7 @@ Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最�
 保持 **一个** Harness 插件。官方要求：只有能力需要独立替换时才拆包，不要预防性拆分。见 DeepSeek Harness `docs/user/develop/practice/index.zh.md`。
 
 设置位 `settings.plugin.item` 的含义是「一个插件一张卡」，不是一个功能一张卡。
-Harness rc.7 会先从 Host 的 `settings.describe` 取得插件命名空间，再按同名 `key` 派发设置卡；插件同时保留 rc.6 使用的 `id`。当前设置值仍统一由插件 Remote 和 `~/.dsh-oil-creator/overlay.json` 管理，Host 命名空间只负责让设置卡被发现，避免双数据源。
+DeepSeek Harness `0.1.1-rc.2` 会先从 Host 的 `settings.describe` 取得插件命名空间，再按同名 `key` 派发设置卡；插件仍保留旧版使用的 `id`，用于现有用户兼容。当前设置值统一由插件 Remote 和 `~/.dsh-oil-creator/overlay.json` 管理，Host 命名空间只负责让设置卡被发现，避免双数据源。
 
 执行分工：
 

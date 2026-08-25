@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="420" viewBox="0 0 1200 420"
+     role="img" aria-labelledby="title desc">
+  <title id="title">Jacky Creator for DeepSeek Harness</title>
+  <desc id="desc">纸上生长品牌视觉下的本地创作工作台，将灵感、脚本、制作、发布和复盘连成一条工作流。</desc>
+
+  <defs>
+    <pattern id="paper-grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#102034" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+    <clipPath id="canvas">
+      <rect width="1200" height="420" rx="28"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#canvas)">
+    <rect width="1200" height="420" fill="#F4EFE3"/>
+    <rect width="1200" height="420" fill="url(#paper-grid)"/>
+    <circle cx="1050" cy="178" r="244" fill="#1D4ED8"/>
+    <circle cx="1050" cy="178" r="190" fill="#F8F5EC" stroke="#102034" stroke-width="3"/>
+    <path d="M842 280C947 327 1100 326 1190 266" fill="none" stroke="#1D4ED8" stroke-width="5"/>
+    <circle cx="890" cy="295" r="9" fill="#79C800" stroke="#102034" stroke-width="3"/>
+  </g>
+
+  <g id="title-block" transform="translate(58 52)">
+    <g transform="translate(0 0)">
+      <rect width="336" height="34" rx="17" fill="#102034"/>
+      <text x="18" y="23" fill="#FFFFFF"
+            font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+            font-size="15" font-weight="700" letter-spacing="1.4">DEEPSEEK HARNESS PLUGIN · BETA</text>
+    </g>
+
+    <text x="0" y="112" fill="#102034"
+          font-family="-apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, sans-serif"
+          font-size="66" font-weight="850" letter-spacing="-2">Jacky Creator</text>
+    <text x="0" y="160" fill="#1D4ED8"
+          font-family="-apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, sans-serif"
+          font-size="30" font-weight="800">对话、内容、运营，在同一块创作工作台持续生长</text>
+    <text x="0" y="198" fill="#586474"
+          font-family="-apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, sans-serif"
+          font-size="21">正文留在本地文件夹，运营沉淀回到下一次脚本创作。</text>
+  </g>
+
+  <g id="workflow" transform="translate(58 286)"
+     font-family="-apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, sans-serif">
+    <g>
+      <rect width="112" height="62" rx="15" fill="#FFFFFF" stroke="#102034" stroke-width="2.5"/>
+      <path d="M24 39c0-10 6-17 15-20-2 8 0 15 6 20M37 17c5-7 11-9 18-8-1 8-6 13-15 15" fill="none" stroke="#79C800" stroke-width="4" stroke-linecap="round"/>
+      <text x="59" y="38" fill="#102034" font-size="20" font-weight="750">灵感</text>
+    </g>
+    <path d="M123 31h24" stroke="#102034" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="m141 24 8 7-8 7" fill="none" stroke="#102034" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(158 0)">
+      <rect width="112" height="62" rx="15" fill="#FFFFFF" stroke="#102034" stroke-width="2.5"/>
+      <text x="56" y="39" text-anchor="middle" fill="#102034" font-size="20" font-weight="750">脚本</text>
+    </g>
+    <path d="M281 31h24" stroke="#102034" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="m299 24 8 7-8 7" fill="none" stroke="#102034" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(316 0)">
+      <rect width="112" height="62" rx="15" fill="#FFFFFF" stroke="#102034" stroke-width="2.5"/>
+      <text x="56" y="39" text-anchor="middle" fill="#102034" font-size="20" font-weight="750">制作</text>
+    </g>
+    <path d="M439 31h24" stroke="#102034" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="m457 24 8 7-8 7" fill="none" stroke="#102034" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(474 0)">
+      <rect width="112" height="62" rx="15" fill="#FFFFFF" stroke="#102034" stroke-width="2.5"/>
+      <text x="56" y="39" text-anchor="middle" fill="#102034" font-size="20" font-weight="750">发布</text>
+    </g>
+    <path d="M597 31h24" stroke="#102034" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="m615 24 8 7-8 7" fill="none" stroke="#102034" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(632 0)">
+      <rect width="112" height="62" rx="15" fill="#1D4ED8" stroke="#102034" stroke-width="2.5"/>
+      <text x="56" y="39" text-anchor="middle" fill="#FFFFFF" font-size="20" font-weight="800">复盘</text>
+    </g>
+  </g>
+
+  <g id="mascot">
+    <image x="885" y="54" width="260" height="260"
+           preserveAspectRatio="xMidYMid meet"
+           href="../../../src/client/assets/jacky-creator-mascot-full.png"/>
+    <g transform="translate(894 331)">
+      <rect width="238" height="44" rx="22" fill="#F8F5EC" stroke="#102034" stroke-width="2.5"/>
+      <text x="119" y="29" text-anchor="middle" fill="#102034"
+            font-family="-apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, sans-serif"
+            font-size="18" font-weight="800"><tspan fill="#1D4ED8">AI</tspan><tspan> 无限生长星球</tspan></text>
+    </g>
+  </g>
+</svg>

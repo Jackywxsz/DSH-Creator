@@ -46,10 +46,10 @@ function createRepository() {
       version: "0.1.0",
       repository: {
         type: "git",
-        url: "git+https://github.com/oil-oil/dsh-oil-creator.git",
+        url: "git+https://github.com/Jackywxsz/DSH-Creator.git",
       },
-      bugs: { url: "https://github.com/oil-oil/dsh-oil-creator/issues" },
-      homepage: "https://github.com/oil-oil/dsh-oil-creator#readme",
+      bugs: { url: "https://github.com/Jackywxsz/DSH-Creator/issues" },
+      homepage: "https://github.com/Jackywxsz/DSH-Creator#readme",
       packageManager: "pnpm@10.16.1",
       main: "./lib/index.js",
       exports: { ".": "./lib/index.js" },
@@ -60,7 +60,11 @@ function createRepository() {
         "lib/collect-publish.mjs",
         "cordis.patch.yml",
         "README.md",
-        "assets/readme/hero.svg",
+        "assets/readme/hero.png",
+        "docs/*.md",
+        "BRAND_ASSETS.md",
+        "CONTRIBUTING.md",
+        "SECURITY.md",
       ],
       dsh: { bundle: { patch: "./cordis.patch.yml" } },
       scripts: {
@@ -88,7 +92,12 @@ function createRepository() {
     ["src/client/index.tsx", "export {};\n"],
     ...REQUIRED_CHAIN_FILES.map((file) => [file, "export {};\n"] as const),
     ["README.md", "# test\n"],
-    ["assets/readme/hero.svg", "<svg />\n"],
+    ["assets/readme/hero.png", "png\n"],
+    ["docs/installation.md", "# install\n"],
+    ["docs/distribution.md", "# distribute\n"],
+    ["BRAND_ASSETS.md", "# brand\n"],
+    ["CONTRIBUTING.md", "# contributing\n"],
+    ["SECURITY.md", "# security\n"],
     ["LICENSE", "MIT\n"],
   ]);
 
@@ -108,7 +117,7 @@ function createRepository() {
   git(repository, "config", "user.name", "release-check");
   git(repository, "add", "--all");
   git(repository, "commit", "-qm", "initial");
-  git(repository, "remote", "add", "origin", "git@github.com:example/release-check.git");
+  git(repository, "remote", "add", "origin", "git@github.com:Jackywxsz/DSH-Creator.git");
   return repository;
 }
 
@@ -163,19 +172,40 @@ describe("release:check", () => {
 
   it("rejects missing origin and missing files", () => {
     const noOrigin = createRepository();
+    const wrongOrigin = createRepository();
     const missing = createRepository();
     try {
       git(noOrigin, "remote", "remove", "origin");
       const noOriginResult = runReleaseCheck(noOrigin);
       expect(noOriginResult.output).toContain("缺少 origin");
 
-      rmSync(join(missing, "assets/readme/hero.svg"));
+      git(wrongOrigin, "remote", "set-url", "origin", "git@github.com:example/wrong.git");
+      const wrongOriginResult = runReleaseCheck(wrongOrigin);
+      expect(wrongOriginResult.output).toContain("origin 必须指向 Jackywxsz/DSH-Creator");
+
+      rmSync(join(missing, "assets/readme/hero.png"));
       const missingResult = runReleaseCheck(missing);
-      expect(missingResult.output).toContain("关键文件缺失：assets/readme/hero.svg");
+      expect(missingResult.output).toContain("关键文件缺失：assets/readme/hero.png");
 
     } finally {
       rmSync(noOrigin, { recursive: true, force: true });
+      rmSync(wrongOrigin, { recursive: true, force: true });
       rmSync(missing, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects runtime artifacts that leak the build machine path", () => {
+    const repository = createRepository();
+    try {
+      writeFileSync(
+        join(repository, "lib", "client.js"),
+        `//#region ${repository}/src/client/index.tsx\n`,
+      );
+      const result = runReleaseCheck(repository);
+      expect(result.code).not.toBe(0);
+      expect(result.output).toContain("运行产物泄露构建机绝对路径：lib/client.js");
+    } finally {
+      rmSync(repository, { recursive: true, force: true });
     }
   });
 
