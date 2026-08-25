@@ -1,5 +1,9 @@
 node_modules
 lib
+.lab
+artifacts
+output/playwright/
+.playwright-cli/
 .DS_Store
 assets/readme/hero.png
 assets/readme/source/

@@ -7,6 +7,7 @@ import Schema from "@deepseek-ai/schemastery";
 export interface Config {
   libraryRoot: string;
   dataDir: string;
+  cockpitDataDir: string;
   subtitleSkillDir: string;
   coverSkillDir: string;
 }
@@ -18,6 +19,10 @@ export function defaultLibraryRoot(platform: NodeJS.Platform = process.platform)
 
 export function defaultDataDir(): string {
   return join(homedir(), ".dsh-oil-creator");
+}
+
+export function defaultCockpitDataDir(): string {
+  return join(homedir(), ".dsh-creator-cockpit-lab");
 }
 
 export function defaultSubtitleSkillDir(): string {
@@ -59,12 +64,17 @@ export const DEFAULT_LIBRARY_ROOT = defaultLibraryRoot();
 export const Config: Schema<Config> = Schema.object({
   libraryRoot: Schema.string().default(defaultLibraryRoot()),
   dataDir: Schema.string().default(defaultDataDir()),
+  cockpitDataDir: Schema.string().default(defaultCockpitDataDir()),
   subtitleSkillDir: Schema.string().default(""),
   coverSkillDir: Schema.string().default(""),
 });
 
 export function resolveDataDir(config: Config): string {
   return config.dataDir === "" ? defaultDataDir() : config.dataDir;
+}
+
+export function resolveCockpitDataDir(config: Config): string {
+  return config.cockpitDataDir === "" ? defaultCockpitDataDir() : config.cockpitDataDir;
 }
 
 export function resolveConfiguredPath(configured: string, fallback: string, envValue?: string): string {

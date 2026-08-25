@@ -338,6 +338,150 @@
   box-shadow: none;
 }
 
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptWorkspace {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: 14px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge {
+  flex: none;
+  padding: 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge > header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge > header strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge > header span,
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge > p {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 9px;
+  line-height: 15px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge > header button {
+  flex: none;
+  min-height: 28px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 7px;
+  background: var(--dsw-alias-state-business-primary);
+  color: var(--dsw-alias-label-primary-inverted);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge > header button:active {
+  transform: scale(0.96);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptStrategyChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 9px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptStrategyChips span {
+  padding: 2px 6px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 999px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 9px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptKnowledgeChoices {
+  display: flex;
+  max-height: 110px;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 9px;
+  overflow-y: auto;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptKnowledgeChoices label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 9px;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptKnowledgeChoices input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge {
+  border: 2px solid #111111;
+  border-radius: 12px;
+  background: #ffdf2b;
+  box-shadow: 4px 4px 0 #111111;
+  color: #111111;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge > header strong {
+  color: #111111;
+  font-family: "Arial Black", "PingFang SC", sans-serif;
+  font-weight: 900;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge > header span,
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge > p {
+  color: #33425a;
+  font-weight: 650;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge > header button {
+  min-height: 40px;
+  border: 2px solid #111111;
+  border-radius: 8px;
+  background: #111111;
+  box-shadow: 3px 3px 0 #1f5fff;
+  color: #ffffff;
+  font-weight: 850;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsBridge > header button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #1f5fff;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptStrategyChips span,
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptKnowledgeChoices label {
+  border: 1px solid #111111;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #111111;
+  box-shadow: 1px 1px 0 #111111;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptOperationsError {
+  color: var(--dsw-alias-state-error-primary) !important;
+}
+
 [data-plugin="dsh-oil-creator"][data-surface="inspector"] .scriptEditor:focus {
   outline: none;
   box-shadow: none;
@@ -398,6 +542,27 @@
   margin-top: 4px;
   color: var(--dsw-alias-label-tertiary);
   font: var(--dsw-font-markdown-small);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .publishDate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-markdown-small);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .publishDate input {
+  width: 138px;
+  min-height: 28px;
+  padding: 3px 7px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 7px;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="inspector"] .publishUrl {

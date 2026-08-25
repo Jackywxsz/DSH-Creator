@@ -51,6 +51,7 @@ const platformPublishSchema = z.object({
   views: z.number().optional(),
   likes: z.number().optional(),
   comments: z.number().optional(),
+  publishedAt: z.number().optional(),
   syncedAt: z.number().optional(),
 });
 
@@ -201,6 +202,7 @@ export const setPublishRequestSchema = z.object({
   platform: publishPlatformSchema,
   status: publishMarkSchema,
   url: z.string().optional(),
+  publishedAt: z.number().int().nonnegative().optional(),
 });
 
 export const subtitlePreviewResultSchema = z.object({

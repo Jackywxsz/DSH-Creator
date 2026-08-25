@@ -9,14 +9,19 @@ import {
 
 type Listener = () => void;
 
+export type OperationsSection = "ideas" | "today" | "schedule" | "content" | "goals" | "reviews" | "settings";
+
 const listeners = new Set<Listener>();
 const libraryListeners = new Set<Listener>();
 const profileListeners = new Set<Listener>();
 const initialUi = loadCreatorUiState(browserCreatorStorage());
 let selectedId = initialUi.selectedId;
 let sidebarTab: SidebarTab = initialUi.sidebarTab;
+let operationsSection: OperationsSection = "today";
 let libraryEpoch = 0;
 let profileEpoch = 0;
+let ideaCaptureEpoch = 0;
+const ideaCaptureListeners = new Set<Listener>();
 let sidebarWidthPx = 280;
 export const INSPECTOR_MIN = 320;
 export const INSPECTOR_MAX = 800;
@@ -247,6 +252,39 @@ export function useSidebarTab(): SidebarTab {
     setTab(getSidebarTab());
   }), []);
   return tab;
+}
+
+export function getOperationsSection(): OperationsSection {
+  return operationsSection;
+}
+
+export function setOperationsSection(section: OperationsSection): void {
+  if (operationsSection === section) return;
+  operationsSection = section;
+  emitChrome();
+}
+
+export function useOperationsSection(): OperationsSection {
+  const [section, setSection] = useState(getOperationsSection);
+  useEffect(() => subscribeSidebarChrome(() => {
+    setSection(getOperationsSection());
+  }), []);
+  return section;
+}
+
+export function requestIdeaCapture(): void {
+  ideaCaptureEpoch += 1;
+  for (const listener of ideaCaptureListeners) listener();
+}
+
+export function useIdeaCaptureEpoch(): number {
+  const [epoch, setEpoch] = useState(ideaCaptureEpoch);
+  useEffect(() => {
+    const listener = (): void => { setEpoch(ideaCaptureEpoch); };
+    ideaCaptureListeners.add(listener);
+    return () => { ideaCaptureListeners.delete(listener); };
+  }, []);
+  return epoch;
 }
 
 export function inspectorIsOpen(): boolean {

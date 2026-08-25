@@ -75,9 +75,19 @@ function platformFromField(field: unknown, fallback: PublishMark): PlatformPubli
   const url = typeof record.url === "string" && record.url.trim() !== ""
     ? record.url.trim()
     : undefined;
-  return url === undefined
-    ? { status, source: "publisher" }
-    : { status, source: "publisher", url };
+  const rawPublishedAt = record.publishedAt ?? record.published_at ?? record.publishTime ?? record.publish_time;
+  const numericPublishedAt = typeof rawPublishedAt === "string"
+    ? Number.isFinite(Number(rawPublishedAt)) ? Number(rawPublishedAt) : Date.parse(rawPublishedAt)
+    : Number(rawPublishedAt);
+  const publishedAt = status === "published" && Number.isFinite(numericPublishedAt) && numericPublishedAt > 0
+    ? numericPublishedAt < 1_000_000_000_000 ? Math.round(numericPublishedAt * 1000) : Math.round(numericPublishedAt)
+    : undefined;
+  return {
+    status,
+    source: "publisher",
+    ...(url === undefined ? {} : { url }),
+    ...(publishedAt === undefined ? {} : { publishedAt }),
+  };
 }
 
 export function publishFromAutoPublish(value: unknown): ContentPublish {
@@ -137,6 +147,9 @@ export function decodeOverlayPublish(raw: unknown): OverlayItem["publish"] {
     if (typeof record.comments === "number" && Number.isFinite(record.comments)) {
       entry.comments = record.comments;
     }
+    if (typeof record.publishedAt === "number" && Number.isFinite(record.publishedAt)) {
+      entry.publishedAt = record.publishedAt;
+    }
     if (typeof record.syncedAt === "number" && Number.isFinite(record.syncedAt)) {
       entry.syncedAt = record.syncedAt;
     }
@@ -168,6 +181,7 @@ export function patchOverlayPublish(
   platform: PublishPlatform,
   status: PublishMark,
   url?: string,
+  now = Date.now(),
 ): NonNullable<OverlayItem["publish"]> {
   const next: NonNullable<OverlayItem["publish"]> = { ...current };
   const previous = current?.[platform];
@@ -175,6 +189,7 @@ export function patchOverlayPublish(
     status,
     ...(previous === undefined ? {} : copyOverlayMetrics(previous)),
   };
+  if (status === "published") entry.publishedAt = previous?.publishedAt ?? now;
   if (status === "published" && url !== undefined && url.trim() !== "") {
     entry.url = url.trim();
   } else if (previous?.url !== undefined && status === "published") {
@@ -186,27 +201,29 @@ export function patchOverlayPublish(
 
 function copyOverlayMetrics(over: OverlayPublish): Pick<
   OverlayPublish,
-  "remoteId" | "views" | "likes" | "comments" | "syncedAt"
+  "remoteId" | "views" | "likes" | "comments" | "publishedAt" | "syncedAt"
 > {
-  const next: Pick<OverlayPublish, "remoteId" | "views" | "likes" | "comments" | "syncedAt"> = {};
+  const next: Pick<OverlayPublish, "remoteId" | "views" | "likes" | "comments" | "publishedAt" | "syncedAt"> = {};
   if (over.remoteId !== undefined) next.remoteId = over.remoteId;
   if (over.views !== undefined) next.views = over.views;
   if (over.likes !== undefined) next.likes = over.likes;
   if (over.comments !== undefined) next.comments = over.comments;
+  if (over.publishedAt !== undefined) next.publishedAt = over.publishedAt;
   if (over.syncedAt !== undefined) next.syncedAt = over.syncedAt;
   return next;
 }
 
 function copyOverlayFields(over: OverlayPublish): Pick<
   OverlayPublish,
-  "url" | "remoteId" | "views" | "likes" | "comments" | "syncedAt"
+  "url" | "remoteId" | "views" | "likes" | "comments" | "publishedAt" | "syncedAt"
 > {
-  const next: Pick<OverlayPublish, "url" | "remoteId" | "views" | "likes" | "comments" | "syncedAt"> = {};
+  const next: Pick<OverlayPublish, "url" | "remoteId" | "views" | "likes" | "comments" | "publishedAt" | "syncedAt"> = {};
   if (over.url !== undefined) next.url = over.url;
   if (over.remoteId !== undefined) next.remoteId = over.remoteId;
   if (over.views !== undefined) next.views = over.views;
   if (over.likes !== undefined) next.likes = over.likes;
   if (over.comments !== undefined) next.comments = over.comments;
+  if (over.publishedAt !== undefined) next.publishedAt = over.publishedAt;
   if (over.syncedAt !== undefined) next.syncedAt = over.syncedAt;
   return next;
 }

@@ -229,6 +229,7 @@ describe("applyMatchesToOverlay", () => {
       url: "https://channels.weixin.qq.com/x",
       views: 3200,
       likes: 12,
+      publishedAt: 1_700_000_000_000,
       syncedAt: 1_700_000_000_000,
     });
   });

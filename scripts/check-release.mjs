@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 
 const REQUIRED_FILES = [
   "package.json",
@@ -58,6 +59,20 @@ function run(root, command, args) {
     cwd: root,
     stdio: "inherit",
   });
+}
+
+function npmPack(root, args) {
+  const cacheDirectory = mkdtempSync(join(tmpdir(), "dsh-oil-creator-npm-cache-"));
+  try {
+    return execFileSync("npm", args, {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "inherit"],
+      env: { ...process.env, npm_config_cache: cacheDirectory },
+    });
+  } finally {
+    rmSync(cacheDirectory, { recursive: true, force: true });
+  }
 }
 
 function parseRootArgument() {
@@ -185,11 +200,7 @@ function runReleasePipeline(root) {
 
   let output;
   try {
-    output = execFileSync(
-      "npm",
-      ["pack", "--dry-run", "--ignore-scripts", "--json"],
-      { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] },
-    );
+    output = npmPack(root, ["pack", "--dry-run", "--ignore-scripts", "--json"]);
   } catch (error) {
     return [`npm pack --dry-run --ignore-scripts 失败：${error.message}`];
   }

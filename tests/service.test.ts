@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -26,6 +26,7 @@ const preview = vi.hoisted(() => ({
   terminateCalls: [] as number[],
   waitMode: "failure" as "failure" | "abort",
   abortController: undefined as AbortController | undefined,
+  ownedCommands: new Map<number, string>(),
 }));
 
 vi.mock("../src/collectEgo.ts", async (importOriginal) => {
@@ -63,6 +64,11 @@ vi.mock("../src/processAlive.ts", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../src/processAlive.ts")>();
   return {
     ...actual,
+    jobPidMatches: vi.fn((pid: number | undefined, fragments: readonly string[]) => {
+      if (pid === undefined || !actual.pidAlive(pid)) return false;
+      const command = preview.ownedCommands.get(pid) ?? actual.pidCommand(pid);
+      return command !== undefined && fragments.some((fragment) => command.includes(fragment));
+    }),
     terminateOwnedProcess: vi.fn(async (pid: number | undefined) => {
       if (pid !== undefined) preview.terminateCalls.push(pid);
       return true;
@@ -315,6 +321,7 @@ describe("OilCreatorService subtitle job reconcile", () => {
       stdio: "ignore",
     });
     child.unref();
+    if (child.pid !== undefined) preview.ownedCommands.set(child.pid, script);
     return child;
   }
 
@@ -334,7 +341,10 @@ describe("OilCreatorService subtitle job reconcile", () => {
       const overlay = await loadOverlay(dataDir);
       expect(overlay.items.demo?.subtitleJob?.status).toBe("running");
     } finally {
-      if (child.pid !== undefined) process.kill(child.pid);
+      if (child.pid !== undefined) {
+        preview.ownedCommands.delete(child.pid);
+        process.kill(child.pid);
+      }
     }
   });
 
@@ -363,7 +373,42 @@ describe("OilCreatorService subtitle job reconcile", () => {
         pid: child.pid,
       });
     } finally {
-      if (child.pid !== undefined) process.kill(child.pid);
+      if (child.pid !== undefined) {
+        preview.ownedCommands.delete(child.pid);
+        process.kill(child.pid);
+      }
+    }
+  });
+});
+
+describe("OilCreatorService.bindStudio", () => {
+  it("resolves the only Screen Studio project inside a selected directory", async () => {
+    const root = await mkdtemp(join(tmpdir(), "oil-service-studio-"));
+    const project = join(root, "Area 2026-08-24.screenstudio");
+    await mkdir(project);
+    await writeFile(join(project, "project.json"), "{}");
+
+    const service = Object.create(OilCreatorService.prototype) as OilCreatorService;
+    let boundPath: string | undefined;
+    const probe = service as unknown as {
+      patchItem: (
+        id: string,
+        mutate: (item: OverlayItem) => void,
+        signal: AbortSignal,
+      ) => Promise<ContentDetail>;
+    };
+    probe.patchItem = async (_id, mutate) => {
+      const item: OverlayItem = {};
+      mutate(item);
+      boundPath = item.studioPath;
+      return undefined as never;
+    };
+
+    try {
+      await service.bindStudio({ id: "demo", path: root }, new AbortController().signal);
+      expect(boundPath).toBe(project);
+    } finally {
+      await rm(root, { recursive: true, force: true });
     }
   });
 });

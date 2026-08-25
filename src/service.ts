@@ -563,7 +563,7 @@ export class OilCreatorService extends TypertRemoteService {
       throw new Error(`publish platform is disabled: ${request.platform}`);
     }
     return this.patchItem(request.id, (item) => {
-      item.publish = patchOverlayPublish(item.publish, request.platform, request.status, request.url);
+      item.publish = patchOverlayPublish(item.publish, request.platform, request.status, request.url, request.publishedAt ?? Date.now());
     }, signal);
   }
 
@@ -1020,6 +1020,19 @@ async function resolveStudioPath(path: string): Promise<string> {
   if (path.endsWith(".screenstudio")) return path;
   const project = join(path, "project.json");
   if (await pathExists(project)) return path;
+  if (!info.isDirectory()) throw new Error("not a Screen Studio project");
+
+  const candidates: string[] = [];
+  for (const entry of await readdir(path, { withFileTypes: true })) {
+    if (!entry.name.endsWith(".screenstudio")) continue;
+    const candidate = join(path, entry.name);
+    const candidateInfo = await stat(candidate).catch(() => undefined);
+    if (candidateInfo?.isDirectory()) candidates.push(candidate);
+  }
+  if (candidates.length === 1) return candidates[0]!;
+  if (candidates.length > 1) {
+    throw new Error("multiple Screen Studio projects found; select one project");
+  }
   throw new Error("not a Screen Studio project");
 }
 

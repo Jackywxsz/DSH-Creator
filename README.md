@@ -10,6 +10,9 @@
 > [!NOTE]
 > 当前兼容 Node.js 22.19+、DeepSeek Harness `0.1.0-rc.6` / `0.1.0-rc.7`。核心片库可独立使用；Screen Studio、字幕、封面、公众号和发布能力均可按需安装。
 
+> [!IMPORTANT]
+> 当前分支是 Creator Cockpit 融合版，在原有「会话 / 内容」之外增加「运营」，用于灵感、推进、档期、内容管线、目标、AI 评分和发布后复盘。开发可使用仓库内隔离 profile，正式环境也可通过本地 `link:` 依赖安装本仓库构建产物。使用与架构见 [Creator Cockpit 说明](docs/creator-cockpit.md)，隔离启动见 [实验环境](docs/lab-development.md)。
+
 ## 一条片子，就是一个文件夹
 
 插件不建立封闭的内容数据库。正文和产物仍是普通文件，任何编辑器和 AI 文件工具都能读取：
@@ -174,6 +177,9 @@ pnpm check
 - [日常使用与完整工具说明](docs/usage.md)
 - [内容文件夹约定](docs/files.md)
 - [插件实现与兼容性说明](docs/implementation.md)
+- [Creator Cockpit 使用与架构](docs/creator-cockpit.md)
+- [Creator Cockpit 隔离开发环境](docs/lab-development.md)
+- [Creator Cockpit 对抗性审查](docs/adversarial-review.md)
 
 ## 使用问题
 

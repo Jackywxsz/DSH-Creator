@@ -1,4 +1,7 @@
 import { OIL_CREATOR_INVOCATIONS, PACKAGE_NAME } from "./remote-contract.ts";
+import { CREATOR_COCKPIT_INVOCATIONS } from "./cockpit/remote-contract.ts";
+
+export const ALL_INVOCATIONS = [...OIL_CREATOR_INVOCATIONS, ...CREATOR_COCKPIT_INVOCATIONS];
 
 export const TYPERT = {
   package: PACKAGE_NAME,
@@ -9,5 +12,5 @@ export const TYPERT = {
     events: [],
     objects: [],
   },
-  invocations: OIL_CREATOR_INVOCATIONS,
+  invocations: ALL_INVOCATIONS,
 };

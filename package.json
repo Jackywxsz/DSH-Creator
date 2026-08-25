@@ -61,6 +61,9 @@
   },
   "scripts": {
     "build": "tsdown && node scripts/copy-inplace.mjs scripts/collect-publish.mjs lib/collect-publish.mjs",
+    "lab:setup": "node scripts/setup-lab-profile.mjs",
+    "lab:config": "node scripts/run-lab.mjs --dump-config",
+    "lab:start": "node scripts/run-lab.mjs",
     "prepare": "npm run build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

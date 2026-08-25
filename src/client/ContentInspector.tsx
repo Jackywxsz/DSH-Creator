@@ -25,6 +25,9 @@ import {
   useSelectedContentId,
 } from "./contentSelection.ts";
 import type { CreatorKey } from "./locales.ts";
+import type { CockpitState } from "../cockpit/schemas.ts";
+import type { CreatorCockpitFace } from "./operations/face.ts";
+import { sendCockpitInstruction } from "./operations/sessionBridge.tsx";
 import { PlatformMark } from "./PlatformMark.tsx";
 import { isPublishSyncDisabled, PUBLISH_UI_PLATFORMS, selectEnabledPublishPlatforms } from "./publishPlatforms.ts";
 import { formatRelativeTime } from "./relativeTime.ts";
@@ -118,6 +121,20 @@ function metricParts(
   return parts;
 }
 
+function dateInputValue(value?: number): string {
+  if (value === undefined) return "";
+  const date = new Date(value);
+  const pad = (part: number): string => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function dateInputTimestamp(value: string): number | undefined {
+  const [year, month, day] = value.split("-").map(Number);
+  if (year === undefined || month === undefined || day === undefined) return undefined;
+  const timestamp = new Date(year, month - 1, day, 12).getTime();
+  return Number.isFinite(timestamp) ? timestamp : undefined;
+}
+
 function JobNote({ tone, children }: { tone?: "running" | "done" | "error"; children: ReactNode }) {
   return (
     <div className={tone === undefined ? "jobNote" : `jobNote ${tone}`}>
@@ -151,12 +168,64 @@ function WorkRow({
   );
 }
 
+function ScriptOperationsBridge({
+  contentId,
+  cockpit,
+  t,
+}: {
+  contentId: string;
+  cockpit: CreatorCockpitFace;
+  t: (key: CreatorKey) => string;
+}) {
+  const [state, setState] = useState<CockpitState | undefined>(undefined);
+  const [error, setError] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    let live = true;
+    void cockpit.getCockpitState().then((next) => {
+      if (live) setState(next);
+    }, (cause: unknown) => {
+      if (live) setError(cause instanceof Error ? cause.message : t("operations.state.unavailable"));
+    });
+    return () => { live = false; };
+  }, [contentId]);
+  const meta = state?.contentMeta[contentId];
+  const activeKnowledge = state?.knowledgeItems.filter((entry) => entry.active) ?? [];
+  const selectedIds = meta?.knowledgeIds ?? [];
+  const toggleKnowledge = (id: string, selected: boolean): void => {
+    const knowledgeIds = selected
+      ? [...selectedIds, id]
+      : selectedIds.filter((value) => value !== id);
+    void cockpit.setContentMeta({ contentId, patch: { knowledgeIds } }).then(setState, (cause: unknown) => {
+      setError(cause instanceof Error ? cause.message : t("operations.state.writeFailed"));
+    });
+  };
+  const strategy = [
+    meta?.contentType,
+    meta?.tier,
+    meta?.hookType,
+    meta?.structureType,
+    ...(meta?.tags ?? []),
+  ].filter((value): value is string => value !== undefined && value !== "");
+  return (
+    <section className="scriptOperationsBridge">
+      <header><div><strong>{t("inspector.operations.title")}</strong><span>{t("inspector.operations.hint")}</span></div><button type="button" onClick={() => {
+        const sent = sendCockpitInstruction(`请为 contentId=${contentId} 创作口播脚本。先调用 cockpit_get_script_context 读取运营看板中已选的策略、规则和模板，再调用 oil_script_rules 读取长期人设规则。结合 topic.md 写出成稿，并通过 Oil Creator 的脚本写入能力保存到这条真实内容的 script.md。不要只把脚本发在对话里。`);
+        if (!sent) window.alert(t("operations.ai.noSession"));
+      }}>{t("inspector.operations.create")}</button></header>
+      {error !== undefined && <p className="scriptOperationsError">{error}</p>}
+      {strategy.length > 0 && <div className="scriptStrategyChips">{strategy.map((value) => <span key={value}>{value}</span>)}</div>}
+      {activeKnowledge.length > 0 ? <div className="scriptKnowledgeChoices">{activeKnowledge.map((entry) => <label key={entry.id}><input type="checkbox" checked={selectedIds.includes(entry.id)} onChange={(event) => { toggleKnowledge(entry.id, event.target.checked); }} /><span>{entry.kind === "rule" ? t("operations.knowledge.rule") : t("operations.knowledge.template")} · {entry.title}</span></label>)}</div> : state !== undefined && <p>{t("operations.knowledge.empty")}</p>}
+    </section>
+  );
+}
+
 export type ContentInspectorProps =
   & PropsRuntime<"shell.overlay">
   & InjectFace<CreatorViewFace>
   & PropsLocale<"dsh.oil.creator">
   & {
     closeDetails: () => void;
+    cockpit: CreatorCockpitFace;
   };
 
 export function ContentInspector({
@@ -182,6 +251,7 @@ export function ContentInspector({
   openSubtitlePreview,
   openPath,
   closeDetails,
+  cockpit,
 }: ContentInspectorProps) {
   const [selectedId, setSelectedId] = useSelectedContentId();
   const currentSessionId = useSessions((sessions) => sessions.current);
@@ -378,6 +448,21 @@ export function ContentInspector({
     });
   };
 
+  const applyPublishedAt = (platform: PublishPlatform, value: string): void => {
+    if (detail === undefined) return;
+    const publishedAt = dateInputTimestamp(value);
+    if (publishedAt === undefined) return;
+    const row = detail.publish[platform];
+    setPublishPending(platform);
+    void setPublish(detail.id, platform, "published", row.url, publishedAt).then((next) => {
+      setDetail(next);
+      setPublishPending(null);
+    }, (cause: unknown) => {
+      setActionError(cause instanceof Error ? cause.message : t("empty.error" as CreatorKey));
+      setPublishPending(null);
+    });
+  };
+
   useEffect(() => {
     if (selectedId === null) {
       clearConversationInset();
@@ -434,12 +519,27 @@ export function ContentInspector({
 
   const onBindStudio = (): void => {
     if (detail === undefined) return;
-    void pickDirectory().then((path) => {
-      if (path === null) return;
-      return bindStudio(detail.id, path);
-    }).then((next) => {
-      if (next !== undefined) setDetail(next);
-    });
+    setActionError(undefined);
+    void pickDirectory()
+      .then((path) => {
+        if (path === null) return undefined;
+        return bindStudio(detail.id, path);
+      })
+      .then((next) => {
+        if (next !== undefined) setDetail(next);
+      })
+      .catch((cause: unknown) => {
+        const message = cause instanceof Error ? cause.message : "";
+        if (message.includes("multiple Screen Studio projects")) {
+          setActionError(t("inspector.studio.multiple" as CreatorKey));
+        } else if (message.includes("not a Screen Studio project")) {
+          setActionError(t("inspector.studio.invalid" as CreatorKey));
+        } else if (message.includes("Screen Studio project missing")) {
+          setActionError(t("inspector.studio.missing" as CreatorKey));
+        } else {
+          setActionError(message || t("inspector.studio.bindFailed" as CreatorKey));
+        }
+      });
   };
 
   const onOpenStudio = (): void => {
@@ -834,6 +934,17 @@ export function ContentInspector({
                             {metrics.length > 0 && (
                               <div className="publishMetrics">{metrics.join(" · ")}</div>
                             )}
+                            {row.status === "published" && (
+                              <label className="publishDate">
+                                <span>{t("inspector.publish.publishedAt")}</span>
+                                <input
+                                  type="date"
+                                  value={dateInputValue(row.publishedAt)}
+                                  disabled={publishPending === platform.key}
+                                  onChange={(event) => { applyPublishedAt(platform.key, event.target.value); }}
+                                />
+                              </label>
+                            )}
                             {row.status === "published" && row.url !== undefined && (
                               <a className="publishUrl" href={row.url} target="_blank" rel="noreferrer">
                                 {t("inspector.publish.open" as CreatorKey)}
@@ -889,15 +1000,18 @@ export function ContentInspector({
               )
         )}
         {detail !== undefined && tab === "script" && (
-          <textarea
-            className="scriptEditor"
-            value={scriptDraft}
-            placeholder={t("inspector.script.placeholder" as CreatorKey)}
-            onChange={(event) => {
-              setScriptDraft(event.target.value);
-              setScriptSaved(event.target.value === detail.script);
-            }}
-          />
+          <div className="scriptWorkspace">
+            <ScriptOperationsBridge contentId={detail.id} cockpit={cockpit} t={t} />
+            <textarea
+              className="scriptEditor"
+              value={scriptDraft}
+              placeholder={t("inspector.script.placeholder" as CreatorKey)}
+              onChange={(event) => {
+                setScriptDraft(event.target.value);
+                setScriptSaved(event.target.value === detail.script);
+              }}
+            />
+          </div>
         )}
         {detail !== undefined && tab === "article" && (
           detail.article.trim() === ""

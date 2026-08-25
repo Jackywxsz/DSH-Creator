@@ -32,14 +32,37 @@ import {
   bumpLibrary,
   bumpProfile,
   getSelectedContentId,
+  getSidebarTab,
   setSelectedContentId,
+  setSidebarTab,
   subscribeSelectedContentId,
+  subscribeSidebarChrome,
 } from "./contentSelection.ts";
 import type { CredentialsClient } from "./credentialsApi.ts";
+import type {
+  CockpitState,
+  CreateFollowerSnapshotRequest,
+  CreateGoalRequest,
+  CreateIdeaRequest,
+  CreateScheduleItemRequest,
+  SetContentMetaRequest,
+  UpdateGoalRequest,
+  UpdateIdeaRequest,
+  UpdateCockpitSettingsRequest,
+  UpdateKnowledgeRequest,
+  UpdateScheduleItemRequest,
+  KnowledgeRequest,
+  PromoteIdeaRequest,
+  PromotionResult,
+  RestoreCockpitStateRequest,
+} from "../cockpit/schemas.ts";
+import type { CreatorCockpitFace } from "./operations/face.ts";
 import { CreatorSettingsCard } from "./CreatorSettingsCard.tsx";
 import type { CreatorViewFace } from "./face.ts";
 import { en, NS, type CreatorKey, zh } from "./locales.ts";
 import { OilSidebarRoot } from "./sidebar/OilSidebarRoot.tsx";
+import { OperationsWorkspace } from "./operations/OperationsWorkspace.tsx";
+import { CockpitSessionBridge } from "./operations/sessionBridge.tsx";
 import type { OilSidebarInjected, OilSidebarSlotProps } from "./sidebar/slots.ts";
 import {
   registerCreatorSettingsCard,
@@ -90,6 +113,31 @@ interface OilCreatorRemote {
   setScript: (request: { id: string; text: string }) => Promise<RemoteAnswer<ContentDetail>>;
 }
 
+interface CreatorCockpitRemote {
+  getState: (request: Record<string, never>) => Promise<RemoteAnswer<CockpitState>>;
+  getRevision: (request: Record<string, never>) => Promise<RemoteAnswer<{ revision: number }>>;
+  restoreState: (request: RestoreCockpitStateRequest) => Promise<RemoteAnswer<CockpitState>>;
+  createIdea: (request: CreateIdeaRequest) => Promise<RemoteAnswer<CockpitState>>;
+  updateIdea: (request: UpdateIdeaRequest) => Promise<RemoteAnswer<CockpitState>>;
+  deleteIdea: (request: { id: string }) => Promise<RemoteAnswer<CockpitState>>;
+  setContentMeta: (request: SetContentMetaRequest) => Promise<RemoteAnswer<CockpitState>>;
+  deleteContentMeta: (request: { id: string }) => Promise<RemoteAnswer<CockpitState>>;
+  createGoal: (request: CreateGoalRequest) => Promise<RemoteAnswer<CockpitState>>;
+  updateGoal: (request: UpdateGoalRequest) => Promise<RemoteAnswer<CockpitState>>;
+  deleteGoal: (request: { id: string }) => Promise<RemoteAnswer<CockpitState>>;
+  createFollowerSnapshot: (request: CreateFollowerSnapshotRequest) => Promise<RemoteAnswer<CockpitState>>;
+  deleteFollowerSnapshot: (request: { id: string }) => Promise<RemoteAnswer<CockpitState>>;
+  createScheduleItem: (request: CreateScheduleItemRequest) => Promise<RemoteAnswer<CockpitState>>;
+  updateScheduleItem: (request: UpdateScheduleItemRequest) => Promise<RemoteAnswer<CockpitState>>;
+  deleteScheduleItem: (request: { id: string }) => Promise<RemoteAnswer<CockpitState>>;
+  updateSettings: (request: UpdateCockpitSettingsRequest) => Promise<RemoteAnswer<CockpitState>>;
+  confirmReview: (request: { contentId: string; id: string }) => Promise<RemoteAnswer<CockpitState>>;
+  saveRule: (request: KnowledgeRequest) => Promise<RemoteAnswer<{ state: CockpitState; path: string; entryId: string }>>;
+  saveTemplate: (request: KnowledgeRequest) => Promise<RemoteAnswer<{ state: CockpitState; path: string; entryId: string }>>;
+  updateKnowledge: (request: UpdateKnowledgeRequest) => Promise<RemoteAnswer<CockpitState>>;
+  promoteIdea: (request: PromoteIdeaRequest) => Promise<RemoteAnswer<PromotionResult>>;
+}
+
 function credentialsOf(ctx: ClientContext): CredentialsClient | undefined {
   const connection = ctx.get("connection") as { api?: { credentials?: CredentialsClient } } | undefined;
   return connection?.api?.credentials;
@@ -115,6 +163,122 @@ export function apply(ctx: ClientContext): void {
   }, "dsh-oil-creator: chrome");
   const remoteOf = (): OilCreatorRemote | undefined =>
     ctx.get("remote.oilCreator") as OilCreatorRemote | undefined;
+  const cockpitRemoteOf = (): CreatorCockpitRemote | undefined =>
+    ctx.get("remote.creatorCockpit") as CreatorCockpitRemote | undefined;
+
+  const cockpitFace = (): CreatorCockpitFace => ({
+    cockpitReady: () => cockpitRemoteOf() !== undefined,
+    getCockpitState: async () => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.getState({}), "cockpit state failed");
+    },
+    getCockpitRevision: async () => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.getRevision({}), "cockpit revision failed").revision;
+    },
+    restoreState: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.restoreState(request), "restore cockpit state failed");
+    },
+    createIdea: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.createIdea(request), "create idea failed");
+    },
+    updateIdea: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.updateIdea(request), "update idea failed");
+    },
+    deleteIdea: async (id) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.deleteIdea({ id }), "delete idea failed");
+    },
+    setContentMeta: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.setContentMeta(request), "content metadata failed");
+    },
+    deleteContentMeta: async (id) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.deleteContentMeta({ id }), "delete content metadata failed");
+    },
+    createGoal: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.createGoal(request), "create goal failed");
+    },
+    updateGoal: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.updateGoal(request), "update goal failed");
+    },
+    deleteGoal: async (id) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.deleteGoal({ id }), "delete goal failed");
+    },
+    createFollowerSnapshot: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.createFollowerSnapshot(request), "create follower snapshot failed");
+    },
+    deleteFollowerSnapshot: async (id) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.deleteFollowerSnapshot({ id }), "delete follower snapshot failed");
+    },
+    createScheduleItem: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.createScheduleItem(request), "create schedule item failed");
+    },
+    updateScheduleItem: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.updateScheduleItem(request), "update schedule item failed");
+    },
+    deleteScheduleItem: async (id) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.deleteScheduleItem({ id }), "delete schedule item failed");
+    },
+    updateSettings: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.updateSettings(request), "update cockpit settings failed");
+    },
+    confirmReview: async (contentId, id) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.confirmReview({ contentId, id }), "confirm review failed");
+    },
+    saveRule: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.saveRule(request), "save rule failed");
+    },
+    saveTemplate: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.saveTemplate(request), "save template failed");
+    },
+    updateKnowledge: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.updateKnowledge(request), "update knowledge failed");
+    },
+    promoteIdea: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      return unwrap(await remote.promoteIdea(request), "promote idea failed");
+    },
+  });
 
   const face = (): CreatorViewFace => ({
     ready: () => remoteOf() !== undefined,
@@ -226,11 +390,11 @@ export function apply(ctx: ClientContext): void {
       if (remote === undefined) throw new Error("remote unavailable");
       return unwrap(await remote.openStudio({ id }), "open failed");
     },
-    setPublish: async (id, platform, status, url) => {
+    setPublish: async (id, platform, status, url, publishedAt) => {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
       const next = unwrap(
-        await remote.setPublish(url === undefined ? { id, platform, status } : { id, platform, status, url }),
+        await remote.setPublish({ id, platform, status, ...(url === undefined ? {} : { url }), ...(publishedAt === undefined ? {} : { publishedAt }) }),
         "publish failed",
       );
       bumpLibrary();
@@ -280,6 +444,17 @@ export function apply(ctx: ClientContext): void {
   });
 
   const contentFace = face();
+  const operationsFace = cockpitFace();
+
+  const conversationSlots = ctx.slots as unknown as {
+    inject: (name: string, setup: () => () => void) => () => void;
+    register: (options: Record<string, unknown>, component: typeof CockpitSessionBridge) => () => void;
+  };
+  ctx.effect(() => conversationSlots.inject("conversation.input.dock", () => conversationSlots.register({
+    name: "conversation.input.dock",
+    id: "creator-cockpit-session-bridge",
+    order: 1000,
+  }, CockpitSessionBridge)), "dsh-oil-creator: session input bridge");
 
   ctx.effect(() => {
     const triggers = ctx.get("inputTriggers") as
@@ -312,6 +487,7 @@ export function apply(ctx: ClientContext): void {
         tabLabels={{
           sessions: contentT("tab.sessions"),
           content: contentT("tab"),
+          operations: contentT("tab.operations"),
         }}
         contentFace={contentFace}
         contentT={contentT}
@@ -346,16 +522,43 @@ export function apply(ctx: ClientContext): void {
 
     const stopOverlay = ctx.slots.inject("shell.overlay", () => {
       let disposeOccupant: (() => void) | undefined;
+      let occupantKey = "";
       const release = (): void => {
         disposeOccupant?.();
         disposeOccupant = undefined;
+        occupantKey = "";
       };
       const sync = (): void => {
-        if (getSelectedContentId() === null) {
-          release();
+        const selectedId = getSelectedContentId();
+        const nextKey = getSidebarTab() === "operations"
+          ? "operations"
+          : selectedId === null
+            ? ""
+            : `content:${selectedId}`;
+        if (nextKey === occupantKey) return;
+        release();
+        if (nextKey === "") {
           return;
         }
-        if (disposeOccupant !== undefined) return;
+        occupantKey = nextKey;
+        if (nextKey === "operations") {
+          disposeOccupant = ctx.slots.register({
+            name: "shell.overlay",
+            id: "creator-cockpit-operations",
+            order: 20,
+            locale: NS,
+            inject: () => ({
+              ...face(),
+              ...operationsFace,
+              t: ctx.locale.bind(NS),
+              openContent: (id: string) => {
+                setSelectedContentId(id);
+                setSidebarTab("content");
+              },
+            }),
+          }, OperationsWorkspace);
+          return;
+        }
         disposeOccupant = ctx.slots.register({
           name: "shell.overlay",
           id: "oil-creator-inspector",
@@ -363,16 +566,19 @@ export function apply(ctx: ClientContext): void {
           locale: NS,
           inject: () => ({
             ...face(),
+            cockpit: operationsFace,
             closeDetails: () => {
               setSelectedContentId(null);
             },
           }),
         }, ContentInspector);
       };
-      const stop = subscribeSelectedContentId(sync);
+      const stopSelection = subscribeSelectedContentId(sync);
+      const stopChrome = subscribeSidebarChrome(sync);
       sync();
       return () => {
-        stop();
+        stopSelection();
+        stopChrome();
         release();
       };
     });

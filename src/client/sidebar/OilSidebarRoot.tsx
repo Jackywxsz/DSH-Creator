@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   IconBrowseOutline16,
+  IconDataOutline16,
   IconNewChatOutline16,
   IconPanelLeftOutline16,
   Tooltip,
@@ -10,11 +11,15 @@ import type { CreatorViewFace } from "../face.ts";
 import type { CreatorKey } from "../locales.ts";
 import {
   setSidebarChromeWidth,
+  requestIdeaCapture,
+  setOperationsSection,
   setSidebarTab,
   useSidebarTab,
 } from "../contentSelection.ts";
 import { ContentSidebarPanel } from "./ContentSidebarPanel.tsx";
 import { OilBrand } from "./OilBrand.tsx";
+import { JackySproutIcon } from "./JackySproutIcon.tsx";
+import { OperationsSidebarPanel } from "./OperationsSidebarPanel.tsx";
 import type { OilSidebarSlotProps } from "./slots.ts";
 import "./OilSidebarRoot.css";
 
@@ -28,7 +33,7 @@ function cx(...parts: Array<string | false | undefined>): string {
 export type OilSidebarRootProps =
   & OilSidebarSlotProps
   & {
-    tabLabels: { sessions: string; content: string };
+    tabLabels: { sessions: string; content: string; operations: string };
     contentFace: CreatorViewFace;
     contentT: (key: CreatorKey) => string;
   };
@@ -104,12 +109,15 @@ export function OilSidebarRoot({
   }, [pointerInside]);
 
   const [contentMounted, setContentMounted] = useState(sidebarTab === "content");
+  const [operationsMounted, setOperationsMounted] = useState(sidebarTab === "operations");
   useEffect(() => {
     if (sidebarTab === "content") setContentMounted(true);
+    if (sidebarTab === "operations") setOperationsMounted(true);
   }, [sidebarTab]);
 
   const sessionsVisible = !wide || sidebarTab === "sessions";
   const contentVisible = wide && sidebarTab === "content";
+  const operationsVisible = wide && sidebarTab === "operations";
 
   useEffect(() => {
     setSidebarChromeWidth(!wide ? 56 : collapsed ? lastWideWidth.current : width);
@@ -121,6 +129,7 @@ export function OilSidebarRoot({
       data-plugin="dsh-oil-creator"
       data-surface="sidebar"
       className={cx(
+        sidebarTab === "operations" && "operationsTheme",
         !wide && "collapsed",
         !wide && everWide.current && "railIn",
         collapsed && wide && "fading",
@@ -197,7 +206,31 @@ export function OilSidebarRoot({
               <IconBrowseOutline16 size={14} />
               {tabLabels.content}
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={sidebarTab === "operations"}
+              className={cx("tabButton", sidebarTab === "operations" && "active")}
+              onClick={() => { chooseTab("operations"); }}
+            >
+              <IconDataOutline16 size={14} />
+              {tabLabels.operations}
+            </button>
           </div>
+          <Tooltip label={contentT("operations.quickCapture")} delayMs={400}>
+            <button
+              type="button"
+              className="quickIdeaButton"
+              aria-label={contentT("operations.quickCapture")}
+              onClick={() => {
+                setSidebarTab("operations");
+                setOperationsSection("ideas");
+                requestIdeaCapture();
+              }}
+            >
+              <JackySproutIcon size={17} />
+            </button>
+          </Tooltip>
         </div>
       )}
 
@@ -227,6 +260,16 @@ export function OilSidebarRoot({
             <ContentSidebarPanel
               t={contentT}
               {...contentFace}
+            />
+          </div>
+        )}
+        {operationsMounted && (
+          <div className={cx("regionPane", !operationsVisible && "hidden")}>
+            <OperationsSidebarPanel
+              t={contentT}
+              onNavigate={() => {
+                if (!collapsed && window.matchMedia("(max-width: 620px)").matches) toggleSidebar();
+              }}
             />
           </div>
         )}

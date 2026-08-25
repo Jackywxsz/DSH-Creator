@@ -15,6 +15,8 @@ export interface PublishMetrics {
   views?: number;
   likes?: number;
   comments?: number;
+  /** Actual platform publication time. Never substitute a later sync time. */
+  publishedAt?: number;
   syncedAt?: number;
 }
 
@@ -254,6 +256,7 @@ export interface SetPublishRequest {
   platform: PublishPlatform;
   status: PublishMark;
   url?: string;
+  publishedAt?: number;
 }
 
 export interface SubtitlePreviewResult {

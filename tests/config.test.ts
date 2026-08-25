@@ -5,11 +5,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   defaultCoverSkillDir,
+  defaultCockpitDataDir,
   defaultDataDir,
   defaultLibraryRoot,
   defaultSubtitleSkillDir,
   expandHomePath,
   resolveConfiguredPath,
+  resolveCockpitDataDir,
   resolveDataDir,
   resolveSkillDir,
   skillDirCandidates,
@@ -26,9 +28,17 @@ describe("portable config defaults", () => {
     expect(resolveDataDir({
       libraryRoot: defaultLibraryRoot(),
       dataDir: "",
+      cockpitDataDir: "",
       subtitleSkillDir: "",
       coverSkillDir: "",
     })).toBe(defaultDataDir());
+    expect(resolveCockpitDataDir({
+      libraryRoot: defaultLibraryRoot(),
+      dataDir: "",
+      cockpitDataDir: "",
+      subtitleSkillDir: "",
+      coverSkillDir: "",
+    })).toBe(defaultCockpitDataDir());
   });
 
   it("lets config and env override skill directories", () => {

@@ -43,6 +43,7 @@ export function libraryConventionText(
     "约定文件：topic.md 选题；script.md 口播脚本；公众号文章/<标题>.md 已转写文章，配图在 公众号文章/images/；publish-package.json 只放标题和 tags，不写平台长文案；*.mp4/*.mov 成片（_subtitled 为烧录版）；*.srt/*.ass 字幕；*_3x4.png *_4x3.png *_16x9.png 封面。",
     "读或改这些内容，用系统自带的列文件、读文件、写文件工具。不要为了看一集再调插件工具。",
     "写或改 script.md 必须遵循用户的脚本规则（人设）：先用 oil_script_rules 读取；还没配置时主动问清语气、结构和禁忌，再用 oil_script_rules 存下来。",
+    "为已有内容起草脚本时，再调用 cockpit_get_script_context 读取用户在运营看板选中的开头、结构、标签、复盘规则和模板。运营知识只提供创作依据，成稿仍写入这条真实内容的 script.md。",
     `插件工具只做文件做不到的事：配置工作台、按约定建文件夹、绑/开 Screen Studio、等导出、生成或烧录字幕、生成封面、同步已发布数据、整理文件夹名。工作台状态在 ${dataDir}/overlay.json，不是正文。`,
     "自动发布（video-publisher skill）和已发布数据回收（oil_sync_publish）都依赖 Ego Browser；能力检查显示缺失时明确告诉用户，不要假装能同步。",
   ];

@@ -2,7 +2,7 @@ import type { ContentFilter } from "../types.ts";
 
 export const CREATOR_STORAGE_KEY = "dsh-oil-creator/ui/v1";
 
-export type SidebarTab = "sessions" | "content";
+export type SidebarTab = "sessions" | "content" | "operations";
 
 export interface CreatorUiState {
   schemaVersion: 1;
@@ -46,7 +46,9 @@ export function loadCreatorUiState(storage: CreatorStorage | undefined): Creator
       selectedId: typeof parsed.selectedId === "string" ? parsed.selectedId : null,
       filter: filter === "cover" || filter === "subtitle" || filter === "article" ? filter : "all",
       query: typeof parsed.query === "string" ? parsed.query : "",
-      sidebarTab: parsed.sidebarTab === "content" ? "content" : "sessions",
+      sidebarTab: parsed.sidebarTab === "content" || parsed.sidebarTab === "operations"
+        ? parsed.sidebarTab
+        : "sessions",
       ...(typeof parsed.inspectorWidth === "number" && Number.isFinite(parsed.inspectorWidth)
         ? { inspectorWidth: parsed.inspectorWidth }
         : {}),

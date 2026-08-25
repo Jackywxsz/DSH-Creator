@@ -36,7 +36,7 @@ export interface CreatorViewFace {
   markReadyToRecord: (id: string) => Promise<ContentDetail>;
   bindStudio: (id: string, path: string) => Promise<ContentDetail>;
   openStudio: (id: string) => Promise<ContentDetail>;
-  setPublish: (id: string, platform: PublishPlatform, status: PublishMark, url?: string) => Promise<ContentDetail>;
+  setPublish: (id: string, platform: PublishPlatform, status: PublishMark, url?: string, publishedAt?: number) => Promise<ContentDetail>;
   syncPublish: (request?: { platform?: PublishPlatform; id?: string }) => Promise<SyncPublishResult>;
   openSubtitlePreview: (id: string) => Promise<SubtitlePreviewResult>;
   startSubtitleBurn: (id: string) => Promise<ContentDetail>;

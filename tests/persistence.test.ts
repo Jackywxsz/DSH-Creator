@@ -61,6 +61,19 @@ describe("loadCreatorUiState", () => {
     expect(loadCreatorUiState(storage).sidebarTab).toBe("content");
   });
 
+  it("keeps the operations sidebar tab", () => {
+    const storage = memoryStorage({
+      [CREATOR_STORAGE_KEY]: JSON.stringify({
+        schemaVersion: 1,
+        selectedId: null,
+        filter: "all",
+        query: "",
+        sidebarTab: "operations",
+      }),
+    });
+    expect(loadCreatorUiState(storage).sidebarTab).toBe("operations");
+  });
+
   it("falls back when filter is unknown", () => {
     const storage = memoryStorage({
       [CREATOR_STORAGE_KEY]: JSON.stringify({

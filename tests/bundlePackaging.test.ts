@@ -105,6 +105,7 @@ describe("DeepSeek Harness bundle packaging", () => {
 
   it("keeps README assets and runtime files in the real npm tarball", () => {
     const packDirectory = mkdtempSync(join(tmpdir(), "dsh-oil-creator-pack-"));
+    const npmCache = mkdtempSync(join(tmpdir(), "dsh-oil-creator-npm-cache-"));
     const runtimeFiles = [
       "lib/index.js",
       "lib/client.js",
@@ -126,7 +127,11 @@ describe("DeepSeek Harness bundle packaging", () => {
           "--pack-destination",
           packDirectory,
         ],
-        { cwd: root, encoding: "utf8" },
+        {
+          cwd: root,
+          encoding: "utf8",
+          env: { ...process.env, npm_config_cache: npmCache },
+        },
       );
       const metadata = parsePackMetadata(output);
       const filename = metadata[0]?.filename;
@@ -158,6 +163,7 @@ describe("DeepSeek Harness bundle packaging", () => {
       ).toBe(false);
     } finally {
       rmSync(packDirectory, { recursive: true, force: true });
+      rmSync(npmCache, { recursive: true, force: true });
     }
   });
 });

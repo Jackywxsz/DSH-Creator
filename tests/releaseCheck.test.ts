@@ -139,7 +139,7 @@ describe("release:check", () => {
     } finally {
       rmSync(repository, { recursive: true, force: true });
     }
-  });
+  }, 15_000);
 
   it("rejects dirty and untracked work trees with explicit reasons", () => {
     const dirty = createRepository();

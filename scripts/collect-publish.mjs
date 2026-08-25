@@ -119,6 +119,12 @@ function num(value) {
   return Number.isFinite(n) ? n : undefined;
 }
 
+function timestamp(value) {
+  const n = num(value);
+  if (n === undefined || n <= 0) return undefined;
+  return n < 1_000_000_000_000 ? Math.round(n * 1000) : Math.round(n);
+}
+
 function dedupe(items) {
   const seen = new Set();
   const out = [];
@@ -146,9 +152,11 @@ function parseDouyinPayload(payload) {
     const views = num(stats.play_count);
     const likes = num(stats.digg_count);
     const comments = num(stats.comment_count);
+    const publishedAt = timestamp(aweme.create_time || aweme.publish_time);
     if (views !== undefined) item.views = views;
     if (likes !== undefined) item.likes = likes;
     if (comments !== undefined) item.comments = comments;
+    if (publishedAt !== undefined) item.publishedAt = publishedAt;
     return [item];
   });
 }
@@ -170,6 +178,8 @@ function parseBiliPayload(payload) {
     if (Number.isFinite(Number(stat.view))) item.views = Number(stat.view);
     if (Number.isFinite(Number(stat.like))) item.likes = Number(stat.like);
     if (Number.isFinite(Number(stat.reply))) item.comments = Number(stat.reply);
+    const publishedAt = timestamp(arc.pubdate || arc.ctime || row.pubtime);
+    if (publishedAt !== undefined) item.publishedAt = publishedAt;
     return [item];
   });
 }
@@ -188,6 +198,8 @@ function parseWechatPayload(payload) {
     if (Number.isFinite(Number(row.readCount))) item.views = Number(row.readCount);
     if (Number.isFinite(Number(row.likeCount))) item.likes = Number(row.likeCount);
     if (Number.isFinite(Number(row.commentCount))) item.comments = Number(row.commentCount);
+    const publishedAt = timestamp(row.createTime || row.create_time || row.objectCreateTime || row.publishTime);
+    if (publishedAt !== undefined) item.publishedAt = publishedAt;
     return [item];
   });
 }
@@ -249,9 +261,11 @@ async function xhsState() {
           const views = Number(note.view_count);
           const likes = Number(note.likes);
           const comments = Number(note.comments_count);
+          const rawPublishedAt = Number(note.time || note.create_time || note.publish_time);
           if (Number.isFinite(views)) item.views = views;
           if (Number.isFinite(likes)) item.likes = likes;
           if (Number.isFinite(comments)) item.comments = comments;
+          if (Number.isFinite(rawPublishedAt) && rawPublishedAt > 0) item.publishedAt = rawPublishedAt < 1000000000000 ? Math.round(rawPublishedAt * 1000) : Math.round(rawPublishedAt);
           byId.set(id, item);
         }
       }
@@ -367,9 +381,11 @@ async function collectDouyin() {
           const views = Number(stats.play_count);
           const likes = Number(stats.digg_count);
           const comments = Number(stats.comment_count);
+          const rawPublishedAt = Number(aweme.create_time || aweme.publish_time);
           if (Number.isFinite(views)) item.views = views;
           if (Number.isFinite(likes)) item.likes = likes;
           if (Number.isFinite(comments)) item.comments = comments;
+          if (Number.isFinite(rawPublishedAt) && rawPublishedAt > 0) item.publishedAt = rawPublishedAt < 1000000000000 ? Math.round(rawPublishedAt * 1000) : Math.round(rawPublishedAt);
           byId.set(id, item);
         }
       }

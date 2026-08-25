@@ -4,11 +4,13 @@ import {
   bumpLibrary,
   bumpProfile,
   getLibraryEpoch,
+  getOperationsSection,
   getProfileEpoch,
   getSelectedContentId,
   getSidebarTab,
   inspectorIsOpen,
   setSelectedContentId,
+  setOperationsSection,
   setSidebarTab,
   subscribeLibrary,
   subscribeProfile,
@@ -19,6 +21,7 @@ import {
 describe("content selection", () => {
   afterEach(() => {
     setSidebarTab("sessions");
+    setOperationsSection("today");
     setSelectedContentId(null);
     vi.unstubAllGlobals();
   });
@@ -54,6 +57,18 @@ describe("content selection", () => {
     expect(getSelectedContentId()).toBe("2026-01-23_demo");
     expect(inspectorIsOpen()).toBe(true);
     expect(seen).toEqual([]);
+    stop();
+  });
+
+  it("tracks the active operations section through chrome subscribers", () => {
+    let chrome = 0;
+    const stop = subscribeSidebarChrome(() => {
+      chrome += 1;
+    });
+    setOperationsSection("goals");
+    setOperationsSection("goals");
+    expect(getOperationsSection()).toBe("goals");
+    expect(chrome).toBe(1);
     stop();
   });
 

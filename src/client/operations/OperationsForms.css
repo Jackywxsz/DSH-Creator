@@ -1,0 +1,2126 @@
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsCrudPage {
+  padding-top: 26px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsCrudToolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsCrudToolbar h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsCrudToolbar p {
+  margin: 3px 0 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPrimaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 9px;
+  background: var(--dsw-alias-state-business-primary);
+  color: var(--dsw-alias-label-primary-inverted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPrimaryAction:hover {
+  opacity: 0.9;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPrimaryAction:active {
+  transform: scale(0.98);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPrimaryAction:focus-visible,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRowActions button:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 2px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsInlineEmpty {
+  padding: 44px 8px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsFlatList {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsIdeaRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px auto;
+  align-items: center;
+  gap: 18px;
+  min-height: 80px;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsIdeaBody {
+  min-width: 0;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsIdeaBody > strong {
+  display: block;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsIdeaBody > p {
+  display: -webkit-box;
+  margin: 2px 0 5px;
+  overflow: hidden;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 18px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsIdeaMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] select,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] input,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] textarea,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] select,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] input,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  outline: none;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 12px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] input:focus,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] select:focus,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] textarea:focus,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] input:focus,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] select:focus,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] textarea:focus {
+  border-color: var(--dsw-alias-state-business-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"].operationsFormGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] label.full {
+  grid-column: 1 / -1;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRowActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRowActions button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRowActions button:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRowActions button.danger:hover {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRowActions button.promote {
+  width: auto;
+  padding: 0 8px;
+  color: var(--dsw-alias-state-business-primary);
+  font-size: 11px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] .operationsPromotionWarning {
+  margin: 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 19px;
+}
+
+@media (max-width: 640px) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsCrudToolbar {
+    align-items: flex-start;
+  }
+
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsIdeaRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsIdeaRow > select {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  [data-plugin="dsh-oil-creator"][data-surface="operations-dialog"].operationsFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  [data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] label.full {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPrimaryAction:active {
+    transform: none;
+  }
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsQuietAction {
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCockpitLayout {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.72fr) minmax(0, 1.45fr);
+  gap: 20px;
+  padding-top: 20px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaQuickCapture {
+  position: sticky;
+  top: 18px;
+  display: flex;
+  align-self: start;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--dsw-alias-label-primary) 7%, transparent);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaPanelEyebrow {
+  color: var(--dsw-alias-state-business-primary);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaQuickCapture h3 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 24px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaQuickCapture p {
+  margin: -5px 0 2px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  line-height: 17px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaQuickCapture textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaQuickSelects {
+  display: grid;
+  grid-template-columns: 1fr 0.65fr;
+  gap: 8px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaTagChoices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaTagChoices button,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] .ideaTagChoices button {
+  min-height: 26px;
+  padding: 3px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaTagChoices button.selected,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] .ideaTagChoices button.selected {
+  border-color: color-mix(in srgb, var(--dsw-alias-state-business-primary) 45%, var(--dsw-alias-border-l2));
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 10%, transparent);
+  color: var(--dsw-alias-state-business-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] .ideaTagField {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] .ideaTagField legend {
+  margin-bottom: 7px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaLibrary {
+  min-width: 0;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaLibraryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaLibraryHeader > div:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaLibraryHeader strong {
+  font-size: 20px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaLibraryHeader span {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaFilters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaFilters button {
+  min-height: 27px;
+  padding: 3px 8px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaFilters button:hover,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaFilters button.active {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardList {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaReferenceCard {
+  overflow: hidden;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-base);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaReferenceCard.selected {
+  border-color: color-mix(in srgb, var(--dsw-alias-state-business-primary) 50%, var(--dsw-alias-border-l2));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--dsw-alias-label-primary) 6%, transparent);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardSelect {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 12px;
+  width: 100%;
+  padding: 15px;
+  border: none;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardSelect:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardNumber {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+  line-height: 24px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardBody {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardBody > strong {
+  font-size: 14px;
+  font-weight: 580;
+  line-height: 21px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardBody > small {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  line-height: 18px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardBadges,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardBadges b,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardBadges em,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardTags i {
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardBadges b {
+  color: var(--dsw-alias-state-business-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardBadges em,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardTags i {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 9px 12px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardActions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardActions button:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardActions button.promote {
+  color: var(--dsw-alias-state-business-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardActions button.danger:hover {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+@media (max-width: 760px) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCockpitLayout {
+    grid-template-columns: 1fr;
+  }
+
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaQuickCapture {
+    position: static;
+  }
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleStrip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(118px, 1fr));
+  gap: 8px;
+  padding: 18px 0 8px;
+  overflow-x: auto;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleDay {
+  min-height: 154px;
+  overflow: hidden;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 9px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleDay.hasItems {
+  border-color: var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-base);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleDay > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 8px 9px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleDay > header span {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleDay > header strong {
+  font-size: 16px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleDayItems {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleBlank {
+  color: var(--dsw-alias-label-tertiary);
+  text-align: center;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleEntry {
+  overflow: hidden;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 7px;
+  background: var(--dsw-alias-bg-base);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleEntry.complete {
+  opacity: 0.56;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleEntryMain {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px;
+  border: none;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleEntryMain small {
+  color: var(--dsw-alias-state-business-primary);
+  font-size: 8px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleEntryMain strong {
+  font-size: 10px;
+  font-weight: 550;
+  line-height: 14px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleEntryMain span {
+  overflow: hidden;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleEntryActions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 3px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleEntryActions button {
+  min-height: 22px;
+  padding: 2px 5px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 8px;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleEntryActions button:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleLegend {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 8px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeLibrary {
+  margin-top: 34px;
+  padding-top: 20px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid article {
+  display: flex;
+  min-height: 170px;
+  flex-direction: column;
+  padding: 13px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-1);
+  opacity: 0.62;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid article.active {
+  border-color: var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-base);
+  opacity: 1;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 9px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid header em {
+  font-style: normal;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid > article > strong {
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid p {
+  display: -webkit-box;
+  margin: 6px 0 10px;
+  overflow: hidden;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 10px;
+  line-height: 16px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid > article > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 9px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid > article > button {
+  align-self: flex-end;
+  margin-top: auto;
+  padding: 4px 7px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 9px;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid > article > button:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+@media (max-width: 760px) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaColumns,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaEditor > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px 120px;
+  align-items: center;
+  gap: 18px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineBoard {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(210px, 1fr));
+  gap: 10px;
+  padding-top: 18px;
+  overflow-x: auto;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineColumn {
+  min-width: 210px;
+  padding: 8px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineColumn > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 4px 9px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineColumn > header strong {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineColumn > header span {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineColumn > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsColumnEmpty {
+  padding: 30px 4px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+  text-align: center;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineBoard .operationsContentMetaGroup {
+  overflow: hidden;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 9px;
+  background: var(--dsw-alias-bg-base);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineBoard .operationsMetaEditor {
+  border-bottom: none;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineBoard .operationsMetaEditor > summary {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 10px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineBoard .operationsMetaTitle {
+  width: 100%;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineBoard .operationsMetaEditor > summary > span:not(.operationsMetaTitle) {
+  display: inline;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineBoard .operationsMetaFields {
+  grid-template-columns: 1fr;
+  padding: 10px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineBoard .operationsEditorActions {
+  flex-wrap: wrap;
+  padding: 0 10px 10px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineBoard .operationsEvaluationRow {
+  flex-wrap: wrap;
+  padding: 7px 9px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaColumns {
+  padding: 12px 34px 8px 12px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaEditor {
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaEditor > summary {
+  min-height: 64px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaEditor > summary:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaTitle {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaTitle strong {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaTitle small,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaEditor > summary > span {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPriority.high {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaFields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px 12px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaFields label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaFields .full {
+  grid-column: 1 / -1;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaFields fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaFields legend {
+  margin-bottom: 6px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaFields label.check {
+  flex-direction: row;
+  align-items: center;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaFields label.check input {
+  width: 16px;
+  min-height: 16px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEditorActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 12px 14px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEditorActions button,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsOrphans button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEditorActions button.save {
+  border-color: var(--dsw-alias-state-business-primary);
+  background: var(--dsw-alias-state-business-primary);
+  color: var(--dsw-alias-label-primary-inverted);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEditorActions button.danger:hover,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsOrphans button:hover {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsOrphans {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsOrphans h3 {
+  margin: 0;
+  font-size: 13px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsOrphans p {
+  margin: 4px 0 12px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsOrphans > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+@media (max-width: 760px) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaColumns,
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaEditor > summary {
+    grid-template-columns: minmax(0, 1fr) 88px;
+  }
+
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaColumns > :last-child,
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaEditor > summary > :last-child {
+    display: none;
+  }
+
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaFields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalsList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 28px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalRow {
+  padding: 18px 4px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHealth {
+  padding: 2px 6px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 999px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHealth.ahead,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHealth.complete {
+  color: var(--dsw-alias-state-success-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHealth.ontrack {
+  color: var(--dsw-alias-state-business-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHealth.risk {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHeader > div:first-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHeader strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHeader span,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalRow p {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  line-height: 17px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalValue {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: 14px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalValue strong {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalValue span,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalValue em {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  font-style: normal;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalValue em {
+  margin-left: auto;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalTrack {
+  height: 3px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--dsw-alias-border-l1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalTrack span {
+  display: block;
+  height: 100%;
+  background: var(--dsw-alias-state-business-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSnapshots {
+  margin-top: 32px;
+  padding-top: 18px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSnapshots h3 {
+  margin: 0;
+  font-size: 13px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSnapshots p {
+  margin: 4px 0 12px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSnapshotForm {
+  display: grid;
+  grid-template-columns: 160px 180px auto;
+  gap: 8px;
+  max-width: 540px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSnapshotForm button,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSnapshotList button {
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSnapshotList {
+  max-width: 540px;
+  margin-top: 10px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSnapshotList > div {
+  display: grid;
+  grid-template-columns: 1fr 100px 30px;
+  align-items: center;
+  min-height: 36px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] .operationsGoalContents {
+  display: flex;
+  max-height: 150px;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding: 8px 0;
+  border: none;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] .operationsGoalContents label {
+  flex-direction: row;
+  align-items: center;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] .operationsGoalContents input {
+  width: 16px;
+  min-height: 16px;
+}
+
+@media (max-width: 720px) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalsList {
+    grid-template-columns: 1fr;
+  }
+
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSnapshotForm {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Creator Cockpit component skin, sourced from the original f87820f UI. */
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsCrudPage {
+  padding-top: 30px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsCrudToolbar {
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--cockpit-stroke);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsCrudToolbar h2,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid h2,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSnapshots h3,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsOrphans h3 {
+  color: var(--cockpit-ink);
+  font-family: "Arial Black", "PingFang SC", sans-serif;
+  font-weight: 900;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsCrudToolbar p,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSnapshots p {
+  color: var(--cockpit-muted);
+  font-weight: 650;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPrimaryAction,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsQuietAction,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEditorActions button,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEvaluationRow > button,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard button,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSnapshotForm button {
+  min-height: 40px;
+  padding: 7px 12px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 8px;
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow-small);
+  color: var(--cockpit-ink);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPrimaryAction,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEditorActions button.save {
+  background: var(--cockpit-ink);
+  color: #ffffff;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEvaluationRow > button,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard button,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardActions button.promote {
+  color: var(--cockpit-blue);
+}
+
+@media (hover: hover) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPrimaryAction:hover,
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsQuietAction:hover,
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEditorActions button:hover,
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEvaluationRow > button:hover,
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard button:hover {
+    opacity: 1;
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 var(--cockpit-stroke);
+  }
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPrimaryAction:active,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsQuietAction:active,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEditorActions button:active,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEvaluationRow > button:active,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--cockpit-stroke);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] select,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] input,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] textarea,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] select,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] input,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] textarea {
+  min-height: 40px;
+  border: 2px solid #111111;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111111;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] input:focus,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] select:focus,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] textarea:focus,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] input:focus,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] select:focus,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] textarea:focus {
+  border-color: #111111;
+  box-shadow: 3px 3px 0 #111111;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaQuickCapture {
+  padding: 22px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 14px;
+  background: var(--cockpit-yellow);
+  box-shadow: var(--cockpit-shadow);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaPanelEyebrow {
+  color: var(--cockpit-blue);
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaQuickCapture h3 {
+  color: var(--cockpit-ink);
+  font-family: "Arial Black", "PingFang SC", sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaQuickCapture p {
+  color: var(--cockpit-ink-soft);
+  font-weight: 650;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaTagChoices button,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] .ideaTagChoices button {
+  min-height: 30px;
+  border: 1px solid #111111;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #283243;
+  font-weight: 800;
+  box-shadow: 1px 1px 0 #111111;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaTagChoices button.selected,
+[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] .ideaTagChoices button.selected {
+  border-color: #111111;
+  background: var(--cockpit-blue);
+  color: #ffffff;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaFilters button {
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--cockpit-muted);
+  font-weight: 750;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaFilters button:hover,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaFilters button.active {
+  border-color: var(--cockpit-stroke);
+  background: var(--cockpit-surface);
+  color: var(--cockpit-ink);
+  box-shadow: 2px 2px 0 var(--cockpit-stroke);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaReferenceCard {
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 11px;
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow-small);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaReferenceCard.selected {
+  border-color: var(--cockpit-stroke);
+  box-shadow: var(--cockpit-shadow);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardSelect {
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: 0;
+  min-height: 112px;
+  padding: 0;
+  color: var(--cockpit-ink);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardSelect:hover {
+  background: #fff4a8;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardNumber {
+  display: grid;
+  align-self: stretch;
+  place-items: center;
+  padding: 14px 8px;
+  background: var(--cockpit-blue);
+  color: #ffffff;
+  font-family: "Arial Black", sans-serif;
+  font-size: 19px;
+  font-weight: 900;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardBody {
+  padding: 15px 17px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardBody > strong {
+  color: var(--cockpit-ink);
+  font-size: 15px;
+  font-weight: 850;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardBody > small,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardBadges em,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardTags i {
+  color: var(--cockpit-muted);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardBadges b {
+  color: var(--cockpit-green);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardActions {
+  padding: 10px 12px;
+  border-top: 2px solid var(--cockpit-stroke);
+  background: var(--cockpit-paper-deep);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCardActions button {
+  min-height: 36px;
+  border: 1px solid var(--cockpit-stroke);
+  border-radius: 6px;
+  background: var(--cockpit-surface);
+  color: var(--cockpit-ink-soft);
+  font-weight: 800;
+  box-shadow: 1px 1px 0 var(--cockpit-stroke);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch {
+  margin-top: 24px;
+  padding: 4px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 9px;
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow-small);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch button {
+  min-height: 34px;
+  border-radius: 6px;
+  color: var(--cockpit-ink-soft);
+  font-weight: 800;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch button.active {
+  background: var(--cockpit-blue);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid {
+  gap: 18px;
+  margin-top: 22px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid > article {
+  min-height: 150px;
+  padding: 18px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 11px;
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow-small);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid > article.alert {
+  border-color: var(--cockpit-stroke);
+  background: #fff0e9;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid button,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid article > div {
+  min-height: 46px;
+  padding: 9px 0;
+  border-bottom: 1px solid #c8ced8;
+  color: var(--cockpit-ink);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid strong {
+  color: var(--cockpit-ink);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid span,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayEmpty {
+  color: var(--cockpit-muted);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleDay,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineColumn {
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 11px;
+  background: var(--cockpit-paper-deep);
+  box-shadow: var(--cockpit-shadow-small);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleDay > header,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineColumn > header {
+  border-bottom: 2px solid var(--cockpit-stroke);
+  background: var(--cockpit-yellow);
+  color: var(--cockpit-ink);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleEntry,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsContentMetaGroup {
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 9px;
+  background: var(--cockpit-surface);
+  box-shadow: 2px 2px 0 var(--cockpit-stroke);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsContentMetaGroup {
+  margin: 10px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaEditor,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEvaluationRow {
+  border-color: var(--cockpit-stroke);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalRow,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid > article {
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 11px;
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow-small);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard {
+  margin-top: 14px;
+  padding: 18px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard.overdue {
+  background: #fff0e9;
+  box-shadow: var(--cockpit-shadow-small);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPublishedMetrics > span,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewDraft {
+  border: 1px solid var(--cockpit-stroke);
+  background: var(--cockpit-paper-deep);
+  color: var(--cockpit-ink);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalTrack {
+  height: 9px;
+  border: 1px solid var(--cockpit-stroke);
+  border-radius: 99px;
+  background: var(--cockpit-surface);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalTrack span {
+  background: var(--cockpit-blue);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHealth {
+  border: 1px solid var(--cockpit-stroke);
+  border-radius: 6px;
+  background: var(--cockpit-surface);
+  box-shadow: 1px 1px 0 var(--cockpit-stroke);
+  color: var(--cockpit-ink-soft);
+  font-weight: 850;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHealth.ahead,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHealth.complete {
+  color: var(--cockpit-green);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHealth.ontrack {
+  color: var(--cockpit-blue);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHealth.risk {
+  color: var(--cockpit-red);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeGrid > article.active {
+  background: #eef3ff;
+}
+
+@media (max-width: 760px) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaCockpitLayout {
+    gap: 22px;
+  }
+
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaQuickCapture,
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .ideaReferenceCard,
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid > article {
+    box-shadow: 4px 4px 0 var(--cockpit-stroke);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] button:active {
+    transform: none;
+  }
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch {
+  display: inline-flex;
+  gap: 3px;
+  margin-top: 18px;
+  padding: 3px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 9px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch button {
+  min-height: 27px;
+  padding: 3px 9px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch button.active {
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--dsw-alias-label-primary) 8%, transparent);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid > article {
+  min-height: 120px;
+  padding: 14px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid > article.alert {
+  border-color: var(--dsw-alias-state-warning-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid > article.wide {
+  grid-column: span 2;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid h2 {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid button,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid article > div {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 0;
+  border: 0;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  text-align: left;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid button {
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid strong {
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid span,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayEmpty {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+}
+
+@media (max-width: 900px) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid {
+    grid-template-columns: 1fr;
+  }
+
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid > article.wide {
+    grid-column: auto;
+  }
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsPage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  gap: 24px;
+  margin-top: 30px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsCard {
+  padding: 22px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 12px;
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsCard.accent {
+  background: var(--cockpit-yellow);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsCard > header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsCard > header > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 8px;
+  background: var(--cockpit-blue);
+  color: #ffffff;
+  font-family: "Arial Black", sans-serif;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsCard h2 {
+  margin: 0;
+  color: var(--cockpit-ink);
+  font-family: "Arial Black", "PingFang SC", sans-serif;
+  font-size: 23px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsCard p {
+  margin: 5px 0 0;
+  color: var(--cockpit-ink-soft);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsGrid label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--cockpit-ink);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsGrid label:first-child {
+  grid-column: 1 / -1;
+  max-width: 240px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsGrid textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsPrimary {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 18px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 8px;
+  background: var(--cockpit-blue);
+  box-shadow: var(--cockpit-shadow-small);
+  color: #ffffff;
+  font-weight: 900;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsBackupFacts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsBackupFacts span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--cockpit-stroke);
+  border-radius: 7px;
+  background: var(--cockpit-paper-deep);
+  color: var(--cockpit-muted);
+  font-size: 11px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsBackupFacts strong {
+  color: var(--cockpit-ink);
+  font-family: "Arial Black", sans-serif;
+  font-size: 22px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsBackupActions {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsBackupActions button {
+  min-height: 42px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 8px;
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow-small);
+  color: var(--cockpit-ink);
+  font-weight: 900;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsBackupActions button:first-child {
+  background: var(--cockpit-blue);
+  color: #ffffff;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRestoreMessage {
+  margin-top: 14px;
+  padding: 10px;
+  border: 1px solid var(--cockpit-stroke);
+  border-radius: 7px;
+  background: #dff6ec;
+  color: var(--cockpit-ink);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 920px) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsPage {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsContentMetaGroup {
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsContentMetaGroup .operationsMetaEditor {
+  border-bottom: 0;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEvaluationRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 12px 12px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEvaluationRow > em {
+  color: var(--dsw-alias-state-warning-primary);
+  font-style: normal;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEvaluationRow > button {
+  margin-left: auto;
+  padding: 5px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-state-business-primary);
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEvaluationRow > details {
+  width: 100%;
+  padding-top: 4px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEvaluationRow li {
+  margin: 5px 0;
+  line-height: 17px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEvaluationRow li strong {
+  margin-right: 8px;
+  color: var(--dsw-alias-label-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard {
+  padding: 18px 8px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard.overdue {
+  box-shadow: inset 3px 0 0 var(--dsw-alias-state-warning-primary);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard > header,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewDraft {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard > header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard header span,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewDraft span {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard button {
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-state-business-primary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPublishedMetrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPublishedMetrics > span {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 104px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPublishedMetrics small {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPublishedMetrics strong {
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewMetrics {
+  margin-top: 12px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewMetrics > div {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewMetrics label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewMetrics label.full {
+  grid-column: 1 / -1;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewDraft {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 9px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewDraft p,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewDraft blockquote {
+  white-space: pre-wrap;
+  font-size: 12px;
+  line-height: 19px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeActions {
+  display: flex;
+  flex: none;
+  gap: 6px;
+}
+
+@media (max-width: 720px) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewMetrics > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewDraft {
+    flex-direction: column;
+  }
+}
+
+/* Final cascade for views declared later in this file. */
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineFilters {
+  display: grid;
+  grid-template-columns: minmax(180px, 260px) minmax(120px, 170px) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineFilters > span {
+  color: var(--cockpit-muted);
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch {
+  margin-top: 24px;
+  padding: 4px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 9px;
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow-small);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch button {
+  min-height: 34px;
+  border-radius: 6px;
+  color: var(--cockpit-ink-soft);
+  font-weight: 800;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch button.active {
+  background: var(--cockpit-blue);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid {
+  gap: 18px;
+  margin-top: 22px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid > article {
+  min-height: 150px;
+  padding: 18px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 11px;
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow-small);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid > article.alert {
+  border-color: var(--cockpit-stroke);
+  background: #fff0e9;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid h2 {
+  color: var(--cockpit-ink);
+  font-family: "Arial Black", "PingFang SC", sans-serif;
+  font-weight: 900;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid button,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid article > div {
+  min-height: 46px;
+  padding: 9px 0;
+  border-bottom: 1px solid #c8ced8;
+  color: var(--cockpit-ink);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid strong {
+  color: var(--cockpit-ink);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayGrid span,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayEmpty {
+  color: var(--cockpit-muted);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard {
+  margin-top: 14px;
+  padding: 18px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 11px;
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow-small);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewCard.overdue {
+  background: #fff0e9;
+  box-shadow: var(--cockpit-shadow-small);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPublishedMetrics > span,
+[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsReviewDraft {
+  border: 1px solid var(--cockpit-stroke);
+  background: var(--cockpit-paper-deep);
+  color: var(--cockpit-ink);
+}
+
+@media (max-width: 840px) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineToolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineFilters {
+    grid-template-columns: minmax(0, 1fr) minmax(110px, 0.55fr) auto;
+  }
+}
+
+@media (max-width: 560px) {
+  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineFilters {
+    grid-template-columns: 1fr;
+  }
+}

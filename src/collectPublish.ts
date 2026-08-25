@@ -9,6 +9,7 @@ export interface CollectedPost {
   views?: number;
   likes?: number;
   comments?: number;
+  publishedAt?: number;
 }
 
 export interface CollectedPlatform {
@@ -230,7 +231,12 @@ export function applyMatchesToOverlay(
   for (const match of matches) {
     const current = next[match.id] ?? {};
     const publish = { ...current.publish };
-    const entry: OverlayPublish = { status: "published", syncedAt: now };
+    const previous = current.publish?.[match.platform];
+    const entry: OverlayPublish = {
+      status: "published",
+      publishedAt: match.post.publishedAt ?? previous?.publishedAt ?? now,
+      syncedAt: now,
+    };
     const nextUrl = usablePublishUrl(match.post.url, current.publish?.[match.platform]?.url);
     if (nextUrl !== undefined) entry.url = nextUrl;
     if (match.post.remoteId !== undefined && match.post.remoteId !== "") entry.remoteId = match.post.remoteId;
@@ -245,11 +251,12 @@ export function applyMatchesToOverlay(
 
 export function copyMetrics(
   from: OverlayPublish,
-): Pick<OverlayPublish, "views" | "likes" | "comments" | "syncedAt"> {
-  const next: Pick<OverlayPublish, "views" | "likes" | "comments" | "syncedAt"> = {};
+): Pick<OverlayPublish, "views" | "likes" | "comments" | "publishedAt" | "syncedAt"> {
+  const next: Pick<OverlayPublish, "views" | "likes" | "comments" | "publishedAt" | "syncedAt"> = {};
   if (from.views !== undefined) next.views = from.views;
   if (from.likes !== undefined) next.likes = from.likes;
   if (from.comments !== undefined) next.comments = from.comments;
+  if (from.publishedAt !== undefined) next.publishedAt = from.publishedAt;
   if (from.syncedAt !== undefined) next.syncedAt = from.syncedAt;
   return next;
 }
