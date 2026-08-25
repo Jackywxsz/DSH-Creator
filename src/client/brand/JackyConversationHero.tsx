@@ -1,4 +1,4 @@
-import { JACKY_CREATOR_LOOP_VIDEO_SRC } from "../assets/jackyCreatorLoopVideo.ts";
+import { JACKY_CREATOR_MASCOT_FULL_SRC } from "../assets/jackyCreatorMascotFull.ts";
 
 export interface JackyConversationHeroProps {
   className?: string;
@@ -16,9 +16,10 @@ export function JackyConversationHero({
       lang="zh-CN"
     >
       <span className="jackyConversationHeroMark" aria-hidden="true">
-        <span
-          className="jackyConversationHeroSprite"
-          style={{ backgroundImage: `url("${JACKY_CREATOR_LOOP_VIDEO_SRC}")` }}
+        <img
+          src={JACKY_CREATOR_MASCOT_FULL_SRC}
+          alt=""
+          draggable={false}
         />
       </span>
       <h1>
