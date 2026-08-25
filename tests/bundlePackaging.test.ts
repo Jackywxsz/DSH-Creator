@@ -118,15 +118,10 @@ describe("DeepSeek Harness bundle packaging", () => {
     ];
 
     try {
-      for (const runtimeFile of runtimeFiles) {
-        expect(existsSync(resolve(root, runtimeFile))).toBe(true);
-      }
-
       const output = execFileSync(
         "npm",
         [
           "pack",
-          "--ignore-scripts",
           "--json",
           "--pack-destination",
           packDirectory,

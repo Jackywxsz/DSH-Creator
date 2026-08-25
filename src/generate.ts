@@ -23,12 +23,13 @@ export { defaultCoverSkillDir } from "./config.ts";
 export async function resolveCoverSkill(
   skillDir = process.env.OIL_COVER_SKILL ?? defaultCoverSkillDir(),
   platform: NodeJS.Platform = process.platform,
+  jackySkillDir = process.env.JACKY_COVER_SKILL_DIR,
 ): Promise<{ root: string; jackyRoot: string; python: string; script: string }> {
   const oilScript = join(skillDir, "scripts/generate_oil_cover.py");
   if (!(await pathExists(oilScript))) {
     throw new Error("未安装 oil-cover。执行 git clone https://github.com/oil-oil/oil-cover ~/.agents/skills/oil-cover 后重试。");
   }
-  const jackyRoot = resolveSkillDir("", "jacky-cover", process.env.JACKY_COVER_SKILL_DIR);
+  const jackyRoot = resolveSkillDir("", "jacky-cover", jackySkillDir);
   const jackyFiles = [
     join(jackyRoot, "references", "visual-system.md"),
     join(jackyRoot, "scripts", "validate_run.py"),

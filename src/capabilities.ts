@@ -103,9 +103,10 @@ async function subtitleCapability(
 async function coverCapability(
   path: string,
   platform: NodeJS.Platform,
+  jackySkillDir?: string,
 ): Promise<CreatorCapability> {
   try {
-    const resolved = await resolveCoverSkill(path, platform);
+    const resolved = await resolveCoverSkill(path, platform, jackySkillDir);
     return capability("ready", false, "已发现 Jacky Cover + ZenMux 封面工作流。", resolved.jackyRoot);
   } catch {
     return capability("missing", false, "未发现 Jacky Cover 或 Oil Cover 依赖；封面生成不可用。", path);
@@ -224,7 +225,7 @@ export async function inspectCreatorSetup(
     screenStudio: await screenStudioCapability(platform, home),
     subtitleSkill: await subtitleCapability(options.subtitleSkillDir, platform),
     subtitleCredential: credentialCapability(options.settings.secrets.subtitle, "字幕"),
-    coverSkill: await coverCapability(options.coverSkillDir, platform),
+    coverSkill: await coverCapability(options.coverSkillDir, platform, findSkillDir("jacky-cover")),
     coverCredential: credentialCapability(options.settings.secrets.cover, "封面"),
     publishSync: egoCapability(await findEgo(platform, env, home)),
     editingSkill: skillCapability(findSkillDir, "screen-studio-editor"),

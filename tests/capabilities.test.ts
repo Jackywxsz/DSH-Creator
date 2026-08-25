@@ -24,6 +24,7 @@ describe("creator setup inspection", () => {
     const libraryRoot = join(root, "library");
     const subtitleRoot = join(root, "oil-subtitle");
     const coverRoot = join(root, "oil-cover");
+    const jackyCoverRoot = join(root, "skills", "jacky-cover");
     const bin = join(root, "bin");
     await Promise.all([
       mkdir(libraryRoot, { recursive: true }),
@@ -31,6 +32,9 @@ describe("creator setup inspection", () => {
       mkdir(join(subtitleRoot, "scripts"), { recursive: true }),
       mkdir(join(coverRoot, "scripts"), { recursive: true }),
       mkdir(join(coverRoot, "docs", "showcase"), { recursive: true }),
+      mkdir(join(jackyCoverRoot, "references"), { recursive: true }),
+      mkdir(join(jackyCoverRoot, "scripts"), { recursive: true }),
+      mkdir(join(jackyCoverRoot, "assets"), { recursive: true }),
       mkdir(bin, { recursive: true }),
     ]);
     await writeFile(join(subtitleRoot, "setup.sh"), "#!/bin/bash\n");
@@ -42,6 +46,10 @@ describe("creator setup inspection", () => {
       join(subtitleRoot, "scripts", "review_subtitles.py"),
       join(coverRoot, "scripts", "generate_oil_cover.py"),
       join(coverRoot, "docs", "showcase", "gallery.png"),
+      join(jackyCoverRoot, "references", "visual-system.md"),
+      join(jackyCoverRoot, "scripts", "validate_run.py"),
+      join(jackyCoverRoot, "assets", "jacky-reference-front.jpg"),
+      join(jackyCoverRoot, "assets", "jacky-reference-casual.jpg"),
       join(bin, "ego-browser"),
     ];
     await Promise.all(files.map((path) => writeFile(path, "")));
@@ -168,6 +176,7 @@ describe("inspectCreatorSetup windows and mac paths", () => {
     const libraryRoot = join(root, "library");
     const subtitleRoot = join(root, "oil-subtitle");
     const coverRoot = join(root, "oil-cover");
+    const jackyCoverRoot = join(root, "skills", "jacky-cover");
     const bin = join(root, "bin");
     await Promise.all([
       mkdir(libraryRoot, { recursive: true }),
@@ -175,6 +184,9 @@ describe("inspectCreatorSetup windows and mac paths", () => {
       mkdir(join(subtitleRoot, "scripts"), { recursive: true }),
       mkdir(join(coverRoot, "scripts"), { recursive: true }),
       mkdir(join(coverRoot, "docs", "showcase"), { recursive: true }),
+      mkdir(join(jackyCoverRoot, "references"), { recursive: true }),
+      mkdir(join(jackyCoverRoot, "scripts"), { recursive: true }),
+      mkdir(join(jackyCoverRoot, "assets"), { recursive: true }),
       mkdir(bin, { recursive: true }),
     ]);
     await writeFile(join(subtitleRoot, "setup.sh"), "#!/bin/bash\n");
@@ -186,6 +198,10 @@ describe("inspectCreatorSetup windows and mac paths", () => {
       writeFile(join(subtitleRoot, "scripts", "review_subtitles.py"), ""),
       writeFile(join(coverRoot, "scripts", "generate_oil_cover.py"), ""),
       writeFile(join(coverRoot, "docs", "showcase", "gallery.png"), ""),
+      writeFile(join(jackyCoverRoot, "references", "visual-system.md"), ""),
+      writeFile(join(jackyCoverRoot, "scripts", "validate_run.py"), ""),
+      writeFile(join(jackyCoverRoot, "assets", "jacky-reference-front.jpg"), ""),
+      writeFile(join(jackyCoverRoot, "assets", "jacky-reference-casual.jpg"), ""),
       writeFile(join(bin, "ego-browser.EXE"), ""),
     ]);
 
@@ -198,7 +214,7 @@ describe("inspectCreatorSetup windows and mac paths", () => {
       platform: "win32",
       env: { Path: bin, PATHEXT: ".EXE" },
       home: root,
-      findSkillDir: () => undefined,
+      findSkillDir: (name) => name === "jacky-cover" ? jackyCoverRoot : undefined,
     });
 
     expect(result.capabilities.subtitleSkill.state).toBe("ready");
