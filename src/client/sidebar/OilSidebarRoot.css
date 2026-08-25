@@ -101,10 +101,8 @@
   flex: none;
   place-items: center;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--dsw-alias-label-primary) 18%, transparent);
   border-radius: 50%;
-  background: var(--dsw-alias-bg-layer-1);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--dsw-alias-label-primary) 10%, transparent);
+  background: transparent;
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .oilBrandIcon {
