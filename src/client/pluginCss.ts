@@ -35,3 +35,15 @@ export function releasePluginCss(): void {
     tag.remove();
   }
 }
+
+export function mountJackyBrandScope(): () => void {
+  if (typeof document === "undefined") return () => {};
+  const root = document.documentElement;
+  const previous = root.getAttribute("data-jacky-creator-brand");
+  root.setAttribute("data-jacky-creator-brand", "paper-growth");
+  return () => {
+    if (root.getAttribute("data-jacky-creator-brand") !== "paper-growth") return;
+    if (previous === null) root.removeAttribute("data-jacky-creator-brand");
+    else root.setAttribute("data-jacky-creator-brand", previous);
+  };
+}

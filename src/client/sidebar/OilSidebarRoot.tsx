@@ -70,6 +70,9 @@ export function OilSidebarRoot({
 
   const chooseTab = (tab: typeof sidebarTab): void => {
     setSidebarTab(tab);
+    if (tab === "operations" && !collapsed && window.matchMedia("(max-width: 620px)").matches) {
+      toggleSidebar();
+    }
   };
 
 
@@ -226,6 +229,7 @@ export function OilSidebarRoot({
                 setSidebarTab("operations");
                 setOperationsSection("ideas");
                 requestIdeaCapture();
+                if (!collapsed && window.matchMedia("(max-width: 620px)").matches) toggleSidebar();
               }}
             >
               <JackySproutIcon size={17} />
