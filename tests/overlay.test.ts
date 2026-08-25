@@ -82,6 +82,19 @@ describe("script rules", () => {
   });
 });
 
+describe("content step choices", () => {
+  it("keeps valid optional skips, removes invalid values, and deduplicates", () => {
+    const overlay = decodeOverlay({
+      items: {
+        demo: {
+          skippedSteps: ["presentation", "subtitle", "presentation", "video", 1],
+        },
+      },
+    });
+    expect(overlay.items.demo?.skippedSteps).toEqual(["presentation", "subtitle"]);
+  });
+});
+
 describe("overlay lock", () => {
   it("serializes overlapping writes", async () => {
     const dir = await mkdtemp(join(tmpdir(), "oil-overlay-"));

@@ -8,12 +8,17 @@ import type {} from "@deepseek-ai/dsh-client-ui-settings-plugins/client";
 import { TYPERT_REMOTE } from "../remote.ts";
 import { CREATOR_SETTINGS_NAMESPACE } from "../settingsContract.ts";
 import { startLibraryLiveSync } from "./catalogSync.ts";
-import { remountPluginCss, releasePluginCss } from "./pluginCss.ts";
+import {
+  mountJackyBrandScope,
+  remountPluginCss,
+  releasePluginCss,
+} from "./pluginCss.ts";
 import { releaseShellChrome } from "./contentSelection.ts";
 import { registerContentTriggers } from "./contentTriggers.ts";
 import type {
   ContentDetail,
   ContentFilter,
+  ContentOptionalStep,
   CoverThumbResult,
   CreateContentResult,
   CreatorCapabilities,
@@ -68,6 +73,8 @@ import {
   registerCreatorSettingsCard,
   type CompatibleSettingsSlots,
 } from "./settingsSlot.ts";
+import { JackyConversationHero } from "./brand/JackyConversationHero.tsx";
+import "./brand/JackyBrand.css";
 
 declare module "@deepseek-ai/dsh-client-ui-slots" {
   interface LocaleNamespaceMap {
@@ -97,8 +104,10 @@ interface OilCreatorRemote {
   refreshCatalog: (request: Record<string, never>) => Promise<RemoteAnswer<ListContentsResult>>;
   createContent: (request: { title: string }) => Promise<RemoteAnswer<CreateContentResult>>;
   setContentStage: (request: { id: string; readyToRecord: boolean }) => Promise<RemoteAnswer<ContentDetail>>;
+  setContentSkip: (request: { id: string; step: ContentOptionalStep; skipped: boolean }) => Promise<RemoteAnswer<ContentDetail>>;
   bindStudio: (request: { id: string; path: string }) => Promise<RemoteAnswer<ContentDetail>>;
   openStudio: (request: { id: string }) => Promise<RemoteAnswer<ContentDetail>>;
+  waitForExport: (request: { id: string }) => Promise<RemoteAnswer<ContentDetail>>;
   setPublish: (request: {
     id: string;
     platform: PublishPlatform;
@@ -111,6 +120,7 @@ interface OilCreatorRemote {
   startSubtitleGenerate: (request: { id: string }) => Promise<RemoteAnswer<ContentDetail>>;
   startCoverGenerate: (request: { id: string }) => Promise<RemoteAnswer<ContentDetail>>;
   setScript: (request: { id: string; text: string }) => Promise<RemoteAnswer<ContentDetail>>;
+  setTopicNote: (request: { id: string; text: string }) => Promise<RemoteAnswer<ContentDetail>>;
 }
 
 interface CreatorCockpitRemote {
@@ -156,7 +166,9 @@ export function apply(ctx: ClientContext): void {
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), "dsh-oil-creator: dictionaries");
   ctx.effect(() => {
     remountPluginCss();
+    const releaseBrandScope = mountJackyBrandScope();
     return () => {
+      releaseBrandScope();
       releasePluginCss();
       releaseShellChrome();
     };
@@ -378,6 +390,13 @@ export function apply(ctx: ClientContext): void {
       bumpLibrary();
       return next;
     },
+    setContentSkip: async (id, step, skipped) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      const next = unwrap(await remote.setContentSkip({ id, step, skipped }), "skip failed");
+      bumpLibrary();
+      return next;
+    },
     bindStudio: async (id, path) => {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
@@ -389,6 +408,13 @@ export function apply(ctx: ClientContext): void {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
       return unwrap(await remote.openStudio({ id }), "open failed");
+    },
+    waitForExport: async (id) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      const next = unwrap(await remote.waitForExport({ id }), "wait export failed");
+      bumpLibrary();
+      return next;
     },
     setPublish: async (id, platform, status, url, publishedAt) => {
       const remote = remoteOf();
@@ -441,6 +467,13 @@ export function apply(ctx: ClientContext): void {
       if (remote === undefined) throw new Error("remote unavailable");
       return unwrap(await remote.setScript({ id, text }), "script failed");
     },
+    setTopicNote: async (id, text) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      const next = unwrap(await remote.setTopicNote({ id, text }), "topic failed");
+      bumpLibrary();
+      return next;
+    },
   });
 
   const contentFace = face();
@@ -448,8 +481,19 @@ export function apply(ctx: ClientContext): void {
 
   const conversationSlots = ctx.slots as unknown as {
     inject: (name: string, setup: () => () => void) => () => void;
-    register: (options: Record<string, unknown>, component: typeof CockpitSessionBridge) => () => void;
+    register: (
+      options: Record<string, unknown>,
+      component: typeof CockpitSessionBridge | typeof JackyConversationHero,
+    ) => () => void;
   };
+  ctx.effect(() => conversationSlots.inject(
+    "conversation.hero.brand.mark",
+    () => conversationSlots.register({
+      name: "conversation.hero.brand.mark",
+      id: "jacky-creator-paper-growth-hero",
+      priority: -1,
+    }, JackyConversationHero),
+  ), "dsh-oil-creator: conversation hero brand");
   ctx.effect(() => conversationSlots.inject("conversation.input.dock", () => conversationSlots.register({
     name: "conversation.input.dock",
     id: "creator-cockpit-session-bridge",

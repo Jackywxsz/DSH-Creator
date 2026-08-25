@@ -1,6 +1,7 @@
 import type {
   ContentDetail,
   ContentFilter,
+  ContentOptionalStep,
   CoverThumbResult,
   CreatorCapabilities,
   CreatorProfile,
@@ -34,8 +35,10 @@ export interface CreatorViewFace {
   refreshCatalog: () => Promise<ListContentsResult>;
   createContent: (title: string) => Promise<{ id: string; folderPath: string }>;
   markReadyToRecord: (id: string) => Promise<ContentDetail>;
+  setContentSkip: (id: string, step: ContentOptionalStep, skipped: boolean) => Promise<ContentDetail>;
   bindStudio: (id: string, path: string) => Promise<ContentDetail>;
   openStudio: (id: string) => Promise<ContentDetail>;
+  waitForExport: (id: string) => Promise<ContentDetail>;
   setPublish: (id: string, platform: PublishPlatform, status: PublishMark, url?: string, publishedAt?: number) => Promise<ContentDetail>;
   syncPublish: (request?: { platform?: PublishPlatform; id?: string }) => Promise<SyncPublishResult>;
   openSubtitlePreview: (id: string) => Promise<SubtitlePreviewResult>;
@@ -43,4 +46,5 @@ export interface CreatorViewFace {
   startSubtitleGenerate: (id: string) => Promise<ContentDetail>;
   startCoverGenerate: (id: string) => Promise<ContentDetail>;
   setScript: (id: string, text: string) => Promise<ContentDetail>;
+  setTopicNote: (id: string, text: string) => Promise<ContentDetail>;
 }

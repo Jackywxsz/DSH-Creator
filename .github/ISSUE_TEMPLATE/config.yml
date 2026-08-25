@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全漏洞报告
+    url: https://github.com/Jackywxsz/DSH-Creator/security/policy
+    about: 不要在公开 Issue 中提交安全漏洞、密钥或私人数据。

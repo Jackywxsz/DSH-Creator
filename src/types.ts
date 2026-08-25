@@ -4,6 +4,8 @@ export type PipelineStage = "raw" | "subtitled" | "covered" | "packaged";
 
 export type WorkflowStage = "idle" | "record" | "cut" | "finish" | "publish" | "live";
 
+export type ContentOptionalStep = "presentation" | "subtitle" | "article";
+
 export type { PublishPlatform } from "./platforms.ts";
 import type { PublishPlatform } from "./platforms.ts";
 
@@ -79,6 +81,11 @@ export interface ContentSubtitles {
   transcript?: string;
 }
 
+export interface ContentPresentations {
+  "16x9"?: string;
+  "3x4"?: string;
+}
+
 export interface ContentSummary {
   id: string;
   folderPath: string;
@@ -90,12 +97,14 @@ export interface ContentSummary {
   videoSubtitled?: string;
   covers: ContentCovers;
   subtitles: ContentSubtitles;
+  presentations: ContentPresentations;
   hasPublishPackage: boolean;
   hasArticle: boolean;
   studioPath?: string;
   waitingForExport: boolean;
   exportTimedOut?: boolean;
   articlePath?: string;
+  skippedSteps?: ContentOptionalStep[];
   tags: string[];
   pipeline: PipelineStage;
   workflow: WorkflowStage;
@@ -229,6 +238,12 @@ export interface SetContentStageRequest {
   readyToRecord: boolean;
 }
 
+export interface SetContentSkipRequest {
+  id: string;
+  step: ContentOptionalStep;
+  skipped: boolean;
+}
+
 export interface BindStudioRequest {
   id: string;
   path: string;
@@ -245,6 +260,7 @@ export interface OverlayItem {
   studioPath?: string;
   waitingForExport?: boolean;
   exportTimedOut?: boolean;
+  skippedSteps?: ContentOptionalStep[];
   publish?: Partial<Record<PublishPlatform, OverlayPublish>>;
   burn?: BurnJob;
   subtitleJob?: MediaJob;

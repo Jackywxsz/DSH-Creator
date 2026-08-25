@@ -26,6 +26,7 @@ function item(folderPath: string, patch: Partial<ContentSummary> = {}): ContentS
     createdMs: 1,
     covers: {},
     subtitles: {},
+    presentations: {},
     hasPublishPackage: false,
     hasArticle: false,
     waitingForExport: false,

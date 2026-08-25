@@ -21,6 +21,7 @@ import { OilBrand } from "./OilBrand.tsx";
 import { JackySproutIcon } from "./JackySproutIcon.tsx";
 import { OperationsSidebarPanel } from "./OperationsSidebarPanel.tsx";
 import type { OilSidebarSlotProps } from "./slots.ts";
+import { useOperationsTheme } from "../operations/operationsTheme.ts";
 import "./OilSidebarRoot.css";
 
 const COLLAPSE_SETTLE_MS = 150;
@@ -67,9 +68,13 @@ export function OilSidebarRoot({
   if (!collapsed) everWide.current = true;
 
   const sidebarTab = useSidebarTab();
+  const operationsTheme = useOperationsTheme();
 
   const chooseTab = (tab: typeof sidebarTab): void => {
     setSidebarTab(tab);
+    if (tab === "operations" && !collapsed && window.matchMedia("(max-width: 620px)").matches) {
+      toggleSidebar();
+    }
   };
 
 
@@ -128,6 +133,7 @@ export function OilSidebarRoot({
       ref={column}
       data-plugin="dsh-oil-creator"
       data-surface="sidebar"
+      data-cockpit-theme={sidebarTab === "operations" ? operationsTheme : undefined}
       className={cx(
         sidebarTab === "operations" && "operationsTheme",
         !wide && "collapsed",
@@ -226,6 +232,7 @@ export function OilSidebarRoot({
                 setSidebarTab("operations");
                 setOperationsSection("ideas");
                 requestIdeaCapture();
+                if (!collapsed && window.matchMedia("(max-width: 620px)").matches) toggleSidebar();
               }}
             >
               <JackySproutIcon size={17} />

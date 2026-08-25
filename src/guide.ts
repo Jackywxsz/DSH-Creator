@@ -75,7 +75,7 @@ export function creatorGuideText(status: CreatorSetupStatus): string {
     capabilityLine("Ego Browser（自动发布与数据回收）", capabilities.publishSync),
     capabilityLine("剪辑 skill screen-studio-editor", capabilities.editingSkill),
     capabilityLine("发布 skill video-publisher", capabilities.publishSkill),
-    capabilityLine("公众号 skill oil-video-article", capabilities.articleSkill),
+    capabilityLine("脚本转 Markdown 文章", capabilities.articleSkill),
     "",
     "## 内容管理",
     `- 片库目录是 ${settings.libraryRoot}，一集一个子文件夹，命名为 YYYY-MM-DD_可读标题。`,
@@ -94,15 +94,20 @@ export function creatorGuideText(status: CreatorSetupStatus): string {
     "- oil_generate_subtitles 是长任务，调用后立即返回。完成看 subtitle-transcript.json / subtitle-manifest.json，不要等 *_subtitled.mp4，也不要把启动说成完成。",
     ...subtitleLines(capabilities),
     "",
+    "## 演示",
+    "- 演示与脚本、视频、封面一样是独立创作资产，不是概览里的临时状态。用户从演示页发起后，调用 jacky-motion2-0。",
+    "- 严格保留 Jacky Motion 的 P1 审稿与分镜、P2 风格确认、P3 成片装配三道确认门；未经确认不得直接越级生成。",
+    "- 产物写入这一集的 演示/ 目录，命名为 内容ID-16x9.html 或 内容ID-3x4.html，方便工作台稳定识别和预览。",
+    "",
     "## 封面",
-    "- oil_generate_cover 前先按 oil-cover 从脚本或字幕提炼封面主标题，通过 title 传入；不要把文件夹名直接当封面结论。生成后请用户核对标题文字和错别字，不对就再生成。",
+    "- oil_generate_cover 前先按 Jacky Cover / Oil Cover 从脚本或字幕提炼封面主标题，通过 title 传入；ZenMux 负责分析和整图生成人物融合版三画幅。不要把文件夹名直接当封面结论。生成后请用户核对标题、人物身份和错别字。",
     ...coverLines(capabilities),
     "",
     "## 录制与剪辑",
-    "- Screen Studio 是录制和自动剪辑的共同前提（仅 macOS）：录制和导出成片由用户在 Screen Studio 里亲手完成；剪辑走外部 skill screen-studio-editor，它操作的是 .screenstudio 工程。",
+    "- Screen Studio 是可选的录制与自动剪辑路线（仅 macOS），不是内容流程的必经步骤。使用它时，录制和导出成片由用户亲手完成；自动剪辑走外部 skill screen-studio-editor，它操作的是 .screenstudio 工程。",
     capabilities.screenStudio.state === "ready"
       ? "- 当前已发现 Screen Studio。用 oil_update_content 把工程绑到对应一集，oil_open_studio 打开，oil_wait_export 等待成片落盘。"
-      : "- 当前没有可用的 Screen Studio：绑定工程、自动剪辑（screen-studio-editor）和等待导出都不可用。告诉用户需要先装 Screen Studio 并用它录制；如果用户用其他工具剪片，把成片文件放进这一集的文件夹即可跳过这一环节。",
+      : "- 当前没有可用的 Screen Studio：绑定工程和 screen-studio-editor 不可用，但内容制作不受阻。用户可用剪映或其他工具剪片，把成片文件放进这一集的文件夹，工作台会继续推进。",
     capabilities.editingSkill.state === "ready"
       ? "- 已发现 screen-studio-editor，用户要求清理时间线时直接使用。"
       : "- 缺 screen-studio-editor：征得用户同意后执行 `git clone https://github.com/oil-oil/screen-studio-editor ~/.agents/skills/screen-studio-editor`；没有它时剪辑由用户自己完成。",
@@ -124,15 +129,12 @@ export function creatorGuideText(status: CreatorSetupStatus): string {
         : "- 缺 video-publisher：征得用户同意后执行 `git clone https://github.com/oil-oil/video-publisher-skill ~/.agents/skills/video-publisher`；没有它时在插件里手动标记发布状态即可。",
     "",
     "## 公众号图文",
-    "- 把一期视频转成公众号文章走外部 skill oil-video-article，产物在这一集的 公众号文章/ 目录，插件负责展示，不负责生成。",
-    "- 输入不绑死 Screen Studio：有 .screenstudio 工程时从无头像的屏幕轨道截帧，效果最好；只有普通成片视频时也能转写，配图直接从成片截取。",
-    "- 文章语气遵循 oil-tone skill；公众号不是第五个视频平台，不参与发布状态标记。",
-    capabilities.articleSkill.state === "ready"
-      ? "- 已发现 oil-video-article，用户提到把视频整理成文章时直接使用。"
-      : "- 缺 oil-video-article：征得用户同意后执行 `git clone https://github.com/oil-oil/oil-video-article ~/.agents/skills/oil-video-article`；不需要公众号时可以跳过这一环节。",
+    "- 文章以 script.md 为主要输入，在当前会话里改写，不再依赖 oil-video-article。",
+    "- 产物必须是标准 Markdown 文件，写入这一集的 公众号文章/ 目录；一个 H1，正文使用 H2/H3，图片使用相对路径，方便 Obsidian MDFlow 直接排版。",
+    "- 覆盖已有文章前先征得用户确认；公众号不是第五个视频平台，不参与发布状态标记。",
     "",
     "## 推进原则",
-    "- 每次只推进当前缺失的下一步：选题与脚本 → 录制 → 导出成片 → 字幕 → 封面 → 发布 → 数据回收。",
+    "- 每次只推进当前缺失的下一步：选题 → 脚本 → 演示（可跳过）→ 视频 → 字幕（可跳过）→ 封面 → 文章（可跳过）→ 发布 → 数据回收。",
     "- 任何写入（配置、整理、发布标记）先预览或说明，用户确认后再执行。",
     ...(
       status.recommendations.length === 0

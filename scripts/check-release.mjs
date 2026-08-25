@@ -32,7 +32,12 @@ const REQUIRED_FILES = [
   "tests/settingsHost.test.ts",
   "tests/settingsSlot.test.ts",
   "README.md",
-  "assets/readme/hero.svg",
+  "assets/readme/hero.png",
+  "docs/installation.md",
+  "docs/distribution.md",
+  "BRAND_ASSETS.md",
+  "CONTRIBUTING.md",
+  "SECURITY.md",
   "LICENSE",
 ];
 
@@ -43,8 +48,12 @@ const RUNTIME_FILES = [
   "lib/collect-publish.mjs",
 ];
 
-const GITHUB_REPOSITORY = "https://github.com/oil-oil/dsh-oil-creator";
-const GITHUB_REPOSITORY_GIT = "git+https://github.com/oil-oil/dsh-oil-creator.git";
+const GITHUB_REPOSITORY = "https://github.com/Jackywxsz/DSH-Creator";
+const GITHUB_REPOSITORY_GIT = "git+https://github.com/Jackywxsz/DSH-Creator.git";
+const GITHUB_REMOTE_URLS = new Set([
+  "git@github.com:Jackywxsz/DSH-Creator.git",
+  "https://github.com/Jackywxsz/DSH-Creator.git",
+]);
 
 function git(root, args) {
   return execFileSync("git", args, {
@@ -75,9 +84,35 @@ function npmPack(root, args) {
   }
 }
 
+function parsePackMetadata(output) {
+  const jsonMatch = output.match(/(?:^|\n)\[\s*\{/);
+  if (!jsonMatch || jsonMatch.index === undefined) {
+    throw new Error("npm pack did not return a JSON array");
+  }
+  const jsonStart = jsonMatch.index + (output[jsonMatch.index] === "\n" ? 1 : 0);
+  return JSON.parse(output.slice(jsonStart));
+}
+
 function parseRootArgument() {
   const index = process.argv.indexOf("--root");
   return index === -1 ? undefined : process.argv[index + 1];
+}
+
+function runtimePrivacyFailures(root) {
+  const failures = [];
+  for (const file of RUNTIME_FILES) {
+    const absolutePath = resolve(root, file);
+    if (!existsSync(absolutePath)) continue;
+    const body = readFileSync(absolutePath, "utf8");
+    if (
+      body.includes(root)
+      || /(?:^|[^A-Za-z])\/Users\/[^/]+\//.test(body)
+      || /[A-Za-z]:\\Users\\[^\\]+\\/.test(body)
+    ) {
+      failures.push(`运行产物泄露构建机绝对路径：${file}`);
+    }
+  }
+  return failures;
 }
 
 function checkRelease(root) {
@@ -104,8 +139,11 @@ function checkRelease(root) {
   }
 
   try {
-    if (!git(root, ["remote", "get-url", "origin"])) {
+    const origin = git(root, ["remote", "get-url", "origin"]);
+    if (!origin) {
       addFailure("缺少 origin 远程仓库");
+    } else if (!GITHUB_REMOTE_URLS.has(origin)) {
+      addFailure(`origin 必须指向 Jackywxsz/DSH-Creator，当前为 ${origin}`);
     }
   } catch {
     addFailure("缺少 origin 远程仓库");
@@ -133,6 +171,10 @@ function checkRelease(root) {
   }
 
   const scripts = manifest.scripts ?? {};
+  if (typeof manifest.version !== "string"
+    || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(manifest.version)) {
+    addFailure("version 必须是可发布的 SemVer 版本");
+  }
   if (scripts.build !== "tsdown && node scripts/copy-inplace.mjs scripts/collect-publish.mjs lib/collect-publish.mjs") {
     addFailure("build 脚本不是仓库内可复现的 tsdown + lib 拷贝流程");
   }
@@ -177,7 +219,15 @@ function checkRelease(root) {
   }
 
   const packageFiles = new Set(manifest.files ?? []);
-  for (const file of [...RUNTIME_FILES, "cordis.patch.yml", "README.md", "assets/readme/hero.svg"]) {
+  for (const file of [
+    ...RUNTIME_FILES,
+    "cordis.patch.yml",
+    "README.md",
+    "assets/readme/hero.png",
+    "BRAND_ASSETS.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+  ]) {
     if (!packageFiles.has(file)) addFailure(`npm tarball 未声明 ${file}`);
   }
   if (manifest.main !== "./lib/index.js") addFailure("main 未指向预构建 lib/index.js");
@@ -187,6 +237,8 @@ function checkRelease(root) {
   if (manifest.dsh?.bundle?.patch !== "./cordis.patch.yml") {
     addFailure("缺少可随包携带的 dsh.bundle.patch");
   }
+
+  failures.push(...runtimePrivacyFailures(root));
 
   return failures;
 }
@@ -198,6 +250,9 @@ function runReleasePipeline(root) {
     return [`pnpm check 失败：${error.message}`];
   }
 
+  const privacyFailures = runtimePrivacyFailures(root);
+  if (privacyFailures.length > 0) return privacyFailures;
+
   let output;
   try {
     output = npmPack(root, ["pack", "--dry-run", "--ignore-scripts", "--json"]);
@@ -207,7 +262,7 @@ function runReleasePipeline(root) {
 
   let metadata;
   try {
-    metadata = JSON.parse(output);
+    metadata = parsePackMetadata(output);
   } catch (error) {
     return [`npm pack --dry-run 输出不可解析：${error.message}`];
   }
@@ -215,7 +270,15 @@ function runReleasePipeline(root) {
   const packedFiles = new Set(
     metadata.flatMap((pack) => pack.files ?? []).map((file) => file.path),
   );
-  const missing = [...RUNTIME_FILES, "assets/readme/hero.svg"]
+  const missing = [
+    ...RUNTIME_FILES,
+    "assets/readme/hero.png",
+    "docs/installation.md",
+    "docs/distribution.md",
+    "BRAND_ASSETS.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+  ]
     .filter((file) => !packedFiles.has(file));
   return missing.length > 0
     ? [`npm pack --dry-run 缺少运行或 Hero 文件：${missing.join(", ")}`]

@@ -1,8 +1,17 @@
 # Creator Cockpit 对抗性审查
 
-审查日期：2026-08-24。范围为 `feature/creator-cockpit-operations` 分支与仓库内隔离运行环境。
+审查日期：2026-08-24，Beta 发布复核日期：2026-08-25。范围为 `feature/creator-cockpit-operations` 分支、预构建 npm tarball 与隔离 DSH Profile。
 
 ## 审查结论
+
+### Beta 发布复核
+
+- **GitHub Beta：GO。** 允许 `v0.1.0-beta.1` 继续接受 macOS + DSH Desktop 2.0.2 用户测试。
+- **稳定版 / 插件市场：NO-GO。** Windows x64 真机、市场安装、升级迁移和正式 Web 启动仍缺完整证据；本 Beta 不发布 npm，也不添加 `dsh-plugin` Topic。
+- 对抗审查发现预构建 `lib/client.js` 曾在 CSS 虚拟模块注释中携带构建机绝对路径。已改为仓库相对模块 ID，并在 `release:check` 增加运行产物隐私扫描和负向测试；重新构建后扫描无命中。
+- 安装时会出现 DSH 宿主 Peer 缺失警告，但安装、Bundle 组合和卸载均成功；小白文档已说明以最终完成状态与 `dsh: pnpm failed` 为判断边界。
+- Security Reviewer：未发现高置信度、可从当前插件入口利用的新注入、凭据泄露或权限绕过。
+- Architecture Reviewer：内部插件 ID、Bundle ID 与数据目录继续保留 `dsh-oil-creator`，公开显示品牌使用 Jacky Creator；稳定版改名必须走单独迁移，Beta 不混改身份边界。
 
 1. **正式安装范围是否可控：PASS。** 开发与浏览器验收只写 `.lab`。正式 profile 中的插件已经是指向当前仓库的本地链接，本次只重建该链接指向的 `lib` 产物；没有改远程依赖、API Key 或内容目录。
 2. **是否出现两个 sidebar owner 或两个 `oilCreator` service：PASS。** 额外 patch 禁用已安装 bundle，只加载当前仓库；组合 graph 只有一个同名 bundle 和一个侧栏 owner。
@@ -41,4 +50,6 @@
 
 最终门禁包括 TypeScript、Cockpit 定向测试、全量 Vitest、Host/Client build、1280px 与 375px 浏览器检查、灵感卡选择、全局快捷入口、管线搜索筛选、JSON 备份、脚本知识桥和正式 profile 产物检查。
 
-2026-08-24 最终门禁：`pnpm check` 通过。TypeScript 检查通过，44 个测试文件共 260 个测试全部通过，Host、Typert 和 Client 构建成功。npm 安装包 dry-run 共 17 个条目，包含最新 `lib/index.js`、`lib/client.js`、`lib/typert.host.js`、采集脚本、bundle patch、README 和全部文档；未包含缓存、截图或实验目录。
+2026-08-25 Beta 门禁：`pnpm check` 通过。TypeScript 检查通过，47 个测试文件共 282 个测试全部通过，Host、Typert 和 Client 构建成功。预构建 `dsh-oil-creator-0.1.0-beta.1.tgz` 共 23 个条目，包含最新 Host、Client、Typert、采集脚本、Bundle Patch、README、安装/分发文档、安全策略和品牌说明；不包含测试缓存、实验目录、用户内容或本机绝对路径。
+
+使用 DSH Desktop 2.0.2 自带的 DeepSeek Harness 0.1.1-rc.2 CLI，在全新的临时 `DSH_HOME` / `web` Profile 中从该 tarball 安装成功；组合配置中只有一个 `dsh-oil-creator` Bundle，默认 `ui-sidebar` 被该 Bundle 按设计替换。执行 `dsh plugin remove dsh-oil-creator` 后，插件 Bundle 消失且默认侧栏恢复。隔离 Web 进程尝试启动时受到当前 macOS 全局文件监听上限影响，报 `EMFILE: too many open files, watch`；因此本轮不把临时 Web 启动计为通过。正式 DSH Desktop UI 已在同一代码分支完成过可见验收，发布后仍要求用户从 GitHub Release 再做一次真实安装与重启验收。

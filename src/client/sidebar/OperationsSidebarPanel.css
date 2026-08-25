@@ -65,6 +65,69 @@
   line-height: 16px;
 }
 
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .operationsThemeToggle {
+  display: grid;
+  grid-template-columns: 20px 1fr 34px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  margin-top: auto;
+  padding: 7px 9px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 8px;
+  background: var(--cockpit-surface);
+  box-shadow: var(--cockpit-shadow-small);
+  color: var(--cockpit-ink);
+  cursor: pointer;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .operationsThemeToggle strong {
+  font-size: 12px;
+  font-weight: 850;
+  text-align: left;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .operationsThemeToggle i {
+  position: relative;
+  display: block;
+  width: 34px;
+  height: 18px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 99px;
+  background: var(--cockpit-paper-deep);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .operationsThemeToggle i b {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cockpit-blue);
+  transition: transform 140ms ease-out;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .operationsThemeToggle[aria-pressed="true"] i b {
+  transform: translateX(16px);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .operationsThemeToggle:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--cockpit-stroke);
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .operationsThemeToggle:focus-visible {
+  outline: 3px solid var(--cockpit-blue);
+  outline-offset: 2px;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="sidebar"] .operationsThemeToggle + .operationsVersion {
+  margin-top: 0;
+  padding-top: 10px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-plugin="dsh-oil-creator"][data-surface="sidebar"] .operationsNavItem:active {
     transform: none;
@@ -127,6 +190,6 @@
 }
 
 [data-plugin="dsh-oil-creator"][data-surface="sidebar"].operationsTheme .operationsVersion {
-  color: rgba(17, 17, 17, 0.68);
+  color: var(--cockpit-muted);
   font-weight: 750;
 }

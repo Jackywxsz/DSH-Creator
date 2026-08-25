@@ -5,5 +5,5 @@ artifacts
 output/playwright/
 .playwright-cli/
 .DS_Store
-assets/readme/hero.png
-assets/readme/source/
+__pycache__/
+*.pyc

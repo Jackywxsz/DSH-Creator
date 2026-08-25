@@ -20,6 +20,7 @@ import { ReviewsPage } from "./ReviewsPage.tsx";
 import { SchedulePage } from "./SchedulePage.tsx";
 import { SettingsPage } from "./SettingsPage.tsx";
 import { TodayPage } from "./TodayPage.tsx";
+import { useOperationsTheme } from "./operationsTheme.ts";
 import "./OperationsWorkspace.css";
 import "./CreatorCockpitV3.css";
 
@@ -130,6 +131,7 @@ export function OperationsWorkspace({
   ...cockpitFace
 }: OperationsWorkspaceProps) {
   const section = useOperationsSection();
+  const operationsTheme = useOperationsTheme();
   const libraryEpoch = useLibraryEpoch();
   const [items, setItems] = useState<ContentSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -232,7 +234,11 @@ export function OperationsWorkspace({
   };
 
   return (
-    <main data-plugin="dsh-oil-creator" data-surface="operations-workspace">
+    <main
+      data-plugin="dsh-oil-creator"
+      data-surface="operations-workspace"
+      data-cockpit-theme={operationsTheme}
+    >
       <header className="operationsWorkspaceHeader">
         <div className="operationsWorkspaceTitle">
           <div className="operationsWorkspaceKicker">{t(hero.eyebrow)}</div>

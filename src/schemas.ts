@@ -14,6 +14,11 @@ const contentSubtitlesSchema = z.object({
   transcript: z.string().optional(),
 });
 
+const contentPresentationsSchema = z.object({
+  "16x9": z.string().optional(),
+  "3x4": z.string().optional(),
+});
+
 const pipelineSchema = z.union([
   z.literal("raw"),
   z.literal("subtitled"),
@@ -28,6 +33,12 @@ const workflowSchema = z.union([
   z.literal("finish"),
   z.literal("publish"),
   z.literal("live"),
+]);
+
+export const contentOptionalStepSchema = z.union([
+  z.literal("presentation"),
+  z.literal("subtitle"),
+  z.literal("article"),
 ]);
 
 const publishMarkSchema = z.union([
@@ -86,12 +97,14 @@ export const contentSummarySchema = z.object({
   videoSubtitled: z.string().optional(),
   covers: contentCoversSchema,
   subtitles: contentSubtitlesSchema,
+  presentations: contentPresentationsSchema,
   hasPublishPackage: z.boolean(),
   hasArticle: z.boolean(),
   studioPath: z.string().optional(),
   waitingForExport: z.boolean(),
   exportTimedOut: z.boolean().optional(),
   articlePath: z.string().optional(),
+  skippedSteps: z.array(contentOptionalStepSchema).optional(),
   tags: z.array(z.string()),
   pipeline: pipelineSchema,
   workflow: workflowSchema,
@@ -190,6 +203,12 @@ export const subtitleTextResultSchema = z.object({
 export const setContentStageRequestSchema = z.object({
   id: z.string().min(1),
   readyToRecord: z.boolean(),
+});
+
+export const setContentSkipRequestSchema = z.object({
+  id: z.string().min(1),
+  step: contentOptionalStepSchema,
+  skipped: z.boolean(),
 });
 
 export const bindStudioRequestSchema = z.object({

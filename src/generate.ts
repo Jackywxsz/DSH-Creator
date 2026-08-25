@@ -1,7 +1,8 @@
 import { mkdir } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-import { defaultCoverSkillDir } from "./config.ts";
+import { defaultCoverSkillDir, resolveSkillDir } from "./config.ts";
 
 import { pathExists } from "./artifacts.ts";
 import { resolveVenvPython, systemPythonCommand } from "./runtimePaths.ts";
@@ -22,13 +23,27 @@ export { defaultCoverSkillDir } from "./config.ts";
 export async function resolveCoverSkill(
   skillDir = process.env.OIL_COVER_SKILL ?? defaultCoverSkillDir(),
   platform: NodeJS.Platform = process.platform,
-): Promise<{ root: string; python: string; script: string }> {
-  const script = join(skillDir, "scripts/generate_oil_cover.py");
-  if (!(await pathExists(script))) {
+  jackySkillDir = process.env.JACKY_COVER_SKILL_DIR,
+): Promise<{ root: string; jackyRoot: string; python: string; script: string }> {
+  const oilScript = join(skillDir, "scripts/generate_oil_cover.py");
+  if (!(await pathExists(oilScript))) {
     throw new Error("未安装 oil-cover。执行 git clone https://github.com/oil-oil/oil-cover ~/.agents/skills/oil-cover 后重试。");
   }
+  const jackyRoot = resolveSkillDir("", "jacky-cover", jackySkillDir);
+  const jackyFiles = [
+    join(jackyRoot, "references", "visual-system.md"),
+    join(jackyRoot, "scripts", "validate_run.py"),
+    join(jackyRoot, "assets", "jacky-reference-front.jpg"),
+    join(jackyRoot, "assets", "jacky-reference-casual.jpg"),
+    join(skillDir, "docs", "showcase", "gallery.png"),
+  ];
+  if (!(await Promise.all(jackyFiles.map(pathExists))).every(Boolean)) {
+    throw new Error("未安装 jacky-cover，无法应用 Jacky 品牌规则。");
+  }
+  const script = fileURLToPath(new URL("../scripts/generate_jacky_cover.py", import.meta.url));
+  if (!(await pathExists(script))) throw new Error("Jacky Cover 适配脚本缺失：" + script);
   const python = await resolveVenvPython(skillDir, platform) ?? systemPythonCommand(platform);
-  return { root: skillDir, python, script };
+  return { root: skillDir, jackyRoot, python, script };
 }
 
 export async function pickTranscribeLaunch(item: ContentSummary): Promise<{

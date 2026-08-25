@@ -99,22 +99,24 @@ describe("creatorGuideText", () => {
     expect(guide).not.toContain("当前没有配置脚本规则");
   });
 
-  it("tells the model auto-editing needs Screen Studio when missing", () => {
+  it("keeps content production available without Screen Studio", () => {
     const status = statusOf({});
     status.capabilities.screenStudio = capability("missing", "未发现 Screen Studio；绑定工程、自动剪辑（screen-studio-editor）不可用。");
     const guide = creatorGuideText(status);
     expect(guide).toContain("自动剪辑");
     expect(guide).toContain("screen-studio-editor");
     expect(guide).toContain("当前没有可用的 Screen Studio");
-    expect(guide).toContain("跳过这一环节");
+    expect(guide).toContain("剪映或其他工具");
+    expect(guide).toContain("工作台会继续推进");
   });
 
   it("covers article transcription without requiring Screen Studio", () => {
     const guide = creatorGuideText(statusOf({}));
     expect(guide).toContain("## 公众号图文");
     expect(guide).toContain("oil-video-article");
-    expect(guide).toContain("输入不绑死 Screen Studio");
-    expect(guide).toContain("普通成片视频时也能转写");
+    expect(guide).toContain("script.md 为主要输入");
+    expect(guide).toContain("标准 Markdown 文件");
+    expect(guide).toContain("Obsidian MDFlow");
   });
 
   it("gives install commands and key sites for missing skills and credentials", () => {
@@ -145,13 +147,13 @@ describe("creatorGuideText", () => {
     expect(guide).not.toContain("git clone https://github.com/oil-oil/oil-subtitle");
   });
 
-  it("gives install commands for video-publisher and oil-video-article when missing", () => {
+  it("gives the video-publisher install command without requiring an article skill", () => {
     const status = statusOf({});
     status.capabilities.publishSkill = capability("missing");
-    status.capabilities.articleSkill = capability("missing");
     const guide = creatorGuideText(status);
     expect(guide).toContain("git clone https://github.com/oil-oil/video-publisher-skill ~/.agents/skills/video-publisher");
-    expect(guide).toContain("git clone https://github.com/oil-oil/oil-video-article ~/.agents/skills/oil-video-article");
+    expect(guide).toContain("当前会话里改写");
+    expect(guide).not.toContain("git clone https://github.com/oil-oil/oil-video-article");
   });
 
   it("lists environment recommendations when present", () => {

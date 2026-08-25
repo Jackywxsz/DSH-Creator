@@ -50,7 +50,9 @@ describe("DeepSeek Harness bundle packaging", () => {
     expect(manifest.dsh?.bundle?.patch).toBe("./cordis.patch.yml");
     expect(manifest.files).toContain("cordis.patch.yml");
     expect(manifest.files).toContain("README.md");
-    expect(manifest.files).toContain("assets/readme/hero.svg");
+    expect(manifest.files).toContain("assets/readme/hero.png");
+    expect(manifest.files).toContain("BRAND_ASSETS.md");
+    expect(manifest.files).toContain("SECURITY.md");
     expect(manifest.files).toContain("LICENSE");
     expect(manifest.files).toContain("docs/*.md");
     expect(manifest.scripts?.prepare).toBe("npm run build");
@@ -60,22 +62,22 @@ describe("DeepSeek Harness bundle packaging", () => {
     expect(manifest.engines?.node).toBe(">=22.19.0");
     expect(manifest.repository).toEqual({
       type: "git",
-      url: "git+https://github.com/oil-oil/dsh-oil-creator.git",
+      url: "git+https://github.com/Jackywxsz/DSH-Creator.git",
     });
     expect(manifest.bugs?.url).toBe(
-      "https://github.com/oil-oil/dsh-oil-creator/issues",
+      "https://github.com/Jackywxsz/DSH-Creator/issues",
     );
     expect(manifest.homepage).toBe(
-      "https://github.com/oil-oil/dsh-oil-creator#readme",
+      "https://github.com/Jackywxsz/DSH-Creator#readme",
     );
     expect(manifest.dsh?.client?.inject).toEqual(expect.arrayContaining([
       "@deepseek-ai/dsh-client-ui-settings",
       "@deepseek-ai/dsh-client-ui-settings-plugins",
     ]));
     expect(manifest.peerDependencies?.["@deepseek-ai/dsh-settings"])
-      .toContain("0.1.0-rc.7");
+      .toContain("0.1.1-rc.2");
     expect(manifest.peerDependencies?.["@deepseek-ai/dsh-client-ui-settings-plugins"])
-      .toContain("0.1.0-rc.7");
+      .toContain("0.1.1-rc.2");
     expect(patch).toMatch(/^- id: ui-sidebar\n  disabled: true$/m);
     expect(patch).toMatch(/^- insert:\n    - id: dsh-oil-creator\n      name: dsh-oil-creator$/m);
     expect(copyInplace).not.toContain(".dsh/profiles");
@@ -93,9 +95,11 @@ describe("DeepSeek Harness bundle packaging", () => {
       "utf8",
     );
 
-    expect(readme).toContain("plugin --profile web add");
     expect(readme).toContain(
-      "dsh plugin --profile web remove dsh-oil-creator",
+      "dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.1/dsh-oil-creator-0.1.0-beta.1.tgz",
+    );
+    expect(readme).toContain(
+      "dsh plugin remove dsh-oil-creator",
     );
     expect(implementation).toContain("dsh.bundle.patch");
     expect(implementation).not.toContain(
@@ -114,15 +118,10 @@ describe("DeepSeek Harness bundle packaging", () => {
     ];
 
     try {
-      for (const runtimeFile of runtimeFiles) {
-        expect(existsSync(resolve(root, runtimeFile))).toBe(true);
-      }
-
       const output = execFileSync(
         "npm",
         [
           "pack",
-          "--ignore-scripts",
           "--json",
           "--pack-destination",
           packDirectory,
@@ -150,13 +149,17 @@ describe("DeepSeek Harness bundle packaging", () => {
 
       expect([...packedFiles]).toEqual(expect.arrayContaining([
         "README.md",
-        "assets/readme/hero.svg",
+        "assets/readme/hero.png",
+        "BRAND_ASSETS.md",
+        "CONTRIBUTING.md",
+        "SECURITY.md",
         "LICENSE",
         "cordis.patch.yml",
         "lib/index.js",
         "lib/client.js",
         "lib/typert.host.js",
         "lib/collect-publish.mjs",
+        "scripts/generate_jacky_cover.py",
       ]));
       expect(
         [...packedFiles].some((entry) => entry.startsWith("assets/readme/source/")),

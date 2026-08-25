@@ -1,14 +1,14 @@
 # 内容工作台：现阶段实现
 
-`dsh-oil-creator` 是挂在 DeepSeek Harness web 配置上的一个插件。它把 oil 从选题到发布的本地工作收进同一块界面：左侧内容列表、中间一条片子的检查器、右边继续对话。
+Jacky Creator 的内部包名暂时保留为 `dsh-oil-creator`。它是挂在 DeepSeek Harness 配置上的单一插件，把对话、内容生产和运营沉淀收进同一块界面，同时保留本地文件夹作为正文真源。
 
-安装：`npx @deepseek-ai/dsh plugin --profile web add github:oil-oil/dsh-oil-creator`（本地开发用目录路径）
+Beta 安装：`dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.1/dsh-oil-creator-0.1.0-beta.1.tgz`。预构建包避免 pnpm 10 对 Git 源码 `prepare` 的构建授权门槛。外部 CLI 必须显式选择目标 Profile；本地开发使用目录路径。
 
 卸载：`npx @deepseek-ai/dsh plugin --profile web remove dsh-oil-creator`
 
 插件对官方侧栏的替换只写在项目自己的 `cordis.patch.yml`，通过 `package.json` 的 `dsh.bundle.patch` 随包安装。不要把这段配置写进用户的 `~/.dsh/profiles/web/cordis.patch.yml`；用户层不会跟随插件卸载，残留后会把官方侧栏继续关掉。
 
-Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最终 `assets/readme/hero.svg`，不包含 `assets/readme/source/` 下的源素材。
+Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最终 `assets/readme/hero.png`，不包含 `assets/readme/source/` 下的源素材。
 
 本文写当前设计，不是变更记录。实现新功能时先读这里，再打开对应 skill 或官方文档。
 
@@ -70,7 +70,7 @@ Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最�
 保持 **一个** Harness 插件。官方要求：只有能力需要独立替换时才拆包，不要预防性拆分。见 DeepSeek Harness `docs/user/develop/practice/index.zh.md`。
 
 设置位 `settings.plugin.item` 的含义是「一个插件一张卡」，不是一个功能一张卡。
-Harness rc.7 会先从 Host 的 `settings.describe` 取得插件命名空间，再按同名 `key` 派发设置卡；插件同时保留 rc.6 使用的 `id`。当前设置值仍统一由插件 Remote 和 `~/.dsh-oil-creator/overlay.json` 管理，Host 命名空间只负责让设置卡被发现，避免双数据源。
+DeepSeek Harness `0.1.1-rc.2` 会先从 Host 的 `settings.describe` 取得插件命名空间，再按同名 `key` 派发设置卡；插件仍保留旧版使用的 `id`，用于现有用户兼容。当前设置值统一由插件 Remote 和 `~/.dsh-oil-creator/overlay.json` 管理，Host 命名空间只负责让设置卡被发现，避免双数据源。
 
 执行分工：
 
@@ -139,14 +139,15 @@ ego-browser nodejs < scripts/collect-publish.mjs
 | --- | --- | --- | --- | --- |
 | 剪辑工程 | `screen-studio-editor` | `~/.agents/skills/screen-studio-editor` | 以后可加「按绑定工程开剪辑」；现在只绑定和打开 | 审查删除、Screen Studio 里预览、手动导出 |
 | 字幕 | `oil-subtitle` | `~/.agents/skills/oil-subtitle` | clone 后必须运行 `setup.sh`；已包预览编辑器、转录、按稿烧录 | 校对不确定词、确认预览后再烧 |
-| 封面 | `oil-cover` | `~/.agents/skills/oil-cover` | 已包脚本模式三画幅生成 | 提炼主标题、看错别字、决定是否重跑某一画幅 |
+| 封面 | `jacky-cover` + `oil-cover` | 标准全局 Skill 目录 | 插件内复制的 ZenMux 适配器，整图生成人物融合版三画幅 | 提炼主标题、检查身份和错别字 |
+| 演示 | `jacky-motion2-0` | 标准全局 Skill 目录 | 页签提交逐字稿、画幅和输出路径 | 完成审稿、分镜、风格三个确认门 |
 | 发布文案语气 | `oil-tone` | `~/.agents/skills/oil-tone` | 不执行；写标题简介时读档案 | 成稿必须过 `tone_lint.py` 再通读 |
 | 公众号图文 | `oil-video-article` | `~/.agents/skills/oil-video-article` | 识别 `公众号文章/` | 从无头像屏幕轨截图、按 oil-tone 写文章 |
 | 四平台视频草稿 | `video-publisher` | `~/.agents/skills/video-publisher` | 读 `auto-publish.json` 显示状态 | Ego 上传、停在最终发布按钮前、人点发布 |
 
-字幕脚本入口以 oil-subtitle 为准：`bailian_transcribe.py` → `review_subtitles.py` → `prepare_subtitles.py` → `preview_editor.py`，用户确认后再 `burn_subtitles.py`（有审过的 SRT 用 `--srt-input`）。不要在预览前烧录。封面脚本是 `generate_oil_cover.py`，主标题由调用方按 oil-cover 提炼后传入 `--title`，Key 用环境变量 `ZENMUX_API_KEY`。不要改 skill 仓库里的用户路径和密钥。
+字幕脚本入口以 oil-subtitle 为准：`bailian_transcribe.py` → `review_subtitles.py` → `prepare_subtitles.py` → `preview_editor.py`，用户确认后再 `burn_subtitles.py`。封面调用仓库内 `scripts/generate_jacky_cover.py`，它复用 Oil Cover 的分析与 ZenMux 请求逻辑，注入 Jacky Cover 品牌补丁、Oil gallery 和两张身份参考。全局 Skill 真源不修改。
 
-封面还有 Agent 自主模式，依赖执行环境自己的生图工具。Harness 工作台默认走脚本模式，因为这里稳定的是 ZenMux 脚本，不是 Codex 内置 `image_gen`。
+Harness 不依赖原生 ImageGen。图片分析和生成继续使用设置中已有的 `ZENMUX_API_KEY`，人物与界面由 gpt-image-2 同一次整图生成，不做本地人物贴图。
 
 ## 改代码时的约束
 

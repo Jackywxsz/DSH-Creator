@@ -13,6 +13,7 @@ function detail(patch: Partial<ContentDetail> = {}): ContentDetail {
     createdMs: 1,
     covers: {},
     subtitles: {},
+    presentations: {},
     hasPublishPackage: false,
     hasArticle: false,
     waitingForExport: false,
