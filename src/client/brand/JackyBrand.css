@@ -1,25 +1,26 @@
 html[data-jacky-creator-brand="paper-growth"] {
   color-scheme: light;
-  --jacky-paper: #f8f6f0;
-  --jacky-paper-deep: #e7dbc4;
-  --jacky-paper-raised: #fffdf8;
-  --jacky-paper-blue: #edf2ff;
-  --jacky-ink: #17202d;
-  --jacky-ink-soft: #465061;
-  --jacky-ink-muted: #707783;
-  --jacky-cobalt: #0138c4;
-  --jacky-cobalt-soft: #dce6ff;
+  --jacky-paper: #faf8f3;
+  --jacky-sidebar: #f2ede4;
+  --jacky-paper-deep: #f3e8d1;
+  --jacky-paper-raised: #fffaf0;
+  --jacky-paper-blue: #dfe6fb;
+  --jacky-ink: #253340;
+  --jacky-ink-soft: #53606d;
+  --jacky-ink-muted: #77808a;
+  --jacky-cobalt: #234bda;
+  --jacky-cobalt-soft: #dfe6fb;
   --jacky-sprout: #83cf1b;
   --jacky-sprout-light: #d9f57c;
   --jacky-success: #087b5b;
   --jacky-warning: #b66b12;
-  --jacky-danger: #b63836;
-  --jacky-line: #d5ccbe;
-  --jacky-line-strong: #aca292;
+  --jacky-danger: #a94337;
+  --jacky-line: #ddd6c9;
+  --jacky-line-strong: #b8afa1;
   --jacky-radius-sm: 6px;
   --jacky-radius-md: 10px;
   --jacky-radius-lg: 14px;
-  --jacky-shadow-raised: 0 1px 3px rgba(23, 32, 45, 0.12);
+  --jacky-shadow-raised: 0 1px 3px rgba(37, 51, 64, 0.1);
 
   --dsw-alias-bg-base: var(--jacky-paper);
   --dsw-alias-bg-layer-1: var(--jacky-paper-raised);
@@ -31,7 +32,7 @@ html[data-jacky-creator-brand="paper-growth"] {
   --dsw-alias-border-l1: var(--jacky-line);
   --dsw-alias-border-l2: var(--jacky-line-strong);
   --dsw-alias-state-business-primary: var(--jacky-cobalt);
-  --dsw-alias-interactive-bg-hover: rgba(1, 56, 196, 0.07);
+  --dsw-alias-interactive-bg-hover: rgba(35, 75, 218, 0.07);
 }
 
 html[data-jacky-creator-brand="paper-growth"] body {
@@ -68,97 +69,66 @@ html[data-jacky-creator-brand="paper-growth"] [data-phase="hero"] div:has(> span
 }
 
 .jackyConversationHero {
-  display: grid;
-  grid-template-columns: minmax(290px, 1.15fr) minmax(240px, 0.85fr);
+  display: inline-flex;
   align-items: center;
-  width: min(100%, 780px);
-  min-height: 276px;
+  justify-content: center;
+  gap: 14px;
+  width: auto;
+  max-width: 100%;
   margin-inline: auto;
+  color: var(--jacky-ink);
+}
+
+.jackyConversationHeroMark {
+  display: grid;
+  flex: 0 0 62px;
+  width: 62px;
+  height: 62px;
+  place-items: center;
   overflow: hidden;
   border: 1px solid var(--jacky-line);
-  border-radius: var(--jacky-radius-lg);
+  border-radius: 50%;
   background: var(--jacky-paper-raised);
   box-shadow: var(--jacky-shadow-raised);
 }
 
-.jackyConversationHeroArt {
-  align-self: stretch;
-  min-height: 276px;
-  overflow: hidden;
-  background: var(--jacky-paper);
-}
-
-.jackyConversationHeroArt img {
+.jackyConversationHeroMark img {
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 276px;
   object-fit: cover;
   object-position: 50% 50%;
-}
-
-.jackyConversationHeroCopy {
-  position: relative;
-  z-index: 1;
-  padding: 30px 34px 30px 24px;
-  text-align: left;
-}
-
-.jackyConversationHeroEyebrow {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  padding: 3px 8px;
-  border: 1px solid color-mix(in srgb, var(--jacky-cobalt) 35%, var(--jacky-line));
-  border-radius: var(--jacky-radius-sm);
-  color: var(--jacky-cobalt);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  transform: scale(1.02);
 }
 
 .jackyConversationHero h1 {
-  margin: 18px 0 0;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0;
   color: var(--jacky-ink);
-  font-family: "Songti SC", "STSong", "Iowan Old Style", Georgia, serif;
-  font-size: clamp(28px, 3.1vw, 42px);
-  font-weight: 600;
-  line-height: 1.25;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Noto Sans SC", sans-serif;
+  font-size: clamp(22px, 2.2vw, 28px);
+  font-weight: 800;
+  line-height: 1.1;
   letter-spacing: 0;
-  text-wrap: balance;
+  white-space: nowrap;
 }
 
 .jackyConversationHero h1 strong {
-  display: block;
   color: var(--jacky-cobalt);
-  font-weight: 600;
-}
-
-.jackyConversationHero p {
-  max-width: 29ch;
-  margin: 14px 0 0;
-  color: var(--jacky-ink-soft);
-  font-size: 13px;
-  line-height: 1.75;
-  text-wrap: pretty;
-}
-
-.jackyConversationHeroMotto {
-  display: block;
-  margin-top: 18px;
-  color: var(--jacky-ink-muted);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-size: 0.74em;
+  font-weight: 850;
+  letter-spacing: 0.04em;
 }
 
 html[data-jacky-creator-brand="paper-growth"] [data-plugin="dsh-oil-creator"][data-surface="sidebar"],
 html[data-jacky-creator-brand="paper-growth"] [data-plugin="dsh-oil-creator"][data-surface="sidebar"].operationsTheme {
   border-right: 1px solid var(--jacky-line);
-  background: var(--jacky-paper-deep);
+  background: var(--jacky-sidebar);
   color: var(--jacky-ink);
-  --dsh-scrollbar-thumb: rgba(23, 32, 45, 0.2);
-  --dsh-scrollbar-thumb-hover: rgba(23, 32, 45, 0.36);
+  --dsh-scrollbar-thumb: rgba(37, 51, 64, 0.18);
+  --dsh-scrollbar-thumb-hover: rgba(37, 51, 64, 0.32);
 }
 
 html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"] .oilBrandText,
@@ -190,9 +160,16 @@ html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operation
 html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"] .tabButton.active,
 html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme .tabButton.active {
   border-color: color-mix(in srgb, var(--jacky-cobalt) 22%, var(--jacky-line));
-  background: var(--jacky-paper-raised);
-  box-shadow: inset 3px 0 0 var(--jacky-cobalt);
+  background: var(--jacky-paper-blue);
+  box-shadow: none;
   color: var(--jacky-cobalt);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"] [role="treeitem"][aria-selected="true"] [class*="_title"],
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"] [role="treeitem"][aria-expanded="true"] [class*="_title"],
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"] [role="treeitem"][aria-expanded="true"] [class*="_folderActive"] {
+  color: var(--jacky-cobalt);
+  font-weight: 650;
 }
 
 html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"] .quickIdeaButton,
@@ -243,8 +220,8 @@ html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operation
 
 html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme .operationsNavItem.active {
   border-color: color-mix(in srgb, var(--jacky-cobalt) 24%, var(--jacky-line));
-  background: var(--jacky-paper-raised);
-  box-shadow: inset 3px 0 0 var(--jacky-cobalt);
+  background: var(--jacky-paper-blue);
+  box-shadow: none;
   color: var(--jacky-cobalt);
 }
 
@@ -254,7 +231,7 @@ html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operation
 
 html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme .operationsNavItem:active {
   transform: scale(0.98);
-  box-shadow: inset 3px 0 0 var(--jacky-cobalt);
+  box-shadow: none;
 }
 
 html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme .operationsVersion {
@@ -300,7 +277,7 @@ html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspac
   padding: 20px 24px 22px;
   border: 1px solid var(--jacky-line);
   border-radius: var(--jacky-radius-lg);
-  background: var(--jacky-paper-deep);
+  background: var(--jacky-paper-raised);
   box-shadow: none;
 }
 
@@ -315,9 +292,9 @@ html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspac
 html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"] .operationsWorkspaceHeader h1 {
   max-width: 820px;
   color: var(--jacky-ink);
-  font-family: "Songti SC", "STSong", "Iowan Old Style", Georgia, serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Noto Sans SC", sans-serif;
   font-size: clamp(24px, 2.2vw, 32px);
-  font-weight: 600;
+  font-weight: 800;
   line-height: 1.25;
   letter-spacing: 0;
 }
@@ -339,6 +316,17 @@ html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspac
   border-left: 1px solid var(--jacky-line);
 }
 
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"] .operationsSummary > div:first-child {
+  background: var(--jacky-paper-blue);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"] h2,
+html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"] h3 {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Noto Sans SC", sans-serif;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
 html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"] .operationsSummary,
 html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"] .operationsContentRow,
 html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"] .ideaQuickCapture,
@@ -357,11 +345,11 @@ html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspac
 
 html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"] .todayPrimaryPanel > header {
   border-bottom: 1px solid var(--jacky-line);
-  background: var(--jacky-paper-deep);
+  background: var(--jacky-paper-blue);
 }
 
 html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"] .todayPrimaryPanel.overdue > header {
-  background: #f2d8d0;
+  background: #f4ddd5;
 }
 
 html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"] .todayPrimaryPanel.overdue > header span {
@@ -485,31 +473,19 @@ html[data-jacky-creator-brand="paper-growth"] [data-surface="content-inspector"]
   }
 
   .jackyConversationHero {
-    grid-template-columns: 1fr;
-    min-height: 0;
+    gap: 10px;
   }
 
-  .jackyConversationHeroArt {
-    min-height: 158px;
-    max-height: 188px;
-  }
-
-  .jackyConversationHeroArt img {
-    min-height: 188px;
-    object-position: 50% 45%;
-  }
-
-  .jackyConversationHeroCopy {
-    padding: 20px 22px 24px;
+  .jackyConversationHeroMark {
+    flex-basis: 52px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
   }
 
   .jackyConversationHero h1 {
-    margin-top: 12px;
-    font-size: 27px;
-  }
-
-  .jackyConversationHeroMotto {
-    display: none;
+    gap: 5px;
+    font-size: 21px;
   }
 
   html[data-jacky-creator-brand="paper-growth"] [data-surface="operations-workspace"] .operationsWorkspaceHeader {
@@ -522,23 +498,7 @@ html[data-jacky-creator-brand="paper-growth"] [data-surface="content-inspector"]
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .jackyConversationHeroArt img {
-    animation: jacky-planet-breathe 6s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate;
-  }
-}
-
-@keyframes jacky-planet-breathe {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.012);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .jackyConversationHeroArt img,
   html[data-jacky-creator-brand="paper-growth"] [data-surface] button {
     animation: none;
     transition-duration: 0.01ms;
