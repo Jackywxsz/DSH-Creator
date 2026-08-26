@@ -65,7 +65,7 @@ export function OperationsSidebarPanel({ t, onNavigate }: { t: (key: CreatorKey)
         <strong>{themeLabel}</strong>
         <i aria-hidden="true"><b /></i>
       </button>
-      <div className="operationsVersion">Creator Cockpit · Operations v0.3</div>
+      <div className="operationsVersion">Jacky Creator · 运营 v0.3</div>
     </nav>
   );
 }

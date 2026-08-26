@@ -1200,6 +1200,25 @@
   gap: 12px;
 }
 
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .videoActionState > div {
+  min-width: 0;
+  flex: 1;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .videoActionHint {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+[data-plugin="dsh-oil-creator"][data-surface="inspector"] .videoActionHint code {
+  display: block;
+  margin-top: 3px;
+  color: #374151;
+  overflow-wrap: anywhere;
+}
+
 [data-plugin="dsh-oil-creator"][data-surface="inspector"] .coverPreviewBackdrop {
   position: absolute;
   z-index: 20;

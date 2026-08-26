@@ -42,8 +42,8 @@ const evidenceProperties = {
 export function registerCockpitTools(ctx: ToolsContext, service: CreatorCockpitService): void {
   ctx.tools.register(defineTool({
     name: "cockpit_get_script_context",
-    description: "Read the real topic note plus the user-selected Creator Cockpit strategy metadata, active review rules, and reusable templates for one Oil Creator content item. Use this before drafting its script; also read oil_script_rules, then write the result to the real script.md instead of returning an untracked copy.",
-    parameters: { contentId: { type: "string", required: true, description: "Real Oil Creator content id." } },
+    description: "Read the real topic note plus the user-selected Jacky operations strategy, active review rules, and reusable templates for one Jacky content item. Use this before drafting its script; also read oil_script_rules, then write the result to the real script.md instead of returning an untracked copy.",
+    parameters: { contentId: { type: "string", required: true, description: "Real Jacky content id." } },
     output: { schema: JSON_VALUE, render: (_args, value) => text("Script context", (value as { contentId: string }).contentId) },
     presentCall: (args) => present("Read script context", args),
     execute: (args, exec) => service.getScriptContext({ id: args.contentId }, exec.signal).then(asJson),
@@ -51,8 +51,8 @@ export function registerCockpitTools(ctx: ToolsContext, service: CreatorCockpitS
 
   ctx.tools.register(defineTool({
     name: "cockpit_get_evaluation_context",
-    description: "Read the minimum real topic, script, six-dimension rubric, rubric version, and input fingerprint required to evaluate one Creator Cockpit content item.",
-    parameters: { contentId: { type: "string", required: true, description: "Real Oil Creator content id." } },
+    description: "Read the minimum real topic, script, six-dimension rubric, rubric version, and input fingerprint required to evaluate one Jacky content item.",
+    parameters: { contentId: { type: "string", required: true, description: "Real Jacky content id." } },
     output: { schema: JSON_VALUE, render: (_args, value) => text("Evaluation context", (value as { contentId: string }).contentId) },
     presentCall: (args) => present("Read evaluation context", args),
     execute: (args, exec) => service.getEvaluationContext({ id: args.contentId }, exec.signal).then(asJson),
@@ -77,7 +77,7 @@ export function registerCockpitTools(ctx: ToolsContext, service: CreatorCockpitS
   ctx.tools.register(defineTool({
     name: "cockpit_get_review_context",
     description: "Read the minimum real content facts, publishing metrics, supplemental metrics, latest evaluation, and fingerprint needed to draft a post-publication review.",
-    parameters: { contentId: { type: "string", required: true, description: "Real Oil Creator content id." } },
+    parameters: { contentId: { type: "string", required: true, description: "Real Jacky content id." } },
     output: { schema: JSON_VALUE, render: (_args, value) => text("Review context", (value as { contentId: string }).contentId) },
     presentCall: (args) => present("Read review context", args),
     execute: (args, exec) => service.getReviewContext({ id: args.contentId }, exec.signal).then(asJson),

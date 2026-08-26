@@ -438,7 +438,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
     name: "oil_generate_cover",
     description:
       "Generate 3x4 / 4x3 / 16x9 covers with the Jacky Cover brand patch and ZenMux backend. "
-      + "Extract a cover title first from the episode script or subtitles (Oil Cover evidence rule: do not leave this to the image model). "
+      + "Extract a cover title first from the episode script or subtitles (Jacky Cover evidence rule: do not leave this to the image model). "
       + "Pass that title. Requires ZENMUX_API_KEY in Settings → Plugins → 内容工作台. "
       + "Returns immediately. When finished, the episode folder has *_3x4.png / *_4x3.png / *_16x9.png.",
     parameters: {

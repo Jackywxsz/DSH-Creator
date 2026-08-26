@@ -27,6 +27,7 @@ export interface CreatorViewFace {
   getSubtitleText: (id: string) => Promise<SubtitleTextResult>;
   pickDirectory: () => Promise<string | null>;
   openPath: (path: string) => Promise<void>;
+  openFolder: (path: string) => Promise<void>;
   getSettings: () => Promise<LibrarySettings>;
   getCapabilities: () => Promise<CreatorCapabilities>;
   setLibraryRoot: (path: string) => Promise<void>;

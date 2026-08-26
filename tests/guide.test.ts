@@ -113,7 +113,7 @@ describe("creatorGuideText", () => {
   it("covers article transcription without requiring Screen Studio", () => {
     const guide = creatorGuideText(statusOf({}));
     expect(guide).toContain("## 公众号图文");
-    expect(guide).toContain("oil-video-article");
+    expect(guide).toContain("不依赖额外的图文转换 skill");
     expect(guide).toContain("script.md 为主要输入");
     expect(guide).toContain("标准 Markdown 文件");
     expect(guide).toContain("Obsidian MDFlow");

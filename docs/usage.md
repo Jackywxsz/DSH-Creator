@@ -68,7 +68,7 @@ DeepSeek Harness 打开后，左侧切到「内容」，中间是一条片子的
 
 剪辑在对话里喊 `screen-studio-editor`，对照绑定的工程清理停顿和误讲。工作台只负责打开工程，不替你改时间线。预览满意后，在 Screen Studio 里亲手导出 MP4，导出目标就是这一期的文件夹。
 
-导出开始后说：「等这条的成片落盘，落盘后生成字幕和封面。」`oil_wait_export` 会等到文件大小稳定。成片到了再用 `oil_generate_subtitles` 出字幕稿并打开预览；用户确认后再 `oil_burn_subtitles`。封面用 `oil_generate_cover`，调用前按 Jacky Cover / Oil Cover 提炼主标题传入 `title`。生成后核对标题、人物身份和错别字。
+导出开始后说：「等这条的成片落盘，落盘后生成字幕和封面。」`oil_wait_export` 会等到文件大小稳定。成片到了再用 `oil_generate_subtitles` 出字幕稿并打开预览；用户确认后再 `oil_burn_subtitles`。封面用 `oil_generate_cover`，调用前按 Jacky Cover 规则提炼主标题传入 `title`。生成后核对标题、人物身份和错别字。
 
 首次 clone `oil-subtitle` 后必须运行 `bash ~/.agents/skills/oil-subtitle/setup.sh`，否则字幕工作流不会就绪。不要在预览前烧录。`oil_burn_subtitles` 不会覆盖已经带字幕的成片文件名习惯，产物文件名里带 `_subtitled`。
 

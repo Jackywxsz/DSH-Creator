@@ -348,7 +348,7 @@ export class CreatorCockpitService extends TypertRemoteService {
   }
 
   private requireOil(): OilCreatorService {
-    if (this.oil === undefined) throw new Error("oil creator service is unavailable");
+    if (this.oil === undefined) throw new Error("Jacky Creator content service is unavailable");
     return this.oil;
   }
 
@@ -554,7 +554,7 @@ export class CreatorCockpitService extends TypertRemoteService {
           analysis: state.contentMeta[entry.sourceContentId]?.reviews.find((review) => review.id === entry.sourceReviewId)?.analysis,
         },
       })),
-      instruction: "Read oil_script_rules, use this operational context as supporting evidence, then write the finished draft to this content item's real script.md through the Oil Creator script tool.",
+      instruction: "Read oil_script_rules, use this Jacky operations context as supporting evidence, then write the finished draft to this content item's real script.md.",
     };
   }
 

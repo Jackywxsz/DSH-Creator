@@ -27,7 +27,7 @@ export async function resolveCoverSkill(
 ): Promise<{ root: string; jackyRoot: string; python: string; script: string }> {
   const oilScript = join(skillDir, "scripts/generate_oil_cover.py");
   if (!(await pathExists(oilScript))) {
-    throw new Error("未安装 oil-cover。执行 git clone https://github.com/oil-oil/oil-cover ~/.agents/skills/oil-cover 后重试。");
+    throw new Error("Jacky Cover 的底层生成依赖未安装。请先完成封面能力配置后重试。");
   }
   const jackyRoot = resolveSkillDir("", "jacky-cover", jackySkillDir);
   const jackyFiles = [
