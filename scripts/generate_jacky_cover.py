@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate oil-cover Xiaohongshu and Bilibili covers with Zenmux.
+Generate Jacky Cover assets for Xiaohongshu and Bilibili with ZenMux.
 
 The script reads the oil-cover reference rules, asks Gemini to select/plan a
 cover, then calls gpt-image-2 to generate the final cover images.
@@ -181,7 +181,7 @@ def read_urlopen_json(request: urllib.request.Request, timeout: int, *, attempts
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate oil-cover images with Zenmux.")
+    parser = argparse.ArgumentParser(description="Generate Jacky Cover images with ZenMux.")
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--video", type=Path, help="Input video file.")
     source.add_argument(
@@ -847,7 +847,7 @@ def build_analysis_messages(
     )
     system_text = (
         f"You are an expert cover art director for {CREATOR_NAME}'s Xiaohongshu and Bilibili AI tool tutorial videos. "
-        "Use the supplied oil-cover skill rules as the design spec. "
+        "Use the supplied Jacky Cover rules as the design spec. "
         "Treat supplied screenshots as evidence sources, not as full images to copy. "
         "Before writing prompts, decide the one-glance subject: what result should be visible "
         "within 0.5 seconds in a phone feed. Make that subject the dominant visual evidence, "
@@ -862,7 +862,7 @@ def build_analysis_messages(
         "The final image generator is Zenmux openai/gpt-image-2. The local script only extracts frames, "
         "copies files, saves prompts, calls Zenmux APIs"
         +
-        ". The image model receives the Oil Cover gallery, selected evidence, product logos, and two Jacky identity references. "
+        ". The image model receives the Jacky Cover reference gallery, selected evidence, product logos, and two Jacky identity references. "
         "No portrait compositing or post-generation repair is allowed. "
         +
         "It never adds text, pastes Logos, changes layout, crops the generated cover, or performs visual repairs locally. "
@@ -906,7 +906,7 @@ def build_analysis_messages(
     )
     user_text = f"""
 Task:
-Create a complete external Zenmux workflow plan for an oil-cover style Xiaohongshu and Bilibili cover set.
+Create a complete external ZenMux workflow plan for a Jacky Cover Xiaohongshu and Bilibili cover set.
 
 Known title (already distilled by the operator; treat as the final cover headline):
 {args.title or "None"}
@@ -926,7 +926,7 @@ Integrated Jacky portrait plan:
 Subtitle/transcript/script excerpt:
 {subtitle_text or "None"}
 
-Oil-cover skill rules:
+Jacky Cover rules:
 {skill_rules}
 
 Output strict JSON with this schema:
@@ -1028,7 +1028,7 @@ Important:
     for item in logos:
         content.append({"type": "text", "text": f"Logo/reference {item['label']}"})
         content.append({"type": "image_url", "image_url": {"url": image_to_data_uri(Path(item["path"]))}})
-    content.append({"type": "text", "text": "Oil Cover style reference gallery"})
+    content.append({"type": "text", "text": "Jacky Cover style reference gallery"})
     content.append({"type": "image_url", "image_url": {"url": image_to_data_uri(OIL_GALLERY)}})
     for index, path in enumerate(jacky_refs, start=1):
         content.append({"type": "text", "text": f"Jacky identity reference {index}"})
@@ -1369,8 +1369,8 @@ def jacky_prompt_contract(
     )
     return f"""Use case: Jacky personal-brand tutorial cover.
 Asset type: one complete {marker} final cover.
-Input images: Oil Cover style reference gallery; selected real-screen evidence; product logo when available; two Jacky identity references.
-Primary request: Preserve the Oil Cover evidence logic and generate one complete Jacky Cover in a single image.
+Input images: Jacky Cover style reference gallery; selected real-screen evidence; product logo when available; two Jacky identity references.
+Primary request: Preserve the Jacky Cover evidence logic and generate one complete Jacky Cover in a single image.
 Content attribution: Use the real topic, product and host interface from the selected evidence.
 Title text: primary title “{safe_title}”. {title_guard}
 Composition: {prompt}
@@ -1486,7 +1486,7 @@ def write_cover_plan(
         f"- 屏幕裁切：80%-95%，保留真实 {attribution.get('host_interface', '')} 证据",
         "- 人物层级：Jacky 位于所有屏幕、面板、卡片和窗口之前",
         "- 人物空间关系：右下落底，躯干或肩部跨过面板边缘，使用窄幅接触阴影",
-        f"- 参考输入：Oil Cover gallery、真实证据、Logo、两张 Jacky 身份锚点",
+        f"- 参考输入：Jacky Cover 风格参考、真实证据、Logo、两张 Jacky 身份锚点",
         "",
         "## Selected Frame",
         "",
@@ -1591,9 +1591,9 @@ def prompt_sidecar_text(
 ) -> str:
     selected = analysis.get("selected_frame", {})
     composite_text = json.dumps(portrait_composite, ensure_ascii=False, indent=2) if portrait_composite else "None"
-    return f"""# Oil Cover Prompt Sidecar
+    return f"""# Jacky Cover Prompt Sidecar
 
-Use: Xiaohongshu and Bilibili oil-cover external Zenmux workflow
+Use: Xiaohongshu and Bilibili Jacky Cover external ZenMux workflow
 Aspect: {aspect_key}
 Size: {size}
 Selected frame: {selected.get("label", "")} {selected.get("path", "")}
@@ -1875,7 +1875,7 @@ def apply_creator_portrait_composites(
 def main() -> None:
     args = parse_args()
     # This project-local adapter always performs integrated image editing.
-    # Never let the upstream Oil Cover config switch it back to local portrait compositing.
+    # Never let the upstream cover config switch it back to local portrait compositing.
     args.default_creator_portrait = False
     if args.composite_base:
         fail("Jacky Cover adapter does not support post-generation portrait compositing")

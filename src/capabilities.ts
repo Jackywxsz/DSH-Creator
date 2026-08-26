@@ -109,7 +109,7 @@ async function coverCapability(
     const resolved = await resolveCoverSkill(path, platform, jackySkillDir);
     return capability("ready", false, "已发现 Jacky Cover + ZenMux 封面工作流。", resolved.jackyRoot);
   } catch {
-    return capability("missing", false, "未发现 Jacky Cover 或 Oil Cover 依赖；封面生成不可用。", path);
+    return capability("missing", false, "Jacky Cover 依赖不完整；封面生成不可用。", path);
   }
 }
 

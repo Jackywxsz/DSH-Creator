@@ -190,6 +190,10 @@ pnpm release:check
 - [发布与插件市场路径](docs/distribution.md)
 - [参与贡献](CONTRIBUTING.md)
 
+## 项目来源
+
+Jacky Creator 基于开源项目 [dsh-oil-creator](https://github.com/oil-oil/dsh-oil-creator) 的本地内容工作流继续开发，并融合了 Jacky 原 Creator Cockpit 的运营方法与界面经验。感谢原项目作者和贡献者。产品界面统一使用 Jacky Creator 品牌；为兼容已有安装和数据，部分包名、工具名与 skill 名仍保留原有技术标识。
+
 ## License 与品牌资产
 
 代码沿用 [MIT License](LICENSE)。Jacky Creator 名称、芽仔形象、Logo 和品牌视觉不随 MIT 代码许可自动授权，具体边界见 [品牌资产说明](BRAND_ASSETS.md)。原项目和上游贡献者的 MIT 归属继续保留。

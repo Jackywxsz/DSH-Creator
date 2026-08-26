@@ -2,7 +2,7 @@ import type { ClientContext, WorkspaceId } from "@deepseek-ai/dsh-client-runtime
 import type {} from "@deepseek-ai/dsh-client-locale/client";
 import type {} from "@deepseek-ai/dsh-client-ui-layout/client";
 import type {} from "@deepseek-ai/dsh-api-remotes/client";
-import type {} from "@deepseek-ai/dsh-client-connection/client";
+import type { IApiClient } from "@deepseek-ai/dsh-client-connection/client";
 import type {} from "@deepseek-ai/dsh-client-ui-settings-plugins/client";
 
 import { TYPERT_REMOTE } from "../remote.ts";
@@ -33,6 +33,7 @@ import type {
   VideoPlaybackResult,
 } from "../types.ts";
 import { ContentInspector } from "./ContentInspector.tsx";
+import { openNativePath } from "./nativePaths.ts";
 import {
   bumpLibrary,
   bumpProfile,
@@ -151,6 +152,11 @@ interface CreatorCockpitRemote {
 function credentialsOf(ctx: ClientContext): CredentialsClient | undefined {
   const connection = ctx.get("connection") as { api?: { credentials?: CredentialsClient } } | undefined;
   return connection?.api?.credentials;
+}
+
+function hostOf(ctx: ClientContext): IApiClient["host"] | undefined {
+  const connection = ctx.get("connection") as { api?: Pick<IApiClient, "host"> } | undefined;
+  return connection?.api?.host;
 }
 
 function unwrap<T>(answer: RemoteAnswer<T>, fallback: string): T {
@@ -336,6 +342,7 @@ export function apply(ctx: ClientContext): void {
     },
     pickDirectory: () => ctx.workspaces.pickDirectory(),
     openPath: (path) => ctx.workspaces.openPath(path),
+    openFolder: (path) => openNativePath(hostOf(ctx), (next) => ctx.workspaces.openPath(next), path),
     getSettings: async () => {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");

@@ -26,8 +26,9 @@ describe("content inspector creative asset contract", () => {
   it("keeps presentation and cover as first-class tabs and writes article tasks as Markdown", async () => {
     const root = fileURLToPath(new URL("..", import.meta.url));
     const source = await readFile(`${root}/src/client/ContentInspector.tsx`, "utf8");
+    const presentationInstruction = await readFile(`${root}/src/client/presentationInstruction.ts`, "utf8");
     expect(source).toContain('["overview", "script", "presentation", "video", "subtitle", "cover", "article"]');
-    expect(source).toContain("$jacky-motion2-0");
+    expect(presentationInstruction).toContain("$jacky-motion2-0");
     expect(source).toContain("输出必须是纯 Markdown");
     expect(source).toContain("/公众号文章/");
   });
@@ -61,6 +62,8 @@ describe("content inspector creative asset contract", () => {
     const source = await readFile(`${root}/src/client/ContentInspector.tsx`, "utf8");
     expect(source).toContain("contentProgress(detail, publishStepDone)");
     expect(source).toContain("onUseExternalEditor");
+    expect(source).toContain("openFolder(detail.folderPath)");
+    expect(source).toContain("inspector.step.waitingExportHint");
     expect(source).toContain("waitForExport(detail.id)");
     expect(source).toContain("setContentSkip(detail.id");
   });

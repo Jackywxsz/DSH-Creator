@@ -28,6 +28,10 @@ import type { CreatorKey } from "./locales.ts";
 import type { CockpitState } from "../cockpit/schemas.ts";
 import type { CreatorCockpitFace } from "./operations/face.ts";
 import { sendCockpitInstruction } from "./operations/sessionBridge.tsx";
+import {
+  buildPresentationInstruction,
+  type PresentationAspect,
+} from "./presentationInstruction.ts";
 import { PlatformMark } from "./PlatformMark.tsx";
 import { isPublishSyncDisabled, PUBLISH_UI_PLATFORMS, selectEnabledPublishPlatforms } from "./publishPlatforms.ts";
 import { formatRelativeTime } from "./relativeTime.ts";
@@ -422,7 +426,7 @@ function ScriptOperationsBridge({
   return (
     <section className="scriptOperationsBridge">
       <header><div><strong>{t("inspector.operations.title")}</strong><span>{t("inspector.operations.hint")}</span></div><button type="button" onClick={() => {
-        const sent = sendCockpitInstruction(`请为 contentId=${contentId} 创作口播脚本。先调用 cockpit_get_script_context 读取运营看板中已选的策略、规则和模板，再调用 oil_script_rules 读取长期人设规则。结合 topic.md 写出成稿，并通过 Oil Creator 的脚本写入能力保存到这条真实内容的 script.md。不要只把脚本发在对话里。`);
+        const sent = sendCockpitInstruction(`请为 contentId=${contentId} 创作口播脚本。先调用 cockpit_get_script_context 读取运营看板中已选的策略、规则和模板，再调用 oil_script_rules 读取长期人设规则。结合 topic.md 写出成稿，并保存到这条 Jacky 内容项目的 script.md。不要只把脚本发在对话里。`);
         if (!sent) window.alert(t("operations.ai.noSession"));
       }}>{t("inspector.operations.create")}</button></header>
       {error !== undefined && <p className="scriptOperationsError">{error}</p>}
@@ -465,6 +469,7 @@ export function ContentInspector({
   pickDirectory,
   openSubtitlePreview,
   openPath,
+  openFolder,
   closeDetails,
   cockpit,
 }: ContentInspectorProps) {
@@ -786,7 +791,7 @@ export function ContentInspector({
   const onUseExternalEditor = (): void => {
     if (detail === undefined) return;
     setActionError(undefined);
-    void openPath(detail.folderPath).catch((cause: unknown) => {
+    void openFolder(detail.folderPath).catch((cause: unknown) => {
       setActionError(cause instanceof Error ? cause.message : t("inspector.video.openFolderFailed" as CreatorKey));
     });
     void waitForExport(detail.id).then(setDetail, (cause: unknown) => {
@@ -824,19 +829,18 @@ export function ContentInspector({
     });
   };
 
-  const onGeneratePresentation = (aspect: "16x9" | "3x4"): void => {
+  const onGeneratePresentation = (aspect: PresentationAspect): void => {
     if (detail === undefined) return;
     if (detail.script.trim() === "" && scriptDraft.trim() === "") {
       setActionError(t("inspector.presentation.needScript" as CreatorKey));
       return;
     }
     setActionError(undefined);
-    const instruction = [
-      `请为 contentId=${JSON.stringify(detail.id)} 制作 Jacky Motion 演示动画。`,
-      "必须调用 $jacky-motion2-0，并完整遵循 P1 审稿、P2 分镜、P3 选风格三个确认门，不得直接跳到 HTML。",
-      `画幅选择 ${aspect}。读取这条真实内容的 script.md，最终把单文件 HTML 写入 ${JSON.stringify(`${detail.folderPath}/演示/${detail.id}-${aspect}.html`)}。`,
-      "完成后运行 Skill 自带的静态校验和浏览器布局检查。不要只把 HTML 发在对话里。",
-    ].join("\n");
+    const instruction = buildPresentationInstruction({
+      id: detail.id,
+      folderPath: detail.folderPath,
+      aspect,
+    });
     if (!sendCockpitInstruction(instruction)) {
       setActionError(t("operations.ai.noSession"));
       return;
@@ -971,7 +975,7 @@ export function ContentInspector({
                 type="button"
                 className="close"
                 aria-label={t("inspector.openFolder" as CreatorKey)}
-                onClick={() => { void openPath(detail.folderPath); }}
+                onClick={() => { void openFolder(detail.folderPath); }}
               >
                 <IconFolderOpenOutline16 size={14} />
               </button>
@@ -1185,12 +1189,18 @@ export function ContentInspector({
               </ActionBar>
               {detail.waitingForExport && !hasVideo && (
                 <div className="videoActionState">
-                  <JobNote tone={detail.exportTimedOut === true ? "error" : "running"}>
-                    {t((detail.exportTimedOut === true
-                      ? "inspector.step.exportTimedOut"
-                      : "inspector.step.waitingExport") as CreatorKey)}
-                  </JobNote>
-                  <button type="button" onClick={() => { void openPath(detail.folderPath); }}>
+                  <div>
+                    <JobNote tone={detail.exportTimedOut === true ? "error" : "running"}>
+                      {t((detail.exportTimedOut === true
+                        ? "inspector.step.exportTimedOut"
+                        : "inspector.step.waitingExport") as CreatorKey)}
+                    </JobNote>
+                    <p className="videoActionHint">
+                      {t("inspector.step.waitingExportHint" as CreatorKey)}
+                      <code>{detail.folderPath}</code>
+                    </p>
+                  </div>
+                  <button type="button" onClick={() => { void openFolder(detail.folderPath); }}>
                     {t("inspector.video.openFolder" as CreatorKey)}
                   </button>
                 </div>

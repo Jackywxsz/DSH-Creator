@@ -12,7 +12,7 @@ describe("Jacky Cover ZenMux adapter", () => {
 
     expect(source).toContain("JACKY_COVER_SKILL_DIR");
     expect(source).toContain("jacky-reference-front.jpg");
-    expect(source).toContain("Oil Cover style reference gallery");
+    expect(source).toContain("Jacky Cover style reference gallery");
     expect(source).toContain("/images/edits");
     expect(source).toContain("validate_jacky_run(args, work_dir, sidecars, refs)");
     expect(source).toContain('mode": "integrated_image_edit');
