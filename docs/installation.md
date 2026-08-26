@@ -1,6 +1,6 @@
 # 小白安装与首次使用
 
-这份说明面向第一次安装 DeepSeek Harness 插件的用户。当前发布的是 `v0.1.0-beta.1` 测试版，暂时通过 GitHub Release 的预构建安装包安装，不经过插件市场。
+这份说明面向第一次安装 DeepSeek Harness 插件的用户。当前发布的是 `v0.1.0-beta.2` 测试版，GitHub Release 与社区插件市场使用同一份预构建安装包。
 
 ## 开始前准备
 
@@ -21,7 +21,7 @@ DSH Desktop 是社区维护的桌面客户端，不是 DeepSeek 官方桌面产�
 ### 2. 复制安装命令
 
 ```bash
-dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.1/dsh-oil-creator-0.1.0-beta.1.tgz
+dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.2/dsh-oil-creator-0.1.0-beta.2.tgz
 ```
 
 等待命令结束。不要关闭窗口，也不要在安装过程中重复执行。
@@ -92,7 +92,7 @@ dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0
 
 ### Windows 可以使用吗
 
-DSH Desktop 提供 Windows x64 版本，Jacky Creator 的核心代码也避免使用硬编码 macOS 路径，但 `v0.1.0-beta.1` 仍等待 Windows 真机验收。Screen Studio、Ego Lite 等 macOS 专属扩展在 Windows 不可用。
+DSH Desktop 提供 Windows x64 版本，Jacky Creator 的核心代码也避免使用硬编码 macOS 路径，但 `v0.1.0-beta.2` 仍等待 Windows 真机验收。Screen Studio、Ego Lite 等 macOS 专属扩展在 Windows 不可用。
 
 ## 更新
 
@@ -100,7 +100,7 @@ Beta 版本不跟随开发分支自动更新。看到新版本说明后，按说
 
 ```bash
 dsh plugin remove dsh-oil-creator
-dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.1/dsh-oil-creator-0.1.0-beta.1.tgz
+dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.2/dsh-oil-creator-0.1.0-beta.2.tgz
 ```
 
 卸载插件包不会主动删除内容目录和 `~/.dsh-oil-creator/`。更新前仍建议备份重要内容。

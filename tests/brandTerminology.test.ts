@@ -7,6 +7,7 @@ const root = fileURLToPath(new URL("..", import.meta.url));
 
 const runtimeCopyFiles = [
   "src/client/locales.ts",
+  "src/client/index.tsx",
   "src/client/ContentInspector.tsx",
   "src/client/sidebar/OperationsSidebarPanel.tsx",
   "src/client/operations/ContentOperationsPage.tsx",

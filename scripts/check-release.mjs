@@ -15,6 +15,8 @@ const REQUIRED_FILES = [
   "scripts/check-release.mjs",
   "src/index.ts",
   "src/client/index.tsx",
+  "src/client/nativePaths.ts",
+  "src/client/presentationInstruction.ts",
   "src/creatorSkill.ts",
   "src/capabilities.ts",
   "src/guide.ts",
@@ -29,6 +31,8 @@ const REQUIRED_FILES = [
   "tests/platforms.test.ts",
   "tests/creatorSettings.test.ts",
   "tests/contentInspector.test.ts",
+  "tests/nativePaths.test.ts",
+  "tests/presentationInstruction.test.ts",
   "tests/settingsHost.test.ts",
   "tests/settingsSlot.test.ts",
   "README.md",
@@ -201,6 +205,12 @@ function checkRelease(root) {
   }
   if (manifest.homepage !== `${GITHUB_REPOSITORY}#readme`) {
     addFailure("homepage 必须指向 GitHub README");
+  }
+
+  const bundledOfficialPackages = Object.keys(manifest.dependencies ?? {})
+    .filter((name) => name.startsWith("@deepseek-ai/"));
+  if (bundledOfficialPackages.length > 0) {
+    addFailure(`官方 DSH 运行时组件必须声明为 peerDependencies：${bundledOfficialPackages.join(", ")}`);
   }
 
   const copyScriptPath = resolve(root, "scripts/copy-inplace.mjs");

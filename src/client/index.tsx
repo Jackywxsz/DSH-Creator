@@ -188,112 +188,112 @@ export function apply(ctx: ClientContext): void {
     cockpitReady: () => cockpitRemoteOf() !== undefined,
     getCockpitState: async () => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.getState({}), "cockpit state failed");
     },
     getCockpitRevision: async () => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.getRevision({}), "cockpit revision failed").revision;
     },
     restoreState: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.restoreState(request), "restore cockpit state failed");
     },
     createIdea: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.createIdea(request), "create idea failed");
     },
     updateIdea: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.updateIdea(request), "update idea failed");
     },
     deleteIdea: async (id) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.deleteIdea({ id }), "delete idea failed");
     },
     setContentMeta: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.setContentMeta(request), "content metadata failed");
     },
     deleteContentMeta: async (id) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.deleteContentMeta({ id }), "delete content metadata failed");
     },
     createGoal: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.createGoal(request), "create goal failed");
     },
     updateGoal: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.updateGoal(request), "update goal failed");
     },
     deleteGoal: async (id) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.deleteGoal({ id }), "delete goal failed");
     },
     createFollowerSnapshot: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.createFollowerSnapshot(request), "create follower snapshot failed");
     },
     deleteFollowerSnapshot: async (id) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.deleteFollowerSnapshot({ id }), "delete follower snapshot failed");
     },
     createScheduleItem: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.createScheduleItem(request), "create schedule item failed");
     },
     updateScheduleItem: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.updateScheduleItem(request), "update schedule item failed");
     },
     deleteScheduleItem: async (id) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.deleteScheduleItem({ id }), "delete schedule item failed");
     },
     updateSettings: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.updateSettings(request), "update cockpit settings failed");
     },
     confirmReview: async (contentId, id) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.confirmReview({ contentId, id }), "confirm review failed");
     },
     saveRule: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.saveRule(request), "save rule failed");
     },
     saveTemplate: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.saveTemplate(request), "save template failed");
     },
     updateKnowledge: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.updateKnowledge(request), "update knowledge failed");
     },
     promoteIdea: async (request) => {
       const remote = cockpitRemoteOf();
-      if (remote === undefined) throw new Error("creator cockpit remote unavailable");
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.promoteIdea(request), "promote idea failed");
     },
   });

@@ -7,8 +7,21 @@
   灵感进入内容管线，运营复盘沉淀为知识，再回到下一次脚本创作。
 </p>
 
+<p align="center">
+  <a href="https://github.com/Jackywxsz/DSH-Creator/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Jackywxsz/DSH-Creator/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/Jackywxsz/DSH-Creator/releases"><img alt="GitHub Release" src="https://img.shields.io/github/v/release/Jackywxsz/DSH-Creator?include_prereleases&label=release"></a>
+  <a href="./LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-1f5fff.svg"></a>
+</p>
+
+<p align="center">
+  <a href="./docs/installation.md">安装指南</a> ·
+  <a href="./docs/usage.md">使用说明</a> ·
+  <a href="./CHANGELOG.md">更新记录</a> ·
+  <a href="./SECURITY.md">安全说明</a>
+</p>
+
 > [!WARNING]
-> 这是 `v0.1.0-beta.1` 测试版，当前不在插件市场上架。请使用下面固定版本的 GitHub Release 安装包，不要安装未知分支。Beta 首轮以 macOS + DSH Desktop 2.0.2 为验收环境；Windows 仍需真实用户测试。
+> 这是 `v0.1.0-beta.2` 测试版。安装来源固定为同版本的 GitHub Release 预构建包；社区插件市场收录完成后也会安装同一份包，不跟随开发分支。Beta 首轮以 macOS + DSH Desktop 2.0.2 为验收环境；Windows 仍需真实用户测试。
 
 ## Jacky Creator 是什么
 
@@ -40,13 +53,13 @@ DSH Desktop 是社区维护的桌面客户端，不是 DeepSeek 官方桌面产�
 打开 DSH Desktop 的内置终端，完整复制下面一行并回车：
 
 ```bash
-dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.1/dsh-oil-creator-0.1.0-beta.1.tgz
+dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.2/dsh-oil-creator-0.1.0-beta.2.tgz
 ```
 
 安装完成后彻底退出并重新打开 DSH Desktop。侧边栏左上角出现 **Jacky Creator**，并能进入“内容 / 运营 / 灵感”，即表示插件已经加载。
 
 > [!TIP]
-> 测试版固定到 `v0.1.0-beta.1`，这样以后仓库继续开发也不会悄悄改变你本机的版本。
+> 测试版固定到 `v0.1.0-beta.2`，这样以后仓库继续开发也不会悄悄改变你本机的版本。
 
 ### 第 3 步：让 AI 完成首次配置
 
@@ -75,7 +88,7 @@ AI 会先只读检查目录和可选工具；创建目录、保存配置或批�
 如果左侧仍没有 Jacky Creator：
 
 1. 完全退出并重新打开 DSH Desktop。
-2. 确认命令末尾版本号是 `v0.1.0-beta.1`。
+2. 确认命令末尾版本号是 `v0.1.0-beta.2`。
 3. 到 [GitHub Issues](https://github.com/Jackywxsz/DSH-Creator/issues) 提交系统版本、DSH Desktop 版本和安装日志；不要粘贴 API Key。
 
 ## 本地文件如何组织
@@ -129,7 +142,7 @@ Beta 期间每个版本都固定到 Git Tag。升级时先卸载插件包，再�
 
 ```bash
 dsh plugin remove dsh-oil-creator
-dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.1/dsh-oil-creator-0.1.0-beta.1.tgz
+dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.2/dsh-oil-creator-0.1.0-beta.2.tgz
 ```
 
 只卸载：
@@ -152,14 +165,11 @@ dsh plugin remove dsh-oil-creator
 
 DeepSeek Harness 仍处于 Developer Preview。上游破坏性升级不会自动进入稳定版；每次升级 DSH 基线都必须重新通过测试、打包和安装门禁。
 
-## 插件市场计划
+## 插件市场
 
-本 Beta 暂不上架市场。最终路径已经确定为：
+Jacky Creator 通过社区目录 [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) 申请收录，审核通过后会自动出现在 [dsh-market](https://github.com/dsh-market/dsh-market) 中。市场安装固定使用 `v0.1.0-beta.2` 的 GitHub Release 包，不从 `main` 现场构建。
 
-1. GitHub 作为源码、Issue 和版本真源。
-2. 稳定版发布不可变的 npm 包。
-3. 通过 `dsh-plugin` Topic 和 `dsh-market` 提交市场收录。
-4. 市场卡片只安装经过验证的稳定版本，不跟随开发分支。
+当前 Beta 不发布 npm。市场尚未显示 Jacky Creator 时，请使用上面的固定版本安装命令；市场收录不代表 DeepSeek 官方背书。
 
 上架材料、审核门禁和回滚方案见 [发布与插件市场路径](docs/distribution.md)。
 

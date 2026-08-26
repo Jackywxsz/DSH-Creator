@@ -24,6 +24,8 @@ const REQUIRED_CHAIN_FILES = [
   "src/settingsContract.ts",
   "src/settingsHost.ts",
   "src/client/settingsSlot.ts",
+  "src/client/nativePaths.ts",
+  "src/client/presentationInstruction.ts",
   "tests/creatorSkill.test.ts",
   "tests/capabilities.test.ts",
   "tests/guide.test.ts",
@@ -32,6 +34,8 @@ const REQUIRED_CHAIN_FILES = [
   "tests/contentInspector.test.ts",
   "tests/settingsHost.test.ts",
   "tests/settingsSlot.test.ts",
+  "tests/nativePaths.test.ts",
+  "tests/presentationInstruction.test.ts",
 ];
 
 function git(repository: string, ...args: string[]) {
@@ -191,6 +195,23 @@ describe("release:check", () => {
       rmSync(noOrigin, { recursive: true, force: true });
       rmSync(wrongOrigin, { recursive: true, force: true });
       rmSync(missing, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects official DSH runtime packages bundled as regular dependencies", () => {
+    const repository = createRepository();
+    try {
+      const manifestPath = join(repository, "package.json");
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+      manifest.dependencies = { "@deepseek-ai/dsh-tools": "0.1.1-rc.2" };
+      writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+      const result = runReleaseCheck(repository);
+      expect(result.code).not.toBe(0);
+      expect(result.output).toContain("官方 DSH 运行时组件必须声明为 peerDependencies");
+      expect(result.output).toContain("@deepseek-ai/dsh-tools");
+    } finally {
+      rmSync(repository, { recursive: true, force: true });
     }
   });
 

@@ -96,7 +96,7 @@ describe("DeepSeek Harness bundle packaging", () => {
     );
 
     expect(readme).toContain(
-      "dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.1/dsh-oil-creator-0.1.0-beta.1.tgz",
+      "dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.2/dsh-oil-creator-0.1.0-beta.2.tgz",
     );
     expect(readme).toContain(
       "dsh plugin remove dsh-oil-creator",
