@@ -35,7 +35,7 @@ export async function resolveCollectScript(preferred?: string): Promise<string> 
       continue;
     }
   }
-  throw new Error("collect-publish.mjs is missing; rebuild dsh-oil-creator");
+  throw new Error("collect-publish.mjs is missing; rebuild jacky-creator");
 }
 
 export interface CollectRunOptions {

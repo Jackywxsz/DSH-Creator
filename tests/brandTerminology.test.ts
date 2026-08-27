@@ -34,4 +34,51 @@ describe("Jacky Creator product terminology", () => {
     expect(readme).toContain("https://github.com/oil-oil/dsh-oil-creator");
     expect(readme).toContain("Creator Cockpit");
   });
+
+  it("uses the Jacky Creator identity for the installable plugin", async () => {
+    const [manifestText, patch, host, contract, settings, build] = await Promise.all([
+      readFile(`${root}/package.json`, "utf8"),
+      readFile(`${root}/cordis.patch.yml`, "utf8"),
+      readFile(`${root}/src/index.ts`, "utf8"),
+      readFile(`${root}/src/remote-contract.ts`, "utf8"),
+      readFile(`${root}/src/settingsContract.ts`, "utf8"),
+      readFile(`${root}/tsdown.config.ts`, "utf8"),
+    ]);
+    const manifest = JSON.parse(manifestText) as { name?: string; version?: string };
+    const identitySurfaces = [patch, host, contract, settings, build].join("\n");
+
+    expect(manifest.name).toBe("jacky-creator");
+    expect(manifest.version).toBe("0.1.0-beta.3");
+    expect(identitySurfaces).toContain("jacky-creator");
+    expect(identitySurfaces).not.toContain("dsh-oil-creator");
+  });
+
+  it("keeps beginner-facing docs concise and product-branded", async () => {
+    const [readme, installation, usage, files, security, contributing, hero] = await Promise.all([
+      readFile(`${root}/README.md`, "utf8"),
+      readFile(`${root}/docs/installation.md`, "utf8"),
+      readFile(`${root}/docs/usage.md`, "utf8"),
+      readFile(`${root}/docs/files.md`, "utf8"),
+      readFile(`${root}/SECURITY.md`, "utf8"),
+      readFile(`${root}/CONTRIBUTING.md`, "utf8"),
+      readFile(`${root}/assets/readme/source/hero-layout.svg`, "utf8"),
+    ]);
+    const onboarding = `${readme}\n${installation}`;
+    const publicDocs = [readme, installation, usage, files, security, contributing]
+      .join("\n");
+
+    expect(onboarding).not.toMatch(/这是 .*测试版|不跟随开发分支|真实用户测试|测试用户/);
+    expect(readme).not.toContain("dsh plugin remove dsh-oil-creator");
+    expect(installation.match(/dsh plugin remove dsh-oil-creator/g)).toHaveLength(1);
+    expect(onboarding).not.toContain("dsh-oil-creator-0.1.0-beta.2.tgz");
+    expect(onboarding).toContain("jacky-creator-0.1.0-beta.3.tgz");
+    expect(publicDocs).not.toContain("~/.dsh-oil-creator");
+    expect(publicDocs).not.toContain("今天做一期 DeepSeek Harness 安装上手");
+    expect(hero).not.toContain("<circle");
+    expect(hero).not.toContain("DEEPSEEK HARNESS PLUGIN · BETA");
+    expect(hero).not.toContain('stroke="#79C800"');
+    expect(hero).toMatch(
+      /<text x="56" y="39" text-anchor="middle"[^>]*>灵感<\/text>/,
+    );
+  });
 });

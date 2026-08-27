@@ -32,4 +32,4 @@ export type OilSidebarSlotProps =
   & PropsRuntime<"sidebar">
   & PropsRenderSlots<"sidebar.workspaces" | "sidebar.settings" | "sidebar.footer.action">
   & OilSidebarInjected
-  & PropsLocale<"dsh.oil.creator">;
+  & PropsLocale<"dsh.jacky.creator">;

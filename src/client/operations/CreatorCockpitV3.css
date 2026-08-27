@@ -1,4 +1,4 @@
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] {
   --cc3-yellow: var(--cockpit-yellow);
   --cc3-blue: var(--cockpit-blue);
   --cc3-red: var(--cockpit-red);
@@ -11,7 +11,7 @@
   --cc3-shadow-small: var(--cockpit-shadow-small);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader {
   display: grid;
   grid-template-columns: minmax(180px, auto) minmax(200px, 1fr) auto;
   align-items: center;
@@ -25,11 +25,11 @@
   box-shadow: var(--cc3-shadow-small);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsWorkspaceTitle {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsWorkspaceTitle {
   min-width: 0;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsWorkspaceKicker {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsWorkspaceKicker {
   margin: 0 0 2px;
   color: var(--cc3-blue);
   font-size: 9px;
@@ -37,7 +37,7 @@
   letter-spacing: 0.17em;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader h1 {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader h1 {
   margin: 0;
   color: var(--cc3-ink);
   font-family: "Arial Black", "PingFang SC", sans-serif;
@@ -45,7 +45,7 @@
   line-height: 1.12;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader p {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader p {
   max-width: 620px;
   margin: 0;
   color: var(--cockpit-hero-muted);
@@ -54,11 +54,11 @@
   line-height: 1.6;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsWorkspaceBody {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsWorkspaceBody {
   padding-top: 0;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSummary {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsSummary {
   gap: 0;
   margin-top: 20px;
   border: var(--cc3-line);
@@ -68,26 +68,26 @@
   overflow: hidden;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSummary > div {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsSummary > div {
   min-height: 66px;
   padding: 11px 15px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSummary > div:first-child {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsSummary > div:first-child {
   background: var(--cc3-yellow);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSummary > div + div {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsSummary > div + div {
   border-left: 2px solid var(--cc3-ink);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayCockpit,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCockpit,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewCockpit {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayCockpit,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCockpit,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewCockpit {
   padding-top: 22px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsRangeSwitch {
   display: flex;
   align-items: center;
   width: 100%;
@@ -99,7 +99,7 @@
   box-shadow: var(--cc3-shadow-small);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch button {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsRangeSwitch button {
   min-height: 32px;
   padding: 4px 12px;
   border: 0;
@@ -110,24 +110,24 @@
   font-weight: 850;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch button.active {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsRangeSwitch button.active {
   background: var(--cc3-blue);
   color: var(--cockpit-accent-ink);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch > span {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsRangeSwitch > span {
   margin-left: 10px;
   color: var(--cc3-muted);
   font-size: 10px;
   font-variant-numeric: tabular-nums;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsRangeSwitch .todayOpenSchedule {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsRangeSwitch .todayOpenSchedule {
   margin-left: auto;
   color: var(--cc3-blue);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayPrimaryPanel {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayPrimaryPanel {
   margin-top: 16px;
   border: var(--cc3-line);
   border-radius: 12px;
@@ -136,7 +136,7 @@
   overflow: hidden;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayPrimaryPanel > header {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayPrimaryPanel > header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -146,53 +146,53 @@
   background: var(--cc3-yellow);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayPrimaryPanel.overdue > header {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayPrimaryPanel.overdue > header {
   background: var(--cockpit-overdue);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayPrimaryPanel header span,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid header span,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleToolbar > div:first-child > span,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleBacklog header > span {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayPrimaryPanel header span,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todaySupportGrid header span,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleToolbar > div:first-child > span,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleBacklog header > span {
   color: var(--cc3-blue);
   font-size: 9px;
   font-weight: 950;
   letter-spacing: 0.15em;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayPrimaryPanel h2,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid h2,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleToolbar h2 {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayPrimaryPanel h2,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todaySupportGrid h2,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleToolbar h2 {
   margin: 2px 0 0;
   color: var(--cc3-ink);
   font-family: "Arial Black", "PingFang SC", sans-serif;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayPrimaryPanel h2 {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayPrimaryPanel h2 {
   font-size: 21px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayPrimaryPanel header p {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayPrimaryPanel header p {
   margin: 4px 0 0;
   color: var(--cockpit-hero-muted);
   font-size: 11px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayPrimaryPanel > header > strong {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayPrimaryPanel > header > strong {
   font-family: "Arial Black", sans-serif;
   font-size: 28px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayPrimaryPanel > header > strong small {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayPrimaryPanel > header > strong small {
   font-family: inherit;
   font-size: 10px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskList {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskList {
   padding: 0 15px 8px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTask {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTask {
   display: grid;
   grid-template-columns: 30px 32px minmax(0, 1fr) auto;
   align-items: center;
@@ -201,11 +201,11 @@
   border-bottom: 1px solid var(--cockpit-divider);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTask.complete {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTask.complete {
   opacity: 0.52;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskCheck {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskCheck {
   width: 24px;
   height: 24px;
   border: 2px solid var(--cc3-ink);
@@ -215,13 +215,13 @@
   font-weight: 950;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskRank {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskRank {
   color: var(--cc3-blue);
   font-family: "Arial Black", sans-serif;
   font-size: 12px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskMain {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskMain {
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -233,35 +233,35 @@
   text-align: left;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskMain > span {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskMain > span {
   display: flex;
   gap: 8px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskMain em {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskMain em {
   color: var(--cc3-blue);
   font-size: 9px;
   font-style: normal;
   font-weight: 900;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskMain strong {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskMain strong {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskMain small {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskMain small {
   color: var(--cc3-muted);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskControls {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskControls {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskControls button {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskControls button {
   width: 28px;
   min-height: 28px;
   border: 1px solid var(--cc3-ink);
@@ -269,21 +269,21 @@
   background: var(--cc3-white);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskControls input {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskControls input {
   min-height: 30px;
   padding: 3px 6px;
   border-width: 1px;
   font-size: 10px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todaySupportGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   margin-top: 22px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid > section {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todaySupportGrid > section {
   min-height: 180px;
   padding: 15px;
   border: var(--cc3-line);
@@ -292,15 +292,15 @@
   box-shadow: var(--cc3-shadow-small);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid > section:nth-child(2) {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todaySupportGrid > section:nth-child(2) {
   background: var(--cockpit-info-soft);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid h2 {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todaySupportGrid h2 {
   font-size: 15px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid button {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todaySupportGrid button {
   display: flex;
   width: 100%;
   flex-direction: column;
@@ -313,38 +313,38 @@
   text-align: left;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid button > span {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todaySupportGrid button > span {
   display: flex;
   justify-content: space-between;
   gap: 8px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid button em {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todaySupportGrid button em {
   color: var(--cc3-muted);
   font-size: 9px;
   font-style: normal;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid i {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todaySupportGrid i {
   height: 5px;
   border: 1px solid var(--cc3-ink);
   background: var(--cc3-white);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid i b {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .todaySupportGrid i b {
   display: block;
   height: 100%;
   background: var(--cc3-blue);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsTodayEmpty {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsTodayEmpty {
   padding: 18px 2px;
   color: var(--cc3-muted);
   font-size: 11px;
 }
 
 /* Production schedule */
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleToolbar {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleToolbar {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -353,25 +353,25 @@
   border-bottom: var(--cc3-line);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleToolbar h2 {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleToolbar h2 {
   font-size: 24px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleToolbar p {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleToolbar p {
   margin: 4px 0 0;
   color: var(--cc3-muted);
   font-size: 11px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleToolbar > div:last-child,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleMode {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleToolbar > div:last-child,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleMode {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleToolbar button,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleMode button {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleToolbar button,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleMode button {
   min-height: 34px;
   padding: 5px 10px;
   border: 2px solid var(--cc3-ink);
@@ -382,19 +382,19 @@
   font-weight: 850;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleMode button.active {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleMode button.active {
   background: var(--cc3-blue);
   color: var(--cockpit-accent-ink);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleLayout {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleLayout {
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr);
   gap: 18px;
   margin-top: 18px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleBacklog {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleBacklog {
   min-width: 0;
   border: var(--cc3-line);
   border-radius: 10px;
@@ -403,25 +403,25 @@
   overflow: hidden;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleBacklog > header {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleBacklog > header {
   padding: 14px;
   border-bottom: var(--cc3-line);
   background: var(--cc3-yellow);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleBacklog h3 {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleBacklog h3 {
   margin: 3px 0;
   font-family: "Arial Black", "PingFang SC", sans-serif;
   font-size: 16px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleBacklog > div {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleBacklog > div {
   max-height: 660px;
   padding: 8px;
   overflow-y: auto;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleBacklog article {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleBacklog article {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -433,7 +433,7 @@
   cursor: grab;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleBacklog article > strong {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleBacklog article > strong {
   overflow: hidden;
   font-size: 13px;
   line-height: 18px;
@@ -441,19 +441,19 @@
   white-space: nowrap;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleBacklog article span {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleBacklog article span {
   color: var(--cc3-blue);
   font-size: 9px;
   font-weight: 900;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleStageList {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleStageList {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleStageChip {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleStageChip {
   min-height: 22px;
   padding: 2px 6px;
   border: 1px solid var(--cc3-ink);
@@ -466,22 +466,22 @@
   cursor: grab;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleStageChip:hover,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleStageChip:focus-visible {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleStageChip:hover,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleStageChip:focus-visible {
   border-color: var(--cc3-blue);
   color: var(--cc3-blue);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleStageChip.current {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleStageChip.current {
   background: var(--cc3-blue);
   color: var(--cc3-white);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleBacklog article small {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleBacklog article small {
   color: var(--cc3-muted);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCalendar {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCalendar {
   min-width: 0;
   border: var(--cc3-line);
   border-radius: 10px;
@@ -490,18 +490,18 @@
   overflow: hidden;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleWeekdays,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCalendarGrid {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleWeekdays,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCalendarGrid {
   display: grid;
   grid-template-columns: repeat(7, minmax(92px, 1fr));
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleWeekdays {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleWeekdays {
   border-bottom: var(--cc3-line);
   background: var(--cc3-yellow);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleWeekdays span {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleWeekdays span {
   padding: 8px;
   border-right: 1px solid var(--cc3-ink);
   font-size: 10px;
@@ -509,7 +509,7 @@
   text-align: center;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCell {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCell {
   min-height: 128px;
   padding: 6px;
   border-right: 1px solid var(--cockpit-divider);
@@ -517,34 +517,34 @@
   background: var(--cockpit-calendar-muted);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCalendar.week .scheduleCell {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCalendar.week .scheduleCell {
   min-height: 520px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCell.blank {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCell.blank {
   background: var(--cockpit-calendar-empty);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCell.current {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCell.current {
   background: var(--cockpit-calendar-today);
   box-shadow: inset 0 0 0 2px var(--cc3-blue);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCell > header {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCell > header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1px 2px 5px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCell > header button {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCell > header button {
   border: 0;
   background: transparent;
   color: var(--cc3-blue);
   font-weight: 950;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCell article {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCell article {
   margin-bottom: 5px;
   padding: 6px;
   border: 1px solid var(--cc3-ink);
@@ -554,11 +554,11 @@
   box-shadow: 1px 1px 0 var(--cc3-ink);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCell article.complete {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCell article.complete {
   opacity: 0.45;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCardMain {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCardMain {
   display: flex;
   width: 100%;
   min-width: 0;
@@ -571,25 +571,25 @@
   text-align: left;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCardMain span {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCardMain span {
   color: var(--cc3-blue);
   font-size: 8px;
   font-weight: 900;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCardMain strong {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCardMain strong {
   overflow: hidden;
   font-size: 10px;
   text-overflow: ellipsis;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCell article > div {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCell article > div {
   display: flex;
   gap: 3px;
   margin-top: 5px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCell article > div button {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCell article > div button {
   min-height: 21px;
   padding: 2px 5px;
   border: 1px solid var(--cockpit-muted);
@@ -598,15 +598,15 @@
 }
 
 /* Pipeline and strategy cards */
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsPipelineBoard {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsPipelineBoard {
   gap: 14px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaCard {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaCard {
   background: var(--cc3-white);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaCardMain {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaCardMain {
   display: grid;
   width: 100%;
   gap: 6px;
@@ -617,33 +617,33 @@
   text-align: left;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaTitle,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaCardFacts,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaQuickActions {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaTitle,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaCardFacts,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaQuickActions {
   display: flex;
   gap: 6px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaTitle {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaTitle {
   min-width: 0;
   flex-direction: column;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaTitle strong {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaTitle strong {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaTitle small,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaCardMain > small {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaTitle small,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaCardMain > small {
   color: var(--cc3-muted);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaCardFacts {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaCardFacts {
   flex-wrap: wrap;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaCardFacts em {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaCardFacts em {
   padding: 2px 5px;
   border: 1px solid var(--cc3-ink);
   border-radius: 4px;
@@ -652,11 +652,11 @@
   font-style: normal;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaQuickActions {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaQuickActions {
   padding: 0 10px 10px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaQuickActions button {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaQuickActions button {
   flex: 1;
   min-height: 30px;
   border: 1px solid var(--cc3-ink);
@@ -667,7 +667,7 @@
   font-weight: 850;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaFields {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaFields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 9px;
@@ -675,57 +675,57 @@
   border-top: 1px solid var(--cc3-ink);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaFields .full {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaFields .full {
   grid-column: 1 / -1;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaFields label,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaFields fieldset {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaFields label,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaFields fieldset {
   min-width: 0;
   color: var(--cc3-muted);
   font-size: 9px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsEvaluationDetails {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsEvaluationDetails {
   margin: 0 10px 10px;
   color: var(--cc3-muted);
   font-size: 10px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsScoreGrid {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsScoreGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
   margin-top: 8px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsScoreGrid article {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsScoreGrid article {
   padding: 7px;
   border: 1px solid var(--cc3-ink);
   border-radius: 5px;
   background: var(--cc3-paper);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsScoreGrid strong {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsScoreGrid strong {
   float: right;
   color: var(--cc3-blue);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsScoreGrid p {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsScoreGrid p {
   margin: 5px 0 0;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsNewContent {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsNewContent {
   display: flex;
   grid-column: 1 / -1;
   gap: 6px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsNewContent input {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsNewContent input {
   flex: 1;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsNewContent button {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsNewContent button {
   border: var(--cc3-line);
   border-radius: 6px;
   background: var(--cc3-blue);
@@ -734,7 +734,7 @@
   font-weight: 850;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-dialog"] .createError {
+[data-plugin="jacky-creator"][data-surface="operations-dialog"] .createError {
   grid-column: 1 / -1;
   margin: 0;
   color: var(--cc3-red);
@@ -743,22 +743,22 @@
 }
 
 /* Goals */
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalsList {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsGoalsList {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalRow {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsGoalRow {
   padding: 18px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalRow.primary {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsGoalRow.primary {
   grid-column: 1 / -1;
   background: var(--cc3-yellow);
   box-shadow: var(--cc3-shadow);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalHeader em {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsGoalHeader em {
   color: var(--cc3-blue);
   font-size: 9px;
   font-style: normal;
@@ -766,14 +766,14 @@
   letter-spacing: 0.12em;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalQuotaGrid {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalQuotaGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin-top: 14px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalQuotaGrid > div {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalQuotaGrid > div {
   display: flex;
   justify-content: space-between;
   gap: 8px;
@@ -783,7 +783,7 @@
   background: var(--cc3-white);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalFollowerChart {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalFollowerChart {
   margin-top: 14px;
   padding: 10px;
   border: 1px solid var(--cc3-ink);
@@ -791,38 +791,38 @@
   background: var(--cc3-white);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalFollowerChart svg {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalFollowerChart svg {
   display: block;
   width: 100%;
   height: 128px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalFollowerChart line {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalFollowerChart line {
   stroke: var(--cockpit-divider);
   stroke-width: 0.6;
   vector-effect: non-scaling-stroke;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalFollowerChart line.target {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalFollowerChart line.target {
   stroke: var(--cc3-blue);
   stroke-dasharray: 3 2;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalFollowerChart polyline {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalFollowerChart polyline {
   fill: none;
   stroke: var(--cc3-ink);
   stroke-width: 1.4;
   vector-effect: non-scaling-stroke;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalFollowerChart circle {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalFollowerChart circle {
   fill: var(--cc3-blue);
   stroke: var(--cc3-ink);
   stroke-width: 0.7;
   vector-effect: non-scaling-stroke;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalFollowerChart footer {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalFollowerChart footer {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -831,15 +831,15 @@
   font-size: 10px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalFollowerChart footer strong {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalFollowerChart footer strong {
   color: var(--cc3-ink);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalFollowerChart footer span:last-child {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalFollowerChart footer span:last-child {
   text-align: right;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalArchive {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalArchive {
   margin-top: 12px;
   border: 0;
   border-bottom: 1px solid var(--cc3-ink);
@@ -848,7 +848,7 @@
   font-weight: 800;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalHistory {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalHistory {
   margin-top: 18px;
   padding: 14px;
   border: var(--cc3-line);
@@ -857,7 +857,7 @@
 }
 
 /* Review ledger */
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewKpis {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewKpis {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   border: var(--cc3-line);
@@ -867,7 +867,7 @@
   overflow: hidden;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewKpis article {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewKpis article {
   display: flex;
   min-height: 88px;
   flex-direction: column;
@@ -876,39 +876,39 @@
   border-right: 1px solid var(--cc3-ink);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewKpis article:first-child {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewKpis article:first-child {
   background: var(--cc3-yellow);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewKpis article.risk {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewKpis article.risk {
   background: var(--cockpit-danger-soft);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewKpis span,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewKpis small {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewKpis span,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewKpis small {
   color: var(--cc3-muted);
   font-size: 9px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewKpis strong {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewKpis strong {
   color: var(--cc3-ink);
   font-family: "Arial Black", sans-serif;
   font-size: 24px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewKpis em {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewKpis em {
   font-size: 10px;
   font-style: normal;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewLedgers {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewLedgers {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
   margin-top: 22px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewLedgers > section > header {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewLedgers > section > header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -920,28 +920,28 @@
   box-shadow: var(--cc3-shadow-small);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewLedgers > section:nth-child(2) > header {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewLedgers > section:nth-child(2) > header {
   background: var(--cockpit-info-soft);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewLedgers h2 {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewLedgers h2 {
   margin: 2px 0;
   font-family: "Arial Black", "PingFang SC", sans-serif;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewLedgers header span {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewLedgers header span {
   color: var(--cc3-blue);
   font-size: 9px;
   font-weight: 950;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewLedgers header p {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewLedgers header p {
   margin: 0;
   color: var(--cc3-muted);
   font-size: 10px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewTitle {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewTitle {
   flex: 1;
   border: 0;
   background: transparent;
@@ -949,7 +949,7 @@
   text-align: left;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetricsEditor > div {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetricsEditor > div {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
@@ -960,27 +960,27 @@
   background: var(--cc3-paper);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetricsEditor label {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetricsEditor label {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetricsEditor .full {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetricsEditor .full {
   grid-column: 1 / -1;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsKnowledgeLibrary {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsKnowledgeLibrary {
   margin-top: 26px;
 }
 
 /* Customizable settings */
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsPage {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsSettingsPage {
   position: relative;
   padding-top: 62px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsSaveBar {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsSettingsSaveBar {
   position: absolute;
   inset: 0 0 auto;
   display: flex;
@@ -998,7 +998,7 @@
   font-weight: 800;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsSaveBar button {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsSettingsSaveBar button {
   min-height: 32px;
   padding: 4px 14px;
   border: 2px solid var(--cc3-ink);
@@ -1008,13 +1008,13 @@
   font-weight: 900;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSettingsSaveBar button:disabled,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsMetaQuickActions button:disabled {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsSettingsSaveBar button:disabled,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaQuickActions button:disabled {
   opacity: 0.48;
   box-shadow: none;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .settingsChipEditor {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .settingsChipEditor {
   min-width: 0;
   padding: 10px;
   border: 1px solid var(--cc3-ink);
@@ -1022,7 +1022,7 @@
   background: color-mix(in srgb, var(--cc3-white) 78%, transparent);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .settingsChipEditor > div {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .settingsChipEditor > div {
   display: flex;
   min-height: 30px;
   flex-wrap: wrap;
@@ -1030,7 +1030,7 @@
   margin-bottom: 9px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .settingsChipEditor > div > span {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .settingsChipEditor > div > span {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -1042,28 +1042,28 @@
   font-size: 10px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .settingsChipEditor > div button {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .settingsChipEditor > div button {
   border: 0;
   background: transparent;
   color: var(--cockpit-red);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .settingsChipEditor > label,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleTypeCreate {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .settingsChipEditor > label,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleTypeCreate {
   display: flex;
   flex-direction: row;
   gap: 6px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .settingsChipEditor input,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleTypeCreate input {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .settingsChipEditor input,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleTypeCreate input {
   flex: 1;
   min-width: 0;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .settingsChipEditor > label button,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleTypeCreate button,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleTypeSettings button {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .settingsChipEditor > label button,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleTypeCreate button,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleTypeSettings button {
   min-height: 40px;
   padding: 5px 10px;
   border: 2px solid var(--cc3-ink);
@@ -1074,163 +1074,163 @@
   font-weight: 850;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .milestoneColorGrid {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .milestoneColorGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .milestoneColorGrid label,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleTypeSettings > div {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .milestoneColorGrid label,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleTypeSettings > div {
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr) auto;
   align-items: center;
   gap: 7px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .milestoneColorGrid label {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .milestoneColorGrid label {
   grid-template-columns: 36px minmax(0, 1fr) auto;
   padding: 6px;
   border: 1px solid var(--cc3-ink);
   border-radius: 6px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .milestoneColorGrid input,
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleTypeSettings input[type="color"] {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .milestoneColorGrid input,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleTypeSettings input[type="color"] {
   width: 34px;
   min-height: 30px;
   padding: 1px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .milestoneColorGrid code {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .milestoneColorGrid code {
   color: var(--cc3-muted);
   font-size: 8px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleTypeSettings {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleTypeSettings {
   display: grid;
   gap: 7px;
   margin-top: 15px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleTypeCreate {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleTypeCreate {
   margin-top: 10px;
 }
 
 @media (hover: hover) {
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] button:not(:disabled):hover {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] button:not(:disabled):hover {
     filter: saturate(1.08);
   }
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] button:not(:disabled):active {
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] button:not(:disabled):active {
   transform: translate(1px, 1px);
 }
 
 @media (max-width: 920px) {
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader {
     grid-template-columns: minmax(150px, auto) 1fr auto;
     margin-inline: 20px;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleLayout {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleLayout {
     grid-template-columns: 180px minmax(650px, 1fr);
     overflow-x: auto;
     padding-bottom: 8px;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewKpis {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewKpis {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewLedgers {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewLedgers {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 620px) {
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader {
     grid-template-columns: minmax(0, 1fr) auto;
     min-height: 60px;
     margin: 12px 14px 0;
     padding: 10px 12px;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader p {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader p {
     display: none;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader h1 {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsWorkspaceHeader h1 {
     font-size: 19px;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsSummary > div + div {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsSummary > div + div {
     border-left-width: 1px;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTask {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTask {
     grid-template-columns: 28px minmax(0, 1fr);
     padding: 8px 0;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskRank {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskRank {
     display: none;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskControls {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskControls {
     grid-column: 2;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todayTaskControls input {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .todayTaskControls input {
     flex: 1;
     min-width: 120px;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .todaySupportGrid,
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalsList,
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewKpis {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .todaySupportGrid,
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsGoalsList,
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewKpis {
     grid-template-columns: 1fr;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleToolbar {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleToolbar {
     align-items: stretch;
     flex-direction: column;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleToolbar > div:last-child {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleToolbar > div:last-child {
     flex-wrap: wrap;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleLayout {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleLayout {
     display: flex;
     flex-direction: column;
     overflow: visible;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleBacklog {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleBacklog {
     max-height: 250px;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCalendar {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCalendar {
     overflow-x: auto;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleWeekdays,
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .scheduleCalendarGrid {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleWeekdays,
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .scheduleCalendarGrid {
     min-width: 700px;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsGoalRow.primary {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsGoalRow.primary {
     grid-column: auto;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .goalQuotaGrid,
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .milestoneColorGrid,
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .operationsScoreGrid {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .goalQuotaGrid,
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .milestoneColorGrid,
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsScoreGrid {
     grid-template-columns: 1fr;
   }
 
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] .reviewKpis article {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .reviewKpis article {
     min-height: 66px;
     border-right: 0;
     border-bottom: 1px solid var(--cc3-ink);
@@ -1238,7 +1238,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] button:not(:disabled):active {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] button:not(:disabled):active {
     transform: none;
   }
 }

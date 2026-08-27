@@ -235,7 +235,7 @@ export function OperationsWorkspace({
 
   return (
     <main
-      data-plugin="dsh-oil-creator"
+      data-plugin="jacky-creator"
       data-surface="operations-workspace"
       data-cockpit-theme={operationsTheme}
     >

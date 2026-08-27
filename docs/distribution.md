@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 发布阶段：GitHub Beta。
-- 当前版本：`v0.1.0-beta.2`。
+- 当前版本：`v0.1.0-beta.3`。
 - 安装来源：GitHub Release 的预构建 `.tgz`，源码、Git Tag 与安装包一一对应。
 - npm：未发布。
 - 插件市场：准备向 `awesome-dsh-plugin` 提交收录。
@@ -31,7 +31,7 @@ GitHub 是源码、Issue、文档和版本真源。社区目录只保存仓库�
 Beta 的直接安装入口固定到版本包：
 
 ```bash
-dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.2/dsh-oil-creator-0.1.0-beta.2.tgz
+dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.3/jacky-creator-0.1.0-beta.3.tgz
 ```
 
 发布前必须：
@@ -66,7 +66,7 @@ Git 源码安装只供开发者使用。DeepSeek Harness rc.2 的 `dsh plugin` �
 url: https://github.com/Jackywxsz/DSH-Creator
 name: Jackywxsz/DSH-Creator
 category: workflow
-tarball: https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.2/dsh-oil-creator-0.1.0-beta.2.tgz
+tarball: https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.3/jacky-creator-0.1.0-beta.3.tgz
 description:
   en: "Local-first content production and operations workspace for DSH: manage ideas, scripts, media assets, schedules, goals, publishing status, and post-publication reviews."
   zh: "面向 DSH 的本地内容生产与运营工作台：管理灵感、脚本、媒体资产、档期、目标、发布状态和发布后复盘。"
@@ -91,9 +91,9 @@ description:
 
 ## 未来稳定版与 npm
 
-稳定版计划使用公开 Scoped Package，例如 `@jackywxsz/dsh-creator`。在迁移前必须先解决 npm 包名与内部 Cordis 插件 ID、Profile 依赖名及 `~/.dsh-oil-creator` 数据目录之间的兼容关系。
+从 `v0.1.0-beta.3` 起，GitHub Release 包、内部 Cordis 插件 ID 和 Profile 依赖名统一为 `jacky-creator`。旧版用户先卸载旧包，再安装新包；首次启动会把旧状态非破坏性复制到 `~/.jacky-creator/`。
 
-在没有升级迁移测试前，不直接把内部 ID 从 `dsh-oil-creator` 改成新名称。显示品牌可以是 Jacky Creator，数据和插件身份迁移必须单独设计。
+未来若发布 npm，可再迁移到公开 Scoped Package，例如 `@jackywxsz/jacky-creator`。npm 包、Git Tag 和 GitHub Release 必须一一对应。
 
 稳定版还需要：
 
@@ -115,7 +115,7 @@ description:
 3. 暂停或更新市场目录条目，避免继续安装问题版本。
 4. npm 版本若已发布则使用 deprecate，并发布新的补丁版本。
 5. 给用户提供回退到上一固定 Tag 的命令。
-6. 插件卸载和版本回退都不得自动删除 `~/.dsh-oil-creator/` 或内容目录。
+6. 插件卸载和版本回退都不得自动删除 `~/.jacky-creator/`、旧版状态目录或内容目录。
 
 ## 依赖平台变化时
 

@@ -1,16 +1,16 @@
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] {
+[data-plugin="jacky-creator"][data-surface="settings-card"] {
   list-style: none;
   border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 12px;
   background: var(--dsw-alias-bg-layer-3);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"].open {
+[data-plugin="jacky-creator"][data-surface="settings-card"].open {
   background: var(--dsw-alias-bg-layer-2);
   border-color: var(--dsw-alias-label-dimmed);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .header {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .header {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -25,12 +25,12 @@
   cursor: pointer;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .header:focus-visible {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .header:focus-visible {
   outline: 2px solid var(--dsw-alias-brand-primary);
   outline-offset: -2px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .headText {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .headText {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -38,20 +38,20 @@
   gap: 4px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .name {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .name {
   color: var(--dsw-alias-label-primary);
   font-size: 15px;
   font-weight: 600;
   line-height: 1.4;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .description {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .description {
   color: var(--dsw-alias-label-tertiary);
   font-size: 13px;
   line-height: 1.5;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .pending {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .pending {
   flex: none;
   padding: 1px 8px;
   border-radius: 999px;
@@ -62,41 +62,41 @@
   line-height: 17px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .chevron {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .chevron {
   flex: none;
   color: var(--dsw-alias-label-tertiary);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .chevron.open {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .chevron.open {
   transform: rotate(180deg);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .body {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .body {
   margin: 0 16px;
   padding-bottom: 8px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .field {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .field {
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 12px 0;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .fieldLabel {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .fieldLabel {
   color: var(--dsw-alias-label-primary);
   font-size: 13px;
   font-weight: 500;
   line-height: 20px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .fieldHint {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .fieldHint {
   color: var(--dsw-alias-label-tertiary);
   font-size: 12px;
   line-height: 18px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .inputLabel {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .inputLabel {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -106,7 +106,7 @@
   line-height: 18px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .input {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .input {
   width: 100%;
   box-sizing: border-box;
   padding: 6px 10px;
@@ -119,24 +119,24 @@
   line-height: 20px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .input:focus {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .input:focus {
   outline: 2px solid var(--dsw-alias-brand-primary);
   outline-offset: -1px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .textarea {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .textarea {
   min-height: 64px;
   resize: vertical;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .pathRow {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .pathRow {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-top: 6px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .path {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .path {
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -150,11 +150,11 @@
   white-space: nowrap;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .path.empty {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .path.empty {
   color: var(--dsw-alias-label-tertiary);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .footer {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -162,8 +162,8 @@
   padding: 12px 0 4px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .failed,
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .ok {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .failed,
+[data-plugin="jacky-creator"][data-surface="settings-card"] .ok {
   flex: 1;
   min-width: 0;
   margin: 0;
@@ -171,22 +171,22 @@
   line-height: 1.5;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .failed {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .failed {
   color: var(--dsw-alias-label-error);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .ok {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .ok {
   color: var(--dsw-alias-label-secondary);
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .capabilityGrid {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .capabilityGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px 12px;
   margin-top: 8px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .capabilityItem {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .capabilityItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -197,13 +197,13 @@
   line-height: 20px;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .capabilityName {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .capabilityName {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-[data-plugin="dsh-oil-creator"][data-surface="settings-card"] .secretHead {
+[data-plugin="jacky-creator"][data-surface="settings-card"] .secretHead {
   display: flex;
   align-items: center;
   justify-content: space-between;

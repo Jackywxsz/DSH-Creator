@@ -1,7 +1,6 @@
 import type { Context } from "@deepseek-ai/cordis";
 
-import { Config } from "./config.ts";
-import { resolveCockpitDataDir } from "./config.ts";
+import { Config, migrateLegacyDefaultState, resolveCockpitDataDir } from "./config.ts";
 import { CreatorCockpitService } from "./cockpit/service.ts";
 import { registerCockpitTools } from "./cockpit/tools.ts";
 import { registerCreatorWorkbenchSkill } from "./creatorSkill.ts";
@@ -10,11 +9,12 @@ import { OilCreatorService } from "./service.ts";
 import { registerCreatorSettingsNamespace } from "./settingsHost.ts";
 import { registerCreatorTools } from "./tools.ts";
 
-export const name = "dsh-oil-creator";
+export const name = "jacky-creator";
 export { Config };
 export type { Config as ConfigType } from "./config.ts";
 
 export function apply(ctx: Context, config: Config): void {
+  migrateLegacyDefaultState(config);
   const service = new OilCreatorService(ctx, config);
   const cockpit = new CreatorCockpitService(ctx, resolveCockpitDataDir(config), service);
   ctx.inject(["settings"], (settingsCtx) => {

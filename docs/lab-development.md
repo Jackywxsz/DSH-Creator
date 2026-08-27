@@ -2,7 +2,7 @@
 
 本仓库基于 `dsh-oil-creator` commit `03f8d09ce9a298578ba850c0fc5dc3ff44b568ec`，开发分支为 `feature/creator-cockpit-operations`。
 
-测试运行不会修改 `~/.dsh/profiles/web`、已安装的 `dsh-oil-creator` 或 `~/.dsh-oil-creator`。仓库内的 `.lab/dsh-home` 是当前 web profile 的隔离镜像，其他外部 bundle 通过 `profiles/node_modules` 继续指向现有安装，本仓库则作为唯一的 `dsh-oil-creator` 来源。隔离 profile 会清空原 profile 的生命周期脚本，并把 `dsh-oil-creator` 依赖改为本仓库的 `link:` 地址，避免测试流程执行生产 profile 的修补脚本。
+测试运行不会修改 `~/.dsh/profiles/web`、已安装的 `jacky-creator` 或 `~/.jacky-creator`。仓库内的 `.lab/dsh-home` 是当前 web profile 的隔离镜像，其他外部 bundle 通过 `profiles/node_modules` 继续指向现有安装，本仓库则作为唯一的 `jacky-creator` 来源。隔离 profile 会清空原 profile 的生命周期脚本，并把 `jacky-creator` 依赖改为本仓库的 `link:` 地址，避免测试流程执行生产 profile 的修补脚本。
 
 Oil Creator 测试写入进入 `.lab/data`，Creator Cockpit 状态写入进入 `.lab/cockpit-data`，测试内容目录固定为 `.lab/content-library`。准备脚本只生成受控示例内容，不复制真实 Oil Creator overlay 或真实内容目录。准备和启动脚本都会执行字符串路径、`lstat` 与 `realpath` 校验，拒绝仓库 `.lab` 之外的目录和 symlink 根，除非开发者显式设置 `DSH_CREATOR_COCKPIT_ALLOW_EXTERNAL_LIBRARY=1`。启动脚本每次还会重写隔离 overlay 的 `libraryRoot`。隔离 home 只创建一个空的 `.credentials.yaml` 供文件监听，不复制真实凭据。
 
@@ -15,7 +15,7 @@ pnpm lab:setup
 pnpm lab:config
 ```
 
-`pnpm lab:config` 应只出现一个 `dsh-oil-creator` 条目，并且 `ui-sidebar` 保持禁用。它只组合并打印配置，不启动服务。
+`pnpm lab:config` 应只出现一个 `jacky-creator` 条目，并且 `ui-sidebar` 保持禁用。它只组合并打印配置，不启动服务。
 
 准备脚本会创建一个已发布的受控夹具，用于验证 T+3、播放、点赞、评论和复盘页面。其链接使用 `example.invalid`，不会访问真实平台。
 

@@ -21,6 +21,7 @@ import type {
 
 const DATE_PREFIX = /^(\d{4}-\d{2}-\d{2})_(.+)$/;
 const SKIP_DIRS = new Set([
+  ".jacky-creator",
   ".dsh-oil-creator",
   ".oil-cover",
   "公众号文章",

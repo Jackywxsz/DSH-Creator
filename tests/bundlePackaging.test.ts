@@ -25,6 +25,8 @@ describe("DeepSeek Harness bundle packaging", () => {
     const manifest = JSON.parse(
       readFileSync(resolve(root, "package.json"), "utf8"),
     ) as {
+      name?: string;
+      version?: string;
       files?: string[];
       scripts?: Record<string, string>;
       engines?: { node?: string };
@@ -47,6 +49,8 @@ describe("DeepSeek Harness bundle packaging", () => {
       "utf8",
     );
 
+    expect(manifest.name).toBe("jacky-creator");
+    expect(manifest.version).toBe("0.1.0-beta.3");
     expect(manifest.dsh?.bundle?.patch).toBe("./cordis.patch.yml");
     expect(manifest.files).toContain("cordis.patch.yml");
     expect(manifest.files).toContain("README.md");
@@ -54,7 +58,12 @@ describe("DeepSeek Harness bundle packaging", () => {
     expect(manifest.files).toContain("BRAND_ASSETS.md");
     expect(manifest.files).toContain("SECURITY.md");
     expect(manifest.files).toContain("LICENSE");
-    expect(manifest.files).toContain("docs/*.md");
+    expect(manifest.files).toEqual(expect.arrayContaining([
+      "docs/installation.md",
+      "docs/usage.md",
+      "docs/files.md",
+    ]));
+    expect(manifest.files).not.toContain("docs/*.md");
     expect(manifest.scripts?.prepare).toBe("npm run build");
     expect(manifest.scripts?.["release:check"]).toBe(
       "node scripts/check-release.mjs",
@@ -79,7 +88,7 @@ describe("DeepSeek Harness bundle packaging", () => {
     expect(manifest.peerDependencies?.["@deepseek-ai/dsh-client-ui-settings-plugins"])
       .toContain("0.1.1-rc.2");
     expect(patch).toMatch(/^- id: ui-sidebar\n  disabled: true$/m);
-    expect(patch).toMatch(/^- insert:\n    - id: dsh-oil-creator\n      name: dsh-oil-creator$/m);
+    expect(patch).toMatch(/^- insert:\n    - id: jacky-creator\n      name: jacky-creator$/m);
     expect(copyInplace).not.toContain(".dsh/profiles");
     expect(copyInplace).toContain("libDirectory");
     expect(releaseCheck).toContain('run(root, "pnpm", ["check"])');
@@ -88,7 +97,7 @@ describe("DeepSeek Harness bundle packaging", () => {
     );
   });
 
-  it("documents lifecycle through dsh plugin instead of profile edits", () => {
+  it("documents installation through dsh plugin instead of profile edits", () => {
     const readme = readFileSync(resolve(root, "README.md"), "utf8");
     const implementation = readFileSync(
       resolve(root, "docs/implementation.md"),
@@ -96,11 +105,9 @@ describe("DeepSeek Harness bundle packaging", () => {
     );
 
     expect(readme).toContain(
-      "dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.2/dsh-oil-creator-0.1.0-beta.2.tgz",
+      "dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.3/jacky-creator-0.1.0-beta.3.tgz",
     );
-    expect(readme).toContain(
-      "dsh plugin remove dsh-oil-creator",
-    );
+    expect(readme).not.toContain("dsh plugin remove dsh-oil-creator");
     expect(implementation).toContain("dsh.bundle.patch");
     expect(implementation).not.toContain(
       "`~/.dsh/profiles/web/package.json` 里的 `file:` 依赖",
@@ -108,8 +115,8 @@ describe("DeepSeek Harness bundle packaging", () => {
   });
 
   it("keeps README assets and runtime files in the real npm tarball", () => {
-    const packDirectory = mkdtempSync(join(tmpdir(), "dsh-oil-creator-pack-"));
-    const npmCache = mkdtempSync(join(tmpdir(), "dsh-oil-creator-npm-cache-"));
+    const packDirectory = mkdtempSync(join(tmpdir(), "jacky-creator-pack-"));
+    const npmCache = mkdtempSync(join(tmpdir(), "jacky-creator-npm-cache-"));
     const runtimeFiles = [
       "lib/index.js",
       "lib/client.js",
@@ -134,7 +141,7 @@ describe("DeepSeek Harness bundle packaging", () => {
       );
       const metadata = parsePackMetadata(output);
       const filename = metadata[0]?.filename;
-      expect(filename).toBeTruthy();
+      expect(filename).toBe("jacky-creator-0.1.0-beta.3.tgz");
 
       const tarball = resolve(packDirectory, filename!);
       expect(existsSync(tarball)).toBe(true);
@@ -150,6 +157,9 @@ describe("DeepSeek Harness bundle packaging", () => {
       expect([...packedFiles]).toEqual(expect.arrayContaining([
         "README.md",
         "assets/readme/hero.png",
+        "docs/installation.md",
+        "docs/usage.md",
+        "docs/files.md",
         "BRAND_ASSETS.md",
         "CONTRIBUTING.md",
         "SECURITY.md",
@@ -164,6 +174,17 @@ describe("DeepSeek Harness bundle packaging", () => {
       expect(
         [...packedFiles].some((entry) => entry.startsWith("assets/readme/source/")),
       ).toBe(false);
+      const internalDocs = [
+        "docs/adversarial-review.md",
+        "docs/cockpit-design.md",
+        "docs/creator-cockpit.md",
+        "docs/distribution.md",
+        "docs/implementation.md",
+        "docs/lab-development.md",
+      ];
+      expect(
+        [...packedFiles].filter((entry) => internalDocs.includes(entry)),
+      ).toEqual([]);
     } finally {
       rmSync(packDirectory, { recursive: true, force: true });
       rmSync(npmCache, { recursive: true, force: true });

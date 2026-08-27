@@ -30,7 +30,7 @@ import {
   waitExportRequestSchema,
 } from "./schemas.ts";
 
-export const PACKAGE_NAME = "dsh-oil-creator";
+export const PACKAGE_NAME = "jacky-creator";
 export const REMOTE_NAMESPACE = "oilCreator";
 
 const emptyObjectSchema = z.object({});

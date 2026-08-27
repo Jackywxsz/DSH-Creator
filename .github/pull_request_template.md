@@ -12,6 +12,6 @@
 ## 安全与兼容
 
 - [ ] 没有提交密钥、Cookie、私人内容或本机绝对路径
-- [ ] 没有自动删除内容目录或 `~/.dsh-oil-creator/`
+- [ ] 没有自动删除内容目录或 `~/.jacky-creator/`
 - [ ] 缺少可选 Skill 时核心功能仍可用
 - [ ] 说明了验证使用的 DSH Desktop / DeepSeek Harness 版本

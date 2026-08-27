@@ -1,4 +1,12 @@
-import { homedir } from "node:os";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
@@ -10,6 +18,9 @@ import {
   defaultLibraryRoot,
   defaultSubtitleSkillDir,
   expandHomePath,
+  legacyCockpitDataDir,
+  legacyDataDir,
+  migrateLegacyDefaultState,
   resolveConfiguredPath,
   resolveCockpitDataDir,
   resolveDataDir,
@@ -39,6 +50,63 @@ describe("portable config defaults", () => {
       subtitleSkillDir: "",
       coverSkillDir: "",
     })).toBe(defaultCockpitDataDir());
+    expect(defaultDataDir("/home/jacky")).toBe(join("/home/jacky", ".jacky-creator"));
+    expect(defaultCockpitDataDir("/home/jacky")).toBe(
+      join("/home/jacky", ".jacky-creator", "operations"),
+    );
+  });
+
+  it("copies legacy state into Jacky Creator directories without deleting the source", () => {
+    const home = mkdtempSync(join(tmpdir(), "jacky-creator-migration-"));
+    try {
+      mkdirSync(legacyDataDir(home), { recursive: true });
+      mkdirSync(legacyCockpitDataDir(home), { recursive: true });
+      writeFileSync(join(legacyDataDir(home), "overlay.json"), "legacy overlay\n");
+      writeFileSync(join(legacyCockpitDataDir(home), "state.json"), "legacy operations\n");
+
+      const migrated = migrateLegacyDefaultState({
+        libraryRoot: defaultLibraryRoot(),
+        dataDir: defaultDataDir(home),
+        cockpitDataDir: defaultCockpitDataDir(home),
+        subtitleSkillDir: "",
+        coverSkillDir: "",
+      }, home);
+
+      expect(migrated).toEqual([
+        defaultDataDir(home),
+        defaultCockpitDataDir(home),
+      ]);
+      expect(readFileSync(join(defaultDataDir(home), "overlay.json"), "utf8"))
+        .toBe("legacy overlay\n");
+      expect(readFileSync(join(defaultCockpitDataDir(home), "state.json"), "utf8"))
+        .toBe("legacy operations\n");
+      expect(existsSync(join(legacyDataDir(home), "overlay.json"))).toBe(true);
+      expect(existsSync(join(legacyCockpitDataDir(home), "state.json"))).toBe(true);
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
+  });
+
+  it("does not overwrite an existing Jacky Creator state directory", () => {
+    const home = mkdtempSync(join(tmpdir(), "jacky-creator-existing-"));
+    try {
+      mkdirSync(legacyDataDir(home), { recursive: true });
+      mkdirSync(defaultDataDir(home), { recursive: true });
+      writeFileSync(join(legacyDataDir(home), "overlay.json"), "legacy\n");
+      writeFileSync(join(defaultDataDir(home), "overlay.json"), "current\n");
+
+      expect(migrateLegacyDefaultState({
+        libraryRoot: defaultLibraryRoot(),
+        dataDir: defaultDataDir(home),
+        cockpitDataDir: join(home, "custom-operations"),
+        subtitleSkillDir: "",
+        coverSkillDir: "",
+      }, home)).toEqual([]);
+      expect(readFileSync(join(defaultDataDir(home), "overlay.json"), "utf8"))
+        .toBe("current\n");
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
   });
 
   it("lets config and env override skill directories", () => {

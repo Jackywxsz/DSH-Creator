@@ -217,7 +217,7 @@ export function SchedulePage({ state, items, face, t, commit, openContent }: {
     </div>
 
     <Modal open={formOpen} onClose={() => { if (!saving) setFormOpen(false); }} title={editing === undefined ? t("operations.schedule.create") : t("operations.edit")} closeLabel={t("create.cancel")} footer={<><Button variant="outline" disabled={saving} onClick={() => { setFormOpen(false); }}>{t("create.cancel")}</Button><Button variant="primary" disabled={saving || draft.title.trim() === ""} onClick={() => { void save(); }}>{t("settings.save")}</Button></>}>
-      <div data-plugin="dsh-oil-creator" data-surface="operations-dialog" className="operationsFormGrid">
+      <div data-plugin="jacky-creator" data-surface="operations-dialog" className="operationsFormGrid">
         <label className="full"><span>{t("operations.schedule.field.title")}</span><input autoFocus value={draft.title} onChange={(event) => { setDraft({ ...draft, title: event.target.value }); }} /></label>
         <label><span>{t("operations.schedule.field.date")}</span><input type="date" value={draft.plannedDate} onChange={(event) => { setDraft({ ...draft, plannedDate: event.target.value }); }} /></label>
         <label><span>{t("operations.schedule.field.kind")}</span><select value={draft.kind} onChange={(event) => { setDraft({ ...draft, kind: event.target.value as ScheduleItem["kind"] }); }}><option value="content">{t("operations.schedule.kind.content")}</option><option value="review">{t("operations.schedule.kind.review")}</option><option value="live">{t("operations.schedule.kind.live")}</option><option value="custom">{t("operations.schedule.kind.custom")}</option></select></label>

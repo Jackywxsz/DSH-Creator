@@ -11,7 +11,7 @@
 - 对抗审查发现预构建 `lib/client.js` 曾在 CSS 虚拟模块注释中携带构建机绝对路径。已改为仓库相对模块 ID，并在 `release:check` 增加运行产物隐私扫描和负向测试；重新构建后扫描无命中。
 - 安装时会出现 DSH 宿主 Peer 缺失警告，但安装、Bundle 组合和卸载均成功；小白文档已说明以最终完成状态与 `dsh: pnpm failed` 为判断边界。
 - Security Reviewer：未发现高置信度、可从当前插件入口利用的新注入、凭据泄露或权限绕过。
-- Architecture Reviewer：内部插件 ID、Bundle ID 与数据目录继续保留 `dsh-oil-creator`，公开显示品牌使用 Jacky Creator；稳定版改名必须走单独迁移，Beta 不混改身份边界。
+- Architecture Reviewer：2026-08-25 的审核决定是暂时保留旧内部身份；该决定已由 `v0.1.0-beta.3` 的 `jacky-creator` 品牌迁移取代，旧名称只用于上游署名、历史记录和非破坏性状态迁移。
 
 1. **正式安装范围是否可控：PASS。** 开发与浏览器验收只写 `.lab`。正式 profile 中的插件已经是指向当前仓库的本地链接，本次只重建该链接指向的 `lib` 产物；没有改远程依赖、API Key 或内容目录。
 2. **是否出现两个 sidebar owner 或两个 `oilCreator` service：PASS。** 额外 patch 禁用已安装 bundle，只加载当前仓库；组合 graph 只有一个同名 bundle 和一个侧栏 owner。

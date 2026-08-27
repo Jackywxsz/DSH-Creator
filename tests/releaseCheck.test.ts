@@ -43,11 +43,13 @@ function git(repository: string, ...args: string[]) {
 }
 
 function createRepository() {
-  const repository = mkdtempSync(join(tmpdir(), "dsh-oil-creator-release-"));
+  const repository = mkdtempSync(join(tmpdir(), "jacky-creator-release-"));
+  const version = "0.1.0";
+  const installUrl = `https://github.com/Jackywxsz/DSH-Creator/releases/download/v${version}/jacky-creator-${version}.tgz`;
   const files = new Map<string, string>([
     ["package.json", JSON.stringify({
-      name: "dsh-oil-creator",
-      version: "0.1.0",
+      name: "jacky-creator",
+      version,
       repository: {
         type: "git",
         url: "git+https://github.com/Jackywxsz/DSH-Creator.git",
@@ -65,7 +67,9 @@ function createRepository() {
         "cordis.patch.yml",
         "README.md",
         "assets/readme/hero.png",
-        "docs/*.md",
+        "docs/installation.md",
+        "docs/usage.md",
+        "docs/files.md",
         "BRAND_ASSETS.md",
         "CONTRIBUTING.md",
         "SECURITY.md",
@@ -81,7 +85,7 @@ function createRepository() {
       },
     }, null, 2)],
     ["pnpm-lock.yaml", "lockfileVersion: '9.0'\n"],
-    ["cordis.patch.yml", "patch\n"],
+    ["cordis.patch.yml", "- id: ui-sidebar\n  disabled: true\n- insert:\n    - id: jacky-creator\n      name: jacky-creator\n"],
     ["tsdown.config.ts", "export default {};\n"],
     ["vitest.config.ts", "export default {};\n"],
     ["scripts/collect-publish.mjs", "export {};\n"],
@@ -95,10 +99,13 @@ function createRepository() {
     ["src/index.ts", "export {};\n"],
     ["src/client/index.tsx", "export {};\n"],
     ...REQUIRED_CHAIN_FILES.map((file) => [file, "export {};\n"] as const),
-    ["README.md", "# test\n"],
+    ["CHANGELOG.md", `# changes\n\n## [${version}]\n`],
+    ["README.md", `# test\n\n${installUrl}\n`],
     ["assets/readme/hero.png", "png\n"],
-    ["docs/installation.md", "# install\n"],
-    ["docs/distribution.md", "# distribute\n"],
+    ["docs/installation.md", `# install\n\n${installUrl}\n`],
+    ["docs/usage.md", "# usage\n"],
+    ["docs/files.md", "# files\n"],
+    ["docs/distribution.md", `# distribute\n\n${installUrl}\n`],
     ["BRAND_ASSETS.md", "# brand\n"],
     ["CONTRIBUTING.md", "# contributing\n"],
     ["SECURITY.md", "# security\n"],
@@ -210,6 +217,59 @@ describe("release:check", () => {
       expect(result.code).not.toBe(0);
       expect(result.output).toContain("官方 DSH 运行时组件必须声明为 peerDependencies");
       expect(result.output).toContain("@deepseek-ai/dsh-tools");
+    } finally {
+      rmSync(repository, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects the legacy package identity", () => {
+    const repository = createRepository();
+    try {
+      const manifestPath = join(repository, "package.json");
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+      manifest.name = "dsh-oil-creator";
+      writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+      const result = runReleaseCheck(repository);
+      expect(result.code).not.toBe(0);
+      expect(result.output).toContain("package name 必须为 jacky-creator");
+    } finally {
+      rmSync(repository, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects version and install URL drift", () => {
+    const repository = createRepository();
+    try {
+      const manifestPath = join(repository, "package.json");
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+      manifest.version = "0.1.1";
+      writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+      const result = runReleaseCheck(repository);
+      expect(result.code).not.toBe(0);
+      expect(result.output).toContain(
+        "README.md 未指向当前版本的 jacky-creator 安装包",
+      );
+      expect(result.output).toContain("CHANGELOG.md 缺少 0.1.1 条目");
+    } finally {
+      rmSync(repository, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects packaging every internal document", () => {
+    const repository = createRepository();
+    try {
+      const manifestPath = join(repository, "package.json");
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+      manifest.files.push("docs/*.md");
+      writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+      const result = runReleaseCheck(repository);
+      expect(result.code).not.toBe(0);
+      expect(result.output).toContain(
+        "npm tarball 不应打包内部 docs/*.md，只允许显式用户文档",
+      );
     } finally {
       rmSync(repository, { recursive: true, force: true });
     }

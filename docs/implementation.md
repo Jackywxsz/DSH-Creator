@@ -1,10 +1,12 @@
 # 内容工作台：现阶段实现
 
-Jacky Creator 的内部包名暂时保留为 `dsh-oil-creator`。它是挂在 DeepSeek Harness 配置上的单一插件，把对话、内容生产和运营沉淀收进同一块界面，同时保留本地文件夹作为正文真源。
+Jacky Creator 的包名、Bundle ID 和设置命名空间统一为 `jacky-creator`。它是挂在 DeepSeek Harness 配置上的单一插件，把对话、内容生产和运营沉淀收进同一块界面，同时保留本地文件夹作为正文真源。
 
-Beta 安装：`dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.2/dsh-oil-creator-0.1.0-beta.2.tgz`。预构建包避免 pnpm 10 对 Git 源码 `prepare` 的构建授权门槛。外部 CLI 必须显式选择目标 Profile；本地开发使用目录路径。
+安装：`dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.3/jacky-creator-0.1.0-beta.3.tgz`。预构建包避免 pnpm 10 对 Git 源码 `prepare` 的构建授权门槛。外部 CLI 必须显式选择目标 Profile；本地开发使用目录路径。
 
-卸载：`npx @deepseek-ai/dsh plugin --profile web remove dsh-oil-creator`
+卸载：`npx @deepseek-ai/dsh plugin --profile web remove jacky-creator`
+
+从旧包升级时，先卸载旧插件包，再安装 `jacky-creator`。首次启动只在新目录不存在时复制旧版工作台和运营状态；旧目录不删除，已有新目录不覆盖。
 
 插件对官方侧栏的替换只写在项目自己的 `cordis.patch.yml`，通过 `package.json` 的 `dsh.bundle.patch` 随包安装。不要把这段配置写进用户的 `~/.dsh/profiles/web/cordis.patch.yml`；用户层不会跟随插件卸载，残留后会把官方侧栏继续关掉。
 
@@ -70,7 +72,7 @@ Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最�
 保持 **一个** Harness 插件。官方要求：只有能力需要独立替换时才拆包，不要预防性拆分。见 DeepSeek Harness `docs/user/develop/practice/index.zh.md`。
 
 设置位 `settings.plugin.item` 的含义是「一个插件一张卡」，不是一个功能一张卡。
-DeepSeek Harness `0.1.1-rc.2` 会先从 Host 的 `settings.describe` 取得插件命名空间，再按同名 `key` 派发设置卡；插件仍保留旧版使用的 `id`，用于现有用户兼容。当前设置值统一由插件 Remote 和 `~/.dsh-oil-creator/overlay.json` 管理，Host 命名空间只负责让设置卡被发现，避免双数据源。
+DeepSeek Harness `0.1.1-rc.2` 会先从 Host 的 `settings.describe` 取得插件命名空间，再按同名 `key` 派发设置卡。当前设置值统一由插件 Remote 和 `~/.jacky-creator/overlay.json` 管理，Host 命名空间只负责让设置卡被发现，避免双数据源。
 
 执行分工：
 
@@ -95,7 +97,7 @@ DeepSeek Harness `0.1.1-rc.2` 会先从 Host 的 `settings.describe` 取得插�
 
 | 数据 | 位置 |
 | --- | --- |
-| 影片目录、`enabledPlatforms`、脚本规则（人设）、工程绑定、待录制、等导出、手写发布状态、同步到的播放/赞/评、烧录/生成任务 | `~/.dsh-oil-creator/overlay.json` |
+| 影片目录、`enabledPlatforms`、脚本规则（人设）、工程绑定、待录制、等导出、手写发布状态、同步到的播放/赞/评、烧录/生成任务 | `~/.jacky-creator/overlay.json` |
 | 成片、字幕、封面、发布包、公众号文章 | `~/Movies/视频项目/<日期_标题>/` |
 | 字幕和封面 Key | Harness 官方凭据（字幕用 `DASHSCOPE_API_KEY`、封面用 `ZENMUX_API_KEY`），与 `dsh-vision` 共用 |
 | 列表选中项、侧栏宽度 | 浏览器本地 UI 状态 |
@@ -110,7 +112,7 @@ ego-browser nodejs < scripts/collect-publish.mjs
 
 采集脚本每次开一个新的 `oil-collect-*` 空间，跑完就关掉，并清掉登记表里已死进程留下的旧空间，以及历史遗留名 `oil-collect-publish`。它不会按前缀扫掉其他还在跑的 `oil-collect-*`。`pnpm build` 用原地覆写把 `scripts/collect-publish.mjs` 写进 `lib/`，避免 `cp` 断开 profile 里 `file:` 依赖的硬链接。翻页范围：小红书 `note/user/posted`（列表滚到底）、抖音 `work_list`（`max_cursor`）、B 站 `/x/web/archives`（`pn`）、视频号 `post/post_list`（`currentPage`）。对上之后把 `remoteId` 写进 overlay，下一次优先按这个 id 对齐，不再只靠标题。
 
-90 秒内再点同步会直接用 `~/.dsh-oil-creator/collect-cache.json`。超过这个时间再跑 Ego。可用 `OIL_COLLECT_KEEP=1` 留下页面，`OIL_COLLECT_SPACE` 指定空间名，`OIL_COLLECT_PLATFORMS=wechat,douyin` 只跑其中几个。工作台按钮和 `oil_sync_publish` 走同一条脚本。
+90 秒内再点同步会直接用 `~/.jacky-creator/collect-cache.json`。超过这个时间再跑 Ego。可用 `OIL_COLLECT_KEEP=1` 留下页面，`OIL_COLLECT_SPACE` 指定空间名，`OIL_COLLECT_PLATFORMS=wechat,douyin` 只跑其中几个。工作台按钮和 `oil_sync_publish` 走同一条脚本。
 
 文件夹约定：`YYYY-MM-DD_可读标题`。发布包规范名是 `publish-package.json`。带字幕的成片文件名含 `_subtitled`。
 

@@ -4,7 +4,7 @@
 
 <p align="center">
   <strong>一个面向内容创作者的 DeepSeek Harness 本地工作台。</strong><br>
-  灵感进入内容管线，运营复盘沉淀为知识，再回到下一次脚本创作。
+  从灵感和脚本，到制作、发布与复盘，都在同一处推进。
 </p>
 
 <p align="center">
@@ -20,12 +20,9 @@
   <a href="./SECURITY.md">安全说明</a>
 </p>
 
-> [!WARNING]
-> 这是 `v0.1.0-beta.2` 测试版。安装来源固定为同版本的 GitHub Release 预构建包；社区插件市场收录完成后也会安装同一份包，不跟随开发分支。Beta 首轮以 macOS + DSH Desktop 2.0.2 为验收环境；Windows 仍需真实用户测试。
-
 ## Jacky Creator 是什么
 
-Jacky Creator 把 DeepSeek Harness 的对话能力和本地创作目录连起来，并增加内容与运营工作区。它不建立封闭数据库，也不把正文藏进应用：一条内容仍然对应一个普通文件夹，AI、编辑器和你自己都能继续读写。
+Jacky Creator 把 DeepSeek Harness 的对话能力和本地创作目录连起来，并增加内容、运营和灵感工作区。每条内容仍是一个普通文件夹，AI、编辑器和你自己都能继续读写。
 
 ```text
 灵感 → 选题 → 脚本 → 演示 / 视频 / 字幕 / 封面 → 发布 → 复盘
@@ -33,176 +30,110 @@ Jacky Creator 把 DeepSeek Harness 的对话能力和本地创作目录连起来
   └────────── 运营规则、模板和知识回到下一次创作 ────────┘
 ```
 
-你会看到四个核心入口：
-
-- **对话**：继续使用 DSH Agent，并把当前内容和运营知识带进对话。
-- **内容**：按本地文件夹管理脚本、视频、字幕、封面、文章和发布状态。
+- **对话**：使用 DSH Agent，并把当前内容和运营知识带进对话。
+- **内容**：管理脚本、视频、字幕、封面、文章和发布状态。
 - **运营**：查看今日推进、档期、内容管线、阶段目标和发布后复盘。
-- **灵感**：用卡片记录想法、保留标签和分级，确认后推进为真实内容项目。
+- **灵感**：记录想法、标签和分级，确认后推进为内容项目。
 
-## 10 分钟安装测试版
+## 安装
 
-### 第 1 步：安装 DSH Desktop
+### 1. 安装 DSH Desktop
 
-下载并安装 [DSH Desktop 2.0.2](https://github.com/anywhere-labs/dsh-desktop/releases/tag/v2.0.2)。
+下载并安装 [DSH Desktop 2.0.2](https://github.com/anywhere-labs/dsh-desktop/releases/tag/v2.0.2)。DSH Desktop 和 Jacky Creator 均为社区项目。
 
-DSH Desktop 是社区维护的桌面客户端，不是 DeepSeek 官方桌面产品。Jacky Creator 是 DeepSeek Harness 社区插件，也不代表 DeepSeek 官方产品。
+### 2. 安装 Jacky Creator
 
-### 第 2 步：安装 Jacky Creator
-
-打开 DSH Desktop 的内置终端，完整复制下面一行并回车：
+打开 DSH Desktop 的内置终端，复制下面一行并回车：
 
 ```bash
-dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.2/dsh-oil-creator-0.1.0-beta.2.tgz
+dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.3/jacky-creator-0.1.0-beta.3.tgz
 ```
 
-安装完成后彻底退出并重新打开 DSH Desktop。侧边栏左上角出现 **Jacky Creator**，并能进入“内容 / 运营 / 灵感”，即表示插件已经加载。
+安装完成后彻底退出并重新打开 DSH Desktop。侧边栏左上角出现 **Jacky Creator**，并能进入“内容 / 运营 / 灵感”，即表示安装成功。
 
-> [!TIP]
-> 测试版固定到 `v0.1.0-beta.2`，这样以后仓库继续开发也不会悄悄改变你本机的版本。
+### 3. 完成首次配置
 
-### 第 3 步：让 AI 完成首次配置
+新建会话，选择 `standard` 或 `code` Agent，然后发送：
 
-新建会话，选择 `standard` 或 `code` Agent，然后直接发送：
+> 帮我配置 Jacky Creator：选择本地内容目录，先预览准备修改的设置，确认后再保存。
 
-> 检查并配置 Jacky Creator，找到适合的内容目录，先预览准备修改的设置，并告诉我还缺哪些可选能力。
+配置完成后，直接告诉 AI 想做的内容主题，就可以新建项目、整理选题并生成脚本初稿。
 
-AI 会先只读检查目录和可选工具；创建目录、保存配置或批量重命名前都会先给你预览并等待确认。
+完整步骤见 [安装与首次使用](docs/installation.md)。
 
-### 第 4 步：创建第一条内容
-
-继续发送：
-
-> 今天做一期 DeepSeek Harness 安装上手。新建内容项目，把选题写进 topic.md，再给我一个脚本初稿。
-
-随后可以在“内容”查看资产状态，在“运营”安排推进，也可以把新灵感继续记录到灵感库。
-
-更详细的逐步说明见 [小白安装与首次使用](docs/installation.md)。
-
-## 安装失败怎么办
-
-先确认使用的是 **DSH Desktop 内置终端**，而不是普通聊天输入框。
-
-测试版使用预构建 `.tgz`，正常情况下不会触发源码构建授权。如果你安装的是 `github:Jackywxsz/DSH-Creator#...` 源码地址，pnpm 10 会先要求在目标 Profile 的 `pnpm-workspace.yaml` 中允许 `dsh-oil-creator` 构建；这条路径只供开发者使用，小白用户请改回上面的 Release 安装包。
-
-如果左侧仍没有 Jacky Creator：
-
-1. 完全退出并重新打开 DSH Desktop。
-2. 确认命令末尾版本号是 `v0.1.0-beta.2`。
-3. 到 [GitHub Issues](https://github.com/Jackywxsz/DSH-Creator/issues) 提交系统版本、DSH Desktop 版本和安装日志；不要粘贴 API Key。
-
-## 本地文件如何组织
+## 本地文件
 
 ```text
-~/Movies/视频项目/
-└── 2026-08-25_DeepSeek Harness 上手/
+内容目录/
+└── YYYY-MM-DD_内容标题/
     ├── topic.md
     ├── script.md
-    ├── DeepSeek Harness 上手.mp4
-    ├── DeepSeek Harness 上手.srt
-    ├── DeepSeek Harness 上手_subtitled.mp4
-    ├── DeepSeek Harness 上手_3x4.png
-    ├── DeepSeek Harness 上手_4x3.png
-    ├── DeepSeek Harness 上手_16x9.png
-    ├── publish-package.json
+    ├── 内容标题.mp4
+    ├── 内容标题.srt
+    ├── 内容标题_16x9.png
     └── 公众号文章/
 ```
 
-正文和产物保存在你选择的内容目录。工程绑定、运营状态、标签、发布标记和同步数据保存在 `~/.dsh-oil-creator/`。保留旧目录名是为了让现有测试用户升级时不丢数据。
+正文和产物保存在你选择的内容目录。Jacky Creator 只在本机保存工作台设置、运营状态和发布记录，不会把正文搬进封闭数据库。
 
-## 核心能力与可选扩展
+## 核心能力
 
-不安装任何 Jacky 私有 Skill，也可以使用核心内容库、运营工作台、灵感库和脚本规则。
+不安装额外 Skill，也可以使用内容库、运营工作台、灵感库和脚本规则。字幕、封面、演示动画、Screen Studio 和多平台发布属于可选扩展，缺少时不会影响核心工作台。
 
-| 能力 | Beta 状态 | 额外依赖 |
-| --- | --- | --- |
-| 对话、内容、运营、灵感 | 核心能力 | 无 |
-| 本地脚本与项目目录 | 核心能力 | 无 |
-| 字幕转录、校对、烧录 | 可选 | `oil-subtitle`、DashScope Key |
-| Jacky 三画幅封面 | 可选 | `jacky-cover`、`oil-cover`、ZenMux Key |
-| 演示动画 | 可选 | `jacky-motion2-0` |
-| Screen Studio 工程 | 可选，仅 macOS | `screen-studio-editor` |
-| 多平台草稿与数据回收 | 可选，仅 macOS | Ego Lite、`video-publisher` |
+| 能力 | 说明 |
+| --- | --- |
+| 内容工作流 | 管理选题、脚本、制作资产和发布状态 |
+| 运营工作台 | 管理档期、目标、复盘和内容推进 |
+| 灵感库 | 记录想法并推进为真实内容项目 |
+| 可选制作能力 | 字幕、封面、演示动画和多平台发布 |
 
-缺少可选依赖时，只关闭对应环节，不应影响核心工作台。Jacky Creator 不替你自动完成录制、剪辑、最终发表，也不会在未确认时上传内容。
+详细能力和依赖见 [使用说明](docs/usage.md)。
 
-## 数据、权限和安全边界
+## 数据与权限
 
 - 正文、视频、字幕、封面和文章留在用户选择的本地目录。
-- API Key 使用 DSH 凭据服务保存，界面只显示“已配置 / 未配置”。
-- 字幕、封面和平台同步只有在用户主动启用对应能力时才访问外部服务。
-- 目录创建、批量重命名、运营知识确认和配置保存遵循“先预览、再确认、后执行”。
-- 插件卸载不会主动删除内容目录或 `~/.dsh-oil-creator/` 数据。
+- API Key 由 DSH 凭据服务保存，界面只显示配置状态。
+- 目录创建、批量重命名和配置保存会先预览，再等待确认。
+- 外部服务只在用户主动启用对应能力时访问。
+- 插件不会在卸载时删除内容目录。
 
 安全问题请按 [Security Policy](SECURITY.md) 私下报告，不要在公开 Issue 中附带密钥、私人路径或未脱敏内容。
 
-## 更新与卸载
+## 常见问题
 
-Beta 期间每个版本都固定到 Git Tag。升级时先卸载插件包，再安装 README 指定的新 Tag；本地内容和 `~/.dsh-oil-creator/` 状态目录会保留。
+如果侧边栏没有出现 Jacky Creator：
 
-```bash
-dsh plugin remove dsh-oil-creator
-dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.2/dsh-oil-creator-0.1.0-beta.2.tgz
-```
+1. 确认安装命令是在 DSH Desktop 内置终端执行的。
+2. 彻底退出并重新打开 DSH Desktop。
+3. 仍然失败时，到 [GitHub Issues](https://github.com/Jackywxsz/DSH-Creator/issues) 提交系统版本、DSH Desktop 版本和脱敏后的安装日志。
 
-只卸载：
-
-```bash
-dsh plugin remove dsh-oil-creator
-```
-
-执行后重启 DSH Desktop。不要手动编辑 `~/.dsh/profiles/*/package.json`，也不要把仓库里的 `cordis.patch.yml` 复制进用户 Profile。
+不要手动修改 DSH Profile 的 `package.json` 或 `cordis.patch.yml`。
 
 ## 兼容性
 
-| 环境 | 当前策略 |
-| --- | --- |
-| DSH Desktop 2.0.2 | Beta 首要支持目标 |
-| DeepSeek Harness 0.1.1-rc.2 | 构建与插件 API 基线 |
-| macOS | 首轮完整验收环境 |
-| Windows x64 | 核心能力待真实用户验证；macOS 专属扩展不可用 |
-| Node.js | 源码开发需要 22.19 或更高版本 |
-
-DeepSeek Harness 仍处于 Developer Preview。上游破坏性升级不会自动进入稳定版；每次升级 DSH 基线都必须重新通过测试、打包和安装门禁。
+当前主要环境为 macOS、DSH Desktop 2.0.2 和 DeepSeek Harness 0.1.1-rc.2。Windows x64 暂不作为推荐环境，Screen Studio、Ego Lite 等扩展仅支持 macOS。
 
 ## 插件市场
 
-Jacky Creator 通过社区目录 [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) 申请收录，审核通过后会自动出现在 [dsh-market](https://github.com/dsh-market/dsh-market) 中。市场安装固定使用 `v0.1.0-beta.2` 的 GitHub Release 包，不从 `main` 现场构建。
+Jacky Creator 正在通过 [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) 申请社区目录收录。审核完成后，可以在 [dsh-market](https://github.com/dsh-market/dsh-market) 中搜索并安装。在此之前，请使用上面的安装命令。
 
-当前 Beta 不发布 npm。市场尚未显示 Jacky Creator 时，请使用上面的固定版本安装命令；市场收录不代表 DeepSeek 官方背书。
+## 文档与开发
 
-上架材料、审核门禁和回滚方案见 [发布与插件市场路径](docs/distribution.md)。
+- [安装与首次使用](docs/installation.md)
+- [日常使用](docs/usage.md)
+- [内容文件夹约定](docs/files.md)
+- [参与贡献](CONTRIBUTING.md)
 
-## 开发与验证
+本地开发：
 
 ```bash
-git clone https://github.com/Jackywxsz/DSH-Creator.git
-cd DSH-Creator
 pnpm install --frozen-lockfile
 pnpm check
 ```
 
-正式提交、Tag 或 Release 前还必须运行：
-
-```bash
-pnpm release:check
-```
-
-开发环境和隔离 Profile 见 [实验环境](docs/lab-development.md)。插件实现、Bundle Patch 与 DSH 规范边界见 [实现说明](docs/implementation.md)。
-
-## 文档
-
-- [小白安装与首次使用](docs/installation.md)
-- [日常使用与完整工具说明](docs/usage.md)
-- [内容文件夹约定](docs/files.md)
-- [Creator Cockpit 使用与架构](docs/creator-cockpit.md)
-- [插件实现与兼容性说明](docs/implementation.md)
-- [发布与插件市场路径](docs/distribution.md)
-- [参与贡献](CONTRIBUTING.md)
-
 ## 项目来源
 
-Jacky Creator 基于开源项目 [dsh-oil-creator](https://github.com/oil-oil/dsh-oil-creator) 的本地内容工作流继续开发，并融合了 Jacky 原 Creator Cockpit 的运营方法与界面经验。感谢原项目作者和贡献者。产品界面统一使用 Jacky Creator 品牌；为兼容已有安装和数据，部分包名、工具名与 skill 名仍保留原有技术标识。
+Jacky Creator 基于上游开源项目 [dsh-oil-creator](https://github.com/oil-oil/dsh-oil-creator) 的本地内容工作流继续开发，并融合了 Jacky 原 Creator Cockpit 的运营方法与界面经验。感谢原项目作者和贡献者。
 
 ## License 与品牌资产
 

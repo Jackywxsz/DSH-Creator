@@ -35,6 +35,7 @@ const REQUIRED_FILES = [
   "tests/presentationInstruction.test.ts",
   "tests/settingsHost.test.ts",
   "tests/settingsSlot.test.ts",
+  "CHANGELOG.md",
   "README.md",
   "assets/readme/hero.png",
   "docs/installation.md",
@@ -54,6 +55,7 @@ const RUNTIME_FILES = [
 
 const GITHUB_REPOSITORY = "https://github.com/Jackywxsz/DSH-Creator";
 const GITHUB_REPOSITORY_GIT = "git+https://github.com/Jackywxsz/DSH-Creator.git";
+const EXPECTED_PACKAGE_NAME = "jacky-creator";
 const GITHUB_REMOTE_URLS = new Set([
   "git@github.com:Jackywxsz/DSH-Creator.git",
   "https://github.com/Jackywxsz/DSH-Creator.git",
@@ -75,7 +77,7 @@ function run(root, command, args) {
 }
 
 function npmPack(root, args) {
-  const cacheDirectory = mkdtempSync(join(tmpdir(), "dsh-oil-creator-npm-cache-"));
+  const cacheDirectory = mkdtempSync(join(tmpdir(), "jacky-creator-npm-cache-"));
   try {
     return execFileSync("npm", args, {
       cwd: root,
@@ -175,9 +177,31 @@ function checkRelease(root) {
   }
 
   const scripts = manifest.scripts ?? {};
+  if (manifest.name !== EXPECTED_PACKAGE_NAME) {
+    addFailure(`package name 必须为 ${EXPECTED_PACKAGE_NAME}`);
+  }
   if (typeof manifest.version !== "string"
     || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(manifest.version)) {
     addFailure("version 必须是可发布的 SemVer 版本");
+  }
+  const expectedInstallUrl = `${GITHUB_REPOSITORY}/releases/download/v${manifest.version}/${EXPECTED_PACKAGE_NAME}-${manifest.version}.tgz`;
+  for (const file of ["README.md", "docs/installation.md", "docs/distribution.md"]) {
+    const path = resolve(root, file);
+    if (existsSync(path) && !readFileSync(path, "utf8").includes(expectedInstallUrl)) {
+      addFailure(`${file} 未指向当前版本的 ${EXPECTED_PACKAGE_NAME} 安装包`);
+    }
+  }
+  const changelogPath = resolve(root, "CHANGELOG.md");
+  if (existsSync(changelogPath)
+    && !readFileSync(changelogPath, "utf8").includes(`## [${manifest.version}]`)) {
+    addFailure(`CHANGELOG.md 缺少 ${manifest.version} 条目`);
+  }
+  const patchPath = resolve(root, "cordis.patch.yml");
+  if (existsSync(patchPath)) {
+    const patch = readFileSync(patchPath, "utf8");
+    if (!patch.includes(`- id: ${EXPECTED_PACKAGE_NAME}\n      name: ${EXPECTED_PACKAGE_NAME}`)) {
+      addFailure(`cordis.patch.yml 未使用 ${EXPECTED_PACKAGE_NAME} Bundle ID`);
+    }
   }
   if (scripts.build !== "tsdown && node scripts/copy-inplace.mjs scripts/collect-publish.mjs lib/collect-publish.mjs") {
     addFailure("build 脚本不是仓库内可复现的 tsdown + lib 拷贝流程");
@@ -229,11 +253,17 @@ function checkRelease(root) {
   }
 
   const packageFiles = new Set(manifest.files ?? []);
+  if (packageFiles.has("docs/*.md")) {
+    addFailure("npm tarball 不应打包内部 docs/*.md，只允许显式用户文档");
+  }
   for (const file of [
     ...RUNTIME_FILES,
     "cordis.patch.yml",
     "README.md",
     "assets/readme/hero.png",
+    "docs/installation.md",
+    "docs/usage.md",
+    "docs/files.md",
     "BRAND_ASSETS.md",
     "CONTRIBUTING.md",
     "SECURITY.md",
@@ -284,7 +314,8 @@ function runReleasePipeline(root) {
     ...RUNTIME_FILES,
     "assets/readme/hero.png",
     "docs/installation.md",
-    "docs/distribution.md",
+    "docs/usage.md",
+    "docs/files.md",
     "BRAND_ASSETS.md",
     "CONTRIBUTING.md",
     "SECURITY.md",

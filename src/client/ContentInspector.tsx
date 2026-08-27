@@ -439,7 +439,7 @@ function ScriptOperationsBridge({
 export type ContentInspectorProps =
   & PropsRuntime<"shell.overlay">
   & InjectFace<CreatorViewFace>
-  & PropsLocale<"dsh.oil.creator">
+  & PropsLocale<"dsh.jacky.creator">
   & {
     closeDetails: () => void;
     cockpit: CreatorCockpitFace;
@@ -952,7 +952,7 @@ export function ContentInspector({
 
   return (
     <div
-      data-plugin="dsh-oil-creator"
+      data-plugin="jacky-creator"
       data-surface="inspector"
       className={[
         "docked",

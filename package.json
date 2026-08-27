@@ -1,6 +1,6 @@
 {
-  "name": "dsh-oil-creator",
-  "version": "0.1.0-beta.2",
+  "name": "jacky-creator",
+  "version": "0.1.0-beta.3",
   "description": "Jacky Creator: a local-first content and operations cockpit for DeepSeek Harness",
   "license": "MIT",
   "repository": {
@@ -42,7 +42,9 @@
     "scripts/generate_jacky_cover.py",
     "README.md",
     "assets/readme/hero.png",
-    "docs/*.md",
+    "docs/installation.md",
+    "docs/usage.md",
+    "docs/files.md",
     "BRAND_ASSETS.md",
     "CONTRIBUTING.md",
     "SECURITY.md",

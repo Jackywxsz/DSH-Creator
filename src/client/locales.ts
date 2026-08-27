@@ -1,4 +1,4 @@
-export const NS = "dsh.oil.creator";
+export const NS = "dsh.jacky.creator";
 
 export const zh = {
   tab: "内容",

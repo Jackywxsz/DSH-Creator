@@ -16,10 +16,6 @@
   <g clip-path="url(#canvas)">
     <rect width="1200" height="420" fill="#F4EFE3"/>
     <rect width="1200" height="420" fill="url(#paper-grid)"/>
-    <circle cx="1050" cy="178" r="244" fill="#1D4ED8"/>
-    <circle cx="1050" cy="178" r="190" fill="#F8F5EC" stroke="#102034" stroke-width="3"/>
-    <path d="M842 280C947 327 1100 326 1190 266" fill="none" stroke="#1D4ED8" stroke-width="5"/>
-    <circle cx="890" cy="295" r="9" fill="#79C800" stroke="#102034" stroke-width="3"/>
   </g>
 
   <g id="title-block" transform="translate(58 52)">
@@ -27,7 +23,7 @@
       <rect width="336" height="34" rx="17" fill="#102034"/>
       <text x="18" y="23" fill="#FFFFFF"
             font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
-            font-size="15" font-weight="700" letter-spacing="1.4">DEEPSEEK HARNESS PLUGIN · BETA</text>
+            font-size="15" font-weight="700" letter-spacing="1.4">DEEPSEEK HARNESS PLUGIN</text>
     </g>
 
     <text x="0" y="112" fill="#102034"
@@ -45,8 +41,7 @@
      font-family="-apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, sans-serif">
     <g>
       <rect width="112" height="62" rx="15" fill="#FFFFFF" stroke="#102034" stroke-width="2.5"/>
-      <path d="M24 39c0-10 6-17 15-20-2 8 0 15 6 20M37 17c5-7 11-9 18-8-1 8-6 13-15 15" fill="none" stroke="#79C800" stroke-width="4" stroke-linecap="round"/>
-      <text x="59" y="38" fill="#102034" font-size="20" font-weight="750">灵感</text>
+      <text x="56" y="39" text-anchor="middle" fill="#102034" font-size="20" font-weight="750">灵感</text>
     </g>
     <path d="M123 31h24" stroke="#102034" stroke-width="2.5" stroke-linecap="round"/>
     <path d="m141 24 8 7-8 7" fill="none" stroke="#102034" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>

@@ -131,7 +131,7 @@ export function OilSidebarRoot({
   return (
     <div
       ref={column}
-      data-plugin="dsh-oil-creator"
+      data-plugin="jacky-creator"
       data-surface="sidebar"
       data-cockpit-theme={sidebarTab === "operations" ? operationsTheme : undefined}
       className={cx(

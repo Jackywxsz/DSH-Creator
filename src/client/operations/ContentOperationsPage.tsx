@@ -262,7 +262,7 @@ export function ContentOperationsPage({
           </>
         )}
       >
-        <div data-plugin="dsh-oil-creator" data-surface="operations-dialog" className="operationsFormGrid">
+        <div data-plugin="jacky-creator" data-surface="operations-dialog" className="operationsFormGrid">
           <label className="full"><span>{t("create.name")}</span><Input id="operations-create-name" autoFocus value={newTitle} placeholder={t("create.name.placeholder")} disabled={creating} onChange={(event) => { setNewTitle(event.target.value); }} onKeyDown={(event) => { if (event.key !== "Enter") return; event.preventDefault(); void createNow(); }} /></label>
           {createError !== undefined && <div className="createError">{createError}</div>}
         </div>

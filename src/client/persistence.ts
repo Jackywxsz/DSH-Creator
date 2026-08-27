@@ -1,6 +1,6 @@
 import type { ContentFilter } from "../types.ts";
 
-export const CREATOR_STORAGE_KEY = "dsh-oil-creator/ui/v1";
+export const CREATOR_STORAGE_KEY = "jacky-creator/ui/v1";
 
 export type SidebarTab = "sessions" | "content" | "operations";
 

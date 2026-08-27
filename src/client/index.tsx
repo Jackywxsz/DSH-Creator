@@ -79,7 +79,7 @@ import "./brand/JackyBrand.css";
 
 declare module "@deepseek-ai/dsh-client-ui-slots" {
   interface LocaleNamespaceMap {
-    "dsh.oil.creator": CreatorKey;
+    "dsh.jacky.creator": CreatorKey;
   }
 }
 
@@ -169,7 +169,7 @@ function unwrap<T>(answer: RemoteAnswer<T>, fallback: string): T {
 export const inject = ["slots", "locale", "remote", "workspaces", "layout", "connection"];
 
 export function apply(ctx: ClientContext): void {
-  ctx.effect(() => ctx.locale.register(NS, { zh, en }), "dsh-oil-creator: dictionaries");
+  ctx.effect(() => ctx.locale.register(NS, { zh, en }), "jacky-creator: dictionaries");
   ctx.effect(() => {
     remountPluginCss();
     const releaseBrandScope = mountJackyBrandScope();
@@ -178,7 +178,7 @@ export function apply(ctx: ClientContext): void {
       releasePluginCss();
       releaseShellChrome();
     };
-  }, "dsh-oil-creator: chrome");
+  }, "jacky-creator: chrome");
   const remoteOf = (): OilCreatorRemote | undefined =>
     ctx.get("remote.oilCreator") as OilCreatorRemote | undefined;
   const cockpitRemoteOf = (): CreatorCockpitRemote | undefined =>
@@ -500,12 +500,12 @@ export function apply(ctx: ClientContext): void {
       id: "jacky-creator-paper-growth-hero",
       priority: -1,
     }, JackyConversationHero),
-  ), "dsh-oil-creator: conversation hero brand");
+  ), "jacky-creator: conversation hero brand");
   ctx.effect(() => conversationSlots.inject("conversation.input.dock", () => conversationSlots.register({
     name: "conversation.input.dock",
     id: "creator-cockpit-session-bridge",
     order: 1000,
-  }, CockpitSessionBridge)), "dsh-oil-creator: session input bridge");
+  }, CockpitSessionBridge)), "jacky-creator: session input bridge");
 
   ctx.effect(() => {
     const triggers = ctx.get("inputTriggers") as
@@ -519,7 +519,7 @@ export function apply(ctx: ClientContext): void {
         return listed.items.map((item) => ({ id: item.id, title: item.title }));
       },
     );
-  }, "dsh-oil-creator: content triggers");
+  }, "jacky-creator: content triggers");
 
   const injectSidebar = (): OilSidebarInjected => ({
     startSession: (workspaceId?: WorkspaceId) => {
@@ -639,7 +639,7 @@ export function apply(ctx: ClientContext): void {
         CreatorSettingsCard,
         {
           namespace: CREATOR_SETTINGS_NAMESPACE,
-          legacyId: "dsh-oil-creator",
+          legacyId: "jacky-creator",
           legacyOrder: 40,
           locale: NS,
           inject: () => ({
@@ -656,5 +656,5 @@ export function apply(ctx: ClientContext): void {
       stopSettings();
       await disposeRemote();
     };
-  }, "dsh-oil-creator: remote-view");
+  }, "jacky-creator: remote-view");
 }

@@ -13,7 +13,7 @@ export interface PreviewServerRecord {
 }
 
 export function previewRegistryPath(root = homedir()): string {
-  return join(root, ".dsh-oil-creator", "preview-servers.json");
+  return join(root, ".jacky-creator", "preview-servers.json");
 }
 
 export function previewRegistryPathForDataDir(dataDir: string): string {

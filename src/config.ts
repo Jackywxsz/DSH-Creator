@@ -1,6 +1,6 @@
-import { existsSync } from "node:fs";
+import { cpSync, existsSync, lstatSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 import Schema from "@deepseek-ai/schemastery";
 
@@ -17,12 +17,46 @@ export function defaultLibraryRoot(platform: NodeJS.Platform = process.platform)
   return join(homedir(), videos, "视频项目");
 }
 
-export function defaultDataDir(): string {
-  return join(homedir(), ".dsh-oil-creator");
+export function defaultDataDir(home = homedir()): string {
+  return join(home, ".jacky-creator");
 }
 
-export function defaultCockpitDataDir(): string {
-  return join(homedir(), ".dsh-creator-cockpit-lab");
+export function defaultCockpitDataDir(home = homedir()): string {
+  return join(defaultDataDir(home), "operations");
+}
+
+export function legacyDataDir(home = homedir()): string {
+  return join(home, ".dsh-oil-creator");
+}
+
+export function legacyCockpitDataDir(home = homedir()): string {
+  return join(home, ".dsh-creator-cockpit-lab");
+}
+
+export function copyLegacyStateDirectory(source: string, target: string): boolean {
+  if (source === target || existsSync(target) || !existsSync(source)) return false;
+  const sourceStat = lstatSync(source);
+  if (!sourceStat.isDirectory() || sourceStat.isSymbolicLink()) return false;
+  mkdirSync(dirname(target), { recursive: true });
+  cpSync(source, target, {
+    recursive: true,
+    force: false,
+    errorOnExist: true,
+  });
+  return true;
+}
+
+export function migrateLegacyDefaultState(config: Config, home = homedir()): string[] {
+  const migrated: string[] = [];
+  if (resolveDataDir(config) === defaultDataDir(home)
+    && copyLegacyStateDirectory(legacyDataDir(home), defaultDataDir(home))) {
+    migrated.push(defaultDataDir(home));
+  }
+  if (resolveCockpitDataDir(config) === defaultCockpitDataDir(home)
+    && copyLegacyStateDirectory(legacyCockpitDataDir(home), defaultCockpitDataDir(home))) {
+    migrated.push(defaultCockpitDataDir(home));
+  }
+  return migrated;
 }
 
 export function defaultSubtitleSkillDir(): string {

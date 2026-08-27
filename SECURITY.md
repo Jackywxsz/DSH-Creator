@@ -2,7 +2,7 @@
 
 ## Supported version
 
-当前只为最新 Beta 或最新稳定版本提供安全修复。Developer Preview 上游发生破坏性升级时，会先完成兼容验证，再更新支持范围。
+安全修复面向最新发布版本。Developer Preview 上游发生破坏性升级时，会先完成兼容验证，再更新支持范围。
 
 ## Report a vulnerability
 
@@ -20,6 +20,6 @@
 ## Security boundaries
 
 - 凭据应由 DeepSeek Harness 凭据服务保存，不得写入仓库、内容目录或运营状态文件。
-- 插件不会在卸载时自动删除用户内容和 `~/.dsh-oil-creator/`。
+- 插件不会在卸载时自动删除用户内容或本地状态目录。
 - 外部字幕、封面和发布服务只有在用户主动配置并调用时才启用。
 - 目录创建、重命名、状态恢复和知识沉淀必须保留预览、校验和人工确认边界。

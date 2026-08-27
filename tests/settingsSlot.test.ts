@@ -9,9 +9,9 @@ import {
 
 const OPTIONS = {
   namespace: CREATOR_SETTINGS_NAMESPACE,
-  legacyId: "dsh-oil-creator",
+  legacyId: "jacky-creator",
   legacyOrder: 40,
-  locale: "dsh.oil.creator",
+  locale: "dsh.jacky.creator",
   inject: () => ({}),
 };
 
@@ -42,7 +42,7 @@ describe("settings.plugin.item compatibility", () => {
   it("passes the rc.6 list slot validation", () => {
     const slots = registerWithSlotCore("list");
     expect(slots.entries("settings.plugin.item")[0]?.options.id)
-      .toBe("dsh-oil-creator");
+      .toBe("jacky-creator");
   });
 
   it("registers both compatibility coordinates through the public facade", () => {
@@ -56,7 +56,7 @@ describe("settings.plugin.item compatibility", () => {
       expect.objectContaining({
         name: "settings.plugin.item",
         key: CREATOR_SETTINGS_NAMESPACE,
-        id: "dsh-oil-creator",
+        id: "jacky-creator",
         order: 40,
       }),
       "card",

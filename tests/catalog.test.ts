@@ -242,7 +242,7 @@ describe("folderDateMs", () => {
 
 describe("scanLibrary", () => {
   it("reads one content folder", async () => {
-    const root = await mkdtemp(join(tmpdir(), "dsh-oil-creator-"));
+    const root = await mkdtemp(join(tmpdir(), "jacky-creator-"));
     const folder = join(root, "2026-01-23_demo");
     await mkdir(folder);
     await writeFile(join(folder, "2026-01-23_demo_3x4.png"), "x");
@@ -376,7 +376,7 @@ describe("scanLibrary", () => {
   });
 
   it("lists newer recordings first", async () => {
-    const root = await mkdtemp(join(tmpdir(), "dsh-oil-creator-"));
+    const root = await mkdtemp(join(tmpdir(), "jacky-creator-"));
     const older = join(root, "2026-01-01_old");
     const newer = join(root, "2026-08-01_new");
     await mkdir(older);

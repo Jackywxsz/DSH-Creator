@@ -236,7 +236,7 @@ export function ContentSidebarPanel({
           </>
         )}
       >
-        <div data-plugin="dsh-oil-creator" data-surface="create-dialog">
+        <div data-plugin="jacky-creator" data-surface="create-dialog">
           <div className="createField">
             <label className="createLabel" htmlFor="oil-create-name">{t("create.name")}</label>
             <Input

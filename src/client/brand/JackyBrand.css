@@ -123,8 +123,8 @@ html[data-jacky-creator-brand="paper-growth"] [data-phase="hero"] div:has(> span
   letter-spacing: 0;
 }
 
-html[data-jacky-creator-brand="paper-growth"] [data-plugin="dsh-oil-creator"][data-surface="sidebar"],
-html[data-jacky-creator-brand="paper-growth"] [data-plugin="dsh-oil-creator"][data-surface="sidebar"].operationsTheme {
+html[data-jacky-creator-brand="paper-growth"] [data-plugin="jacky-creator"][data-surface="sidebar"],
+html[data-jacky-creator-brand="paper-growth"] [data-plugin="jacky-creator"][data-surface="sidebar"].operationsTheme {
   border-right: 1px solid var(--jacky-line);
   background: var(--jacky-sidebar);
   color: var(--jacky-ink);
@@ -246,7 +246,7 @@ html[data-jacky-creator-brand="paper-growth"] .jackySproutIcon {
   --jacky-sprout-green-light: var(--jacky-sprout-light);
 }
 
-html[data-jacky-creator-brand="paper-growth"] [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"] {
+html[data-jacky-creator-brand="paper-growth"] [data-plugin="jacky-creator"][data-surface="operations-workspace"] {
   --cockpit-paper: var(--jacky-paper);
   --cockpit-paper-deep: var(--jacky-paper-deep);
   --cockpit-surface: var(--jacky-paper-raised);
@@ -507,7 +507,7 @@ html[data-jacky-creator-brand="paper-growth"] [data-surface="content-inspector"]
 }
 
 /* Keep the Creator Cockpit utility skin isolated from the immersive Jacky surfaces. */
-html[data-jacky-creator-brand="paper-growth"] [data-plugin="dsh-oil-creator"][data-surface="sidebar"].operationsTheme[data-cockpit-theme] {
+html[data-jacky-creator-brand="paper-growth"] [data-plugin="jacky-creator"][data-surface="sidebar"].operationsTheme[data-cockpit-theme] {
   border-right: 1px solid var(--cockpit-stroke);
   background: var(--cockpit-sidebar-bg);
   color: var(--cockpit-ink);
@@ -597,7 +597,7 @@ html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operation
   color: var(--cockpit-ink);
 }
 
-html[data-jacky-creator-brand="paper-growth"] [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"][data-cockpit-theme] {
+html[data-jacky-creator-brand="paper-growth"] [data-plugin="jacky-creator"][data-surface="operations-workspace"][data-cockpit-theme] {
   --cockpit-paper: #f2f1ec;
   --cockpit-paper-deep: #e5e7eb;
   --cockpit-surface: #ffffff;
@@ -638,7 +638,7 @@ html[data-jacky-creator-brand="paper-growth"] [data-plugin="dsh-oil-creator"][da
   color: var(--cockpit-ink);
 }
 
-html[data-jacky-creator-brand="paper-growth"] [data-plugin="dsh-oil-creator"][data-surface="operations-workspace"][data-cockpit-theme="dark"] {
+html[data-jacky-creator-brand="paper-growth"] [data-plugin="jacky-creator"][data-surface="operations-workspace"][data-cockpit-theme="dark"] {
   color-scheme: dark;
   --cockpit-paper: #0d131d;
   --cockpit-paper-deep: #080c13;

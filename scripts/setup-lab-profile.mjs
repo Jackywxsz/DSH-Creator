@@ -23,6 +23,8 @@ const labModules = join(labHome, "profiles", "node_modules");
 const labDataDir = resolve(process.env.DSH_CREATOR_COCKPIT_DATA_DIR ?? join(repoRoot, ".lab", "data"));
 const labLibraryRoot = resolve(process.env.DSH_CREATOR_COCKPIT_LIBRARY_ROOT ?? join(repoRoot, ".lab", "content-library"));
 const labRoot = join(repoRoot, ".lab");
+const PACKAGE_NAME = "jacky-creator";
+const LEGACY_PACKAGE_NAME = "dsh-oil-creator";
 
 function requirePath(path, label) {
   if (!existsSync(path)) throw new Error(`${label} is missing: ${path}`);
@@ -132,16 +134,25 @@ writeFileSync(labOverlayPath, `${JSON.stringify(labOverlay, null, 2)}\n`, { mode
 
 const manifest = JSON.parse(readFileSync(join(sourceProfile, "package.json"), "utf8"));
 manifest.scripts = {};
+const profileDependencies = { ...(manifest.dependencies ?? {}) };
+delete profileDependencies[LEGACY_PACKAGE_NAME];
 manifest.dependencies = {
-  ...manifest.dependencies,
-  "dsh-oil-creator": `link:${repoRoot}`,
+  ...profileDependencies,
+  [PACKAGE_NAME]: `link:${repoRoot}`,
 };
+manifest.dsh ??= {};
+manifest.dsh.profile ??= {};
+const bundles = [
+  ...(manifest.dsh.profile.bundles ?? [])
+    .filter((packageName) => packageName !== LEGACY_PACKAGE_NAME && packageName !== PACKAGE_NAME),
+  PACKAGE_NAME,
+];
+manifest.dsh.profile.bundles = bundles;
 writeFileSync(join(labProfile, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`);
-const bundles = manifest.dsh?.profile?.bundles ?? [];
 const installationBundles = new Set(["@deepseek-ai/dsh-base", "@deepseek-ai/dsh-web-app"]);
 for (const packageName of bundles) {
   if (installationBundles.has(packageName)) continue;
-  const target = packageName === "dsh-oil-creator"
+  const target = packageName === PACKAGE_NAME
     ? repoRoot
     : requirePath(join(sourceProfile, "node_modules", ...packageName.split("/")), `profile bundle ${packageName}`);
   ensureLink(target, join(labModules, ...packageName.split("/")));

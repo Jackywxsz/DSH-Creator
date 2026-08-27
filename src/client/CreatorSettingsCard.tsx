@@ -17,7 +17,7 @@ import "./CreatorSettingsCard.css";
 
 export type CreatorSettingsCardProps =
   & PropsRuntime<"settings.plugin.item">
-  & PropsLocale<"dsh.oil.creator">
+  & PropsLocale<"dsh.jacky.creator">
   & InjectFace<
     Pick<CreatorViewFace, "ready" | "getSettings" | "getCapabilities" | "setLibraryRoot" | "setProfile" | "setScriptRules" | "pickDirectory">
     & { credentials: CredentialsClient | undefined }
@@ -220,7 +220,7 @@ export function CreatorSettingsCard({
   };
 
   return (
-    <li data-plugin="dsh-oil-creator" data-surface="settings-card" className={open ? "card open" : "card"}>
+    <li data-plugin="jacky-creator" data-surface="settings-card" className={open ? "card open" : "card"}>
       <button
         type="button"
         className="header"

@@ -1,6 +1,6 @@
 # Extra test-only overlay. The profile package itself is mirrored under
 # .lab/dsh-home, so the installed profile and package stay untouched.
-- id: dsh-oil-creator
+- id: jacky-creator
   config:
     libraryRoot: !!js process.env.DSH_CREATOR_COCKPIT_LIBRARY_ROOT
     dataDir: !!js process.env.DSH_CREATOR_COCKPIT_DATA_DIR

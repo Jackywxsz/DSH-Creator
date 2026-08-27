@@ -15,7 +15,7 @@ export function defaultCollectSpaceName(): string {
 }
 
 export function collectRegistryPath(root = homedir()): string {
-  return join(root, ".dsh-oil-creator", "collect-spaces.json");
+  return join(root, ".jacky-creator", "collect-spaces.json");
 }
 
 export function collectRegistryPathForDataDir(dataDir: string): string {
