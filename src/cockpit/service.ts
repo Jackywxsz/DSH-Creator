@@ -22,6 +22,7 @@ import {
   type PromotionResult,
   type RestoreCockpitStateRequest,
   type SaveEvaluationRequest,
+  type SaveManualReviewDraftRequest,
   type SaveReviewDraftRequest,
   type UpdateGoalRequest,
   type UpdateIdeaRequest,
@@ -433,6 +434,12 @@ export class CreatorCockpitService extends TypertRemoteService {
       meta.updatedAt = timestamp;
       draft.contentMeta[request.contentId] = meta;
     });
+  }
+
+  async saveManualReviewDraft(request: SaveManualReviewDraftRequest, signal: AbortSignal): Promise<CockpitState> {
+    signal.throwIfAborted();
+    const context = await this.getReviewContext({ id: request.contentId }, signal);
+    return this.saveReviewDraft({ ...request, inputFingerprint: context.inputFingerprint }, signal);
   }
 
   async confirmReview(request: { contentId: string; id: string }, signal: AbortSignal): Promise<CockpitState> {

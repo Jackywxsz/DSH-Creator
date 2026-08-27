@@ -61,6 +61,7 @@ import type {
   PromoteIdeaRequest,
   PromotionResult,
   RestoreCockpitStateRequest,
+  SaveManualReviewDraftRequest,
 } from "../cockpit/schemas.ts";
 import type { CreatorCockpitFace } from "./operations/face.ts";
 import { CreatorSettingsCard } from "./CreatorSettingsCard.tsx";
@@ -114,6 +115,7 @@ interface OilCreatorRemote {
     platform: PublishPlatform;
     status: PublishMark;
     url?: string;
+    publishedAt?: number;
   }) => Promise<RemoteAnswer<ContentDetail>>;
   syncPublish: (request: { id?: string; platform?: PublishPlatform; force?: boolean }) => Promise<RemoteAnswer<SyncPublishResult>>;
   openSubtitlePreview: (request: { id: string }) => Promise<RemoteAnswer<SubtitlePreviewResult>>;
@@ -142,6 +144,7 @@ interface CreatorCockpitRemote {
   updateScheduleItem: (request: UpdateScheduleItemRequest) => Promise<RemoteAnswer<CockpitState>>;
   deleteScheduleItem: (request: { id: string }) => Promise<RemoteAnswer<CockpitState>>;
   updateSettings: (request: UpdateCockpitSettingsRequest) => Promise<RemoteAnswer<CockpitState>>;
+  saveManualReviewDraft: (request: SaveManualReviewDraftRequest) => Promise<RemoteAnswer<CockpitState>>;
   confirmReview: (request: { contentId: string; id: string }) => Promise<RemoteAnswer<CockpitState>>;
   saveRule: (request: KnowledgeRequest) => Promise<RemoteAnswer<{ state: CockpitState; path: string; entryId: string }>>;
   saveTemplate: (request: KnowledgeRequest) => Promise<RemoteAnswer<{ state: CockpitState; path: string; entryId: string }>>;
@@ -270,6 +273,11 @@ export function apply(ctx: ClientContext): void {
       const remote = cockpitRemoteOf();
       if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
       return unwrap(await remote.updateSettings(request), "update cockpit settings failed");
+    },
+    saveManualReviewDraft: async (request) => {
+      const remote = cockpitRemoteOf();
+      if (remote === undefined) throw new Error("Jacky Creator operations service unavailable");
+      return unwrap(await remote.saveManualReviewDraft(request), "save review draft failed");
     },
     confirmReview: async (contentId, id) => {
       const remote = cockpitRemoteOf();

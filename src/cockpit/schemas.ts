@@ -441,6 +441,10 @@ export const saveReviewDraftRequestSchema = z.object({
   inputFingerprint: z.string().min(1),
 }).strict();
 
+export const saveManualReviewDraftRequestSchema = saveReviewDraftRequestSchema.omit({
+  inputFingerprint: true,
+});
+
 export const contentRecordRequestSchema = z.object({
   contentId: z.string().min(1),
   id: z.string().min(1),
@@ -508,6 +512,7 @@ export type RestoreCockpitStateRequest = z.infer<typeof restoreCockpitStateReque
 export type EvaluationScores = z.infer<typeof evaluationScoresSchema>;
 export type SaveEvaluationRequest = z.infer<typeof saveEvaluationRequestSchema>;
 export type SaveReviewDraftRequest = z.infer<typeof saveReviewDraftRequestSchema>;
+export type SaveManualReviewDraftRequest = z.infer<typeof saveManualReviewDraftRequestSchema>;
 export type PromoteIdeaRequest = z.infer<typeof promoteIdeaRequestSchema>;
 export type KnowledgeRequest = z.infer<typeof knowledgeRequestSchema>;
 export type UpdateKnowledgeRequest = z.infer<typeof updateKnowledgeRequestSchema>;

@@ -2124,3 +2124,205 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Publish and review closure. Keep secondary AI actions inside the expanded strategy. */
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsMetaQuickActions > button.publish {
+  border-color: var(--cockpit-stroke);
+  background: var(--cockpit-blue);
+  color: var(--cockpit-accent-ink);
+  font-weight: 900;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsEvaluationPanel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin: 0 10px 10px;
+  padding: 12px;
+  border: 1px solid var(--cockpit-stroke);
+  border-radius: 8px;
+  background: var(--cockpit-paper-deep);
+  color: var(--cockpit-ink);
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsEvaluationPanel > header {
+  display: flex;
+  min-width: 0;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsEvaluationPanel > header > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsEvaluationPanel header strong {
+  font-size: 12px;
+  font-weight: 900;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsEvaluationPanel header small,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsEvaluationPanel header span {
+  color: var(--cockpit-muted);
+  font-size: 10px;
+  line-height: 15px;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsEvaluationPanel > button,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsSuggestions > button {
+  align-self: start;
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 1px solid var(--cockpit-stroke);
+  border-radius: 7px;
+  background: var(--cockpit-surface);
+  color: var(--cockpit-ink);
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsEvaluationPanel > button:active,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsSuggestions > button:active,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewActions > button:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsEvaluationPanel .operationsEvaluationDetails {
+  grid-column: 1 / -1;
+  font-size: 11px;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsReviewGuide {
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 11px;
+  background: var(--cockpit-yellow);
+  color: var(--cockpit-ink);
+  box-shadow: var(--cockpit-shadow-small);
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsReviewGuide strong {
+  font-family: "Arial Black", "PingFang SC", sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsReviewGuide p {
+  margin: 5px 0 0;
+  font-size: 12px;
+  line-height: 19px;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReview {
+  margin-top: 14px;
+  padding: 14px;
+  border: 2px solid var(--cockpit-stroke);
+  border-radius: 9px;
+  background: var(--cockpit-surface);
+  color: var(--cockpit-ink);
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReview > header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReview header strong {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReview header small {
+  color: var(--cockpit-muted);
+  font-size: 10px;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewFields {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewFields label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--cockpit-muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewFields label.full {
+  grid-column: 1 / -1;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewFields input,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewFields select,
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewFields textarea {
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid var(--cockpit-stroke);
+  border-radius: 7px;
+  background: var(--cockpit-paper-deep);
+  color: var(--cockpit-ink);
+  font: inherit;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewFields textarea {
+  min-height: 132px;
+  resize: vertical;
+  font-size: 12px;
+  line-height: 19px;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewActions > span {
+  margin-right: auto;
+  color: var(--dsw-alias-state-danger-primary);
+  font-size: 10px;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewActions > button {
+  border: 2px solid var(--cockpit-stroke);
+  background: var(--cockpit-blue);
+  color: var(--cockpit-accent-ink);
+  box-shadow: 2px 2px 0 var(--cockpit-stroke);
+  font-weight: 900;
+}
+
+[data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewActions > button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 560px) {
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsEvaluationPanel,
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewFields {
+    grid-template-columns: 1fr;
+  }
+
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsEvaluationPanel > button {
+    justify-self: start;
+  }
+
+  [data-plugin="jacky-creator"][data-surface="operations-workspace"] .operationsManualReviewFields label.full {
+    grid-column: auto;
+  }
+}

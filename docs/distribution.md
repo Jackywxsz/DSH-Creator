@@ -5,10 +5,10 @@
 ## 当前状态
 
 - 发布阶段：GitHub Beta。
-- 当前版本：`v0.1.0-beta.3`。
+- 当前版本：`v0.1.0-beta.4`。
 - 安装来源：GitHub Release 的预构建 `.tgz`，源码、Git Tag 与安装包一一对应。
 - npm：未发布。
-- 插件市场：准备向 `awesome-dsh-plugin` 提交收录。
+- 插件市场：已收录到 `awesome-dsh-plugin`，由 `dsh-market` 同步市场卡片。
 - 首要宿主：DSH Desktop 2.0.2 / DeepSeek Harness 0.1.1-rc.2。
 
 ## 发布链路
@@ -31,7 +31,7 @@ GitHub 是源码、Issue、文档和版本真源。社区目录只保存仓库�
 Beta 的直接安装入口固定到版本包：
 
 ```bash
-dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.3/jacky-creator-0.1.0-beta.3.tgz
+dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.4/jacky-creator-0.1.0-beta.4.tgz
 ```
 
 发布前必须：
@@ -66,13 +66,13 @@ Git 源码安装只供开发者使用。DeepSeek Harness rc.2 的 `dsh plugin` �
 url: https://github.com/Jackywxsz/DSH-Creator
 name: Jackywxsz/DSH-Creator
 category: workflow
-tarball: https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.3/jacky-creator-0.1.0-beta.3.tgz
+tarball: https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.4/jacky-creator-0.1.0-beta.4.tgz
 description:
   en: "Local-first content production and operations workspace for DSH: manage ideas, scripts, media assets, schedules, goals, publishing status, and post-publication reviews."
   zh: "面向 DSH 的本地内容生产与运营工作台：管理灵感、脚本、媒体资产、档期、目标、发布状态和发布后复盘。"
 ```
 
-市场审核通过前，README 继续保留固定版本安装命令。审核通过后，市场卡片和直接安装命令必须指向同一份 Release 包。
+每次发布后都要更新目录条目的 `tarball`，确保市场卡片和直接安装命令指向同一份 Release 包。
 
 ## 截图与市场材料
 

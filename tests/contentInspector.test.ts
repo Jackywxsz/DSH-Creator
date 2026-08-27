@@ -60,7 +60,11 @@ describe("content inspector creative asset contract", () => {
   it("routes the overview into asset tabs and exposes the external editor path", async () => {
     const root = fileURLToPath(new URL("..", import.meta.url));
     const source = await readFile(`${root}/src/client/ContentInspector.tsx`, "utf8");
-    expect(source).toContain("contentProgress(detail, publishStepDone)");
+    expect(source).toContain("publishProgress(detail.publish");
+    expect(source).toContain("contentProgress(detail, publication.completed)");
+    expect(source.indexOf('title={t("inspector.publish.statusTitle"')).toBeLessThan(
+      source.indexOf('{(currentStep === "publish"'),
+    );
     expect(source).toContain("onUseExternalEditor");
     expect(source).toContain("openFolder(detail.folderPath)");
     expect(source).toContain("inspector.step.waitingExportHint");

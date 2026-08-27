@@ -204,6 +204,35 @@ describe("CreatorCockpitService CRUD", () => {
     expect(saved.state.knowledgeItems[0]).toMatchObject({ kind: "rule", title: "规则", tags: ["案例"], active: true });
   });
 
+  it("lets a person save a review draft without an AI context fingerprint", async () => {
+    const content = {
+      id: "content-1",
+      title: "Demo",
+      topicNote: "topic",
+      script: "script",
+      workflow: "live",
+      publish: { bilibili: { status: "published", publishedAt: 1_000 } },
+    };
+    const service = await serviceAt(3_000, { getContent: async () => content });
+    const state = await (service as CreatorCockpitService & {
+      saveManualReviewDraft: (
+        request: { contentId: string; rating?: number; analysis: string; learnedRule?: string },
+        signal: AbortSignal,
+      ) => Promise<Awaited<ReturnType<CreatorCockpitService["getState"]>>>;
+    }).saveManualReviewDraft({
+      contentId: content.id,
+      rating: 4,
+      analysis: "结果：已发布\n有效做法：案例清楚\n问题：开头偏慢\n下一次实验：先给结果",
+      learnedRule: "真实案例前置",
+    }, signal());
+
+    expect(state.contentMeta[content.id]?.reviews[0]).toMatchObject({
+      status: "draft",
+      rating: 4,
+      learnedRule: "真实案例前置",
+    });
+  });
+
   it("keeps a review draft when its confirmed Markdown cannot be written", async () => {
     const content = { id: "content-1", title: "Demo", topicNote: "topic", script: "script", workflow: "live", publish: { bilibili: { status: "published", syncedAt: 1_000 } } };
     const service = await serviceAt(3_000, { getContent: async () => content });
