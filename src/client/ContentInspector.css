@@ -409,6 +409,57 @@
   gap: 10px;
 }
 
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishStatusDisclosure > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  cursor: pointer;
+  list-style: none;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishStatusDisclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishStatusDisclosure > summary > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishStatusDisclosure > summary strong {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishStatusDisclosure > summary em {
+  color: var(--dsw-alias-state-business-primary);
+  font: var(--dsw-font-markdown-small);
+  font-style: normal;
+  font-weight: 700;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishStatusDisclosure > summary:active {
+  transform: scale(0.98);
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishStatusDisclosure[open] > summary {
+  margin-bottom: 10px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishStatusRule {
+  margin: 0 0 10px;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-markdown-small);
+}
+
 [data-plugin="jacky-creator"][data-surface="inspector"].wide .publishGrid {
   grid-template-columns: 1fr 1fr;
 }

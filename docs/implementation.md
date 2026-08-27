@@ -2,7 +2,7 @@
 
 Jacky Creator 的包名、Bundle ID 和设置命名空间统一为 `jacky-creator`。它是挂在 DeepSeek Harness 配置上的单一插件，把对话、内容生产和运营沉淀收进同一块界面，同时保留本地文件夹作为正文真源。
 
-安装：`dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.3/jacky-creator-0.1.0-beta.3.tgz`。预构建包避免 pnpm 10 对 Git 源码 `prepare` 的构建授权门槛。外部 CLI 必须显式选择目标 Profile；本地开发使用目录路径。
+安装：`dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.4/jacky-creator-0.1.0-beta.4.tgz`。预构建包避免 pnpm 10 对 Git 源码 `prepare` 的构建授权门槛。外部 CLI 必须显式选择目标 Profile；本地开发使用目录路径。
 
 卸载：`npx @deepseek-ai/dsh plugin --profile web remove jacky-creator`
 
@@ -25,7 +25,7 @@ Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最�
 5. **字幕**：用百炼 Key 转录；`oil-subtitle` 首次 clone 后必须运行 `bash ~/.agents/skills/oil-subtitle/setup.sh`；人在 skill 自带的预览编辑器里改稿，确认后再烧进视频。
 6. **封面**：有 ZenMux Key 就出 3:4 / 4:3 / 16:9。封面主标题和错别字由对话里的 Agent 核对，不交给脚本自行发挥。
 7. **标签与发布包**：`publish-package.json` 给四个视频平台，只需要标题和 tags，不写平台长文案。`enabledPlatforms` 默认启用小红书、抖音、B 站、视频号四个平台，关闭的平台不参与 AI 发布和数据同步。公众号文章是旁边的 Markdown，不是第五个视频平台，走 `oil-video-article`，成稿在 `公众号文章/`。
-8. **发布**：`video-publisher` 只为 `enabledPlatforms` 中的平台准备草稿，做到最终发布按钮前，人自己点发布。插件记录每平台未发布 / 草稿已备 / 已发布。
+8. **发布**：`video-publisher` 只为 `enabledPlatforms` 中的平台准备草稿，做到最终发布按钮前，人自己点发布。插件记录每平台未发布 / 草稿已备 / 已发布；任一启用平台为已发布时主 workflow 进入 `live`，其余平台只作为分发进度。
 9. **回收**：用 Ego Lite 打开已登录的创作者后台，只翻 `enabledPlatforms` 中平台的已发布列表，按标题或已存 id 对到本地文件夹，写下播放 / 赞 / 评论。不是公开站爬虫；平台上有、本地没有文件夹的不会自动建条目。
 
 一条片子对应影片目录里的一个子文件夹。工程在 Screen Studio 工程目录里，用绑定连起来。
@@ -40,7 +40,7 @@ Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最�
 | 等导出 | `oil_wait_export` 立刻返回并开始盯目录；成片稳定后清掉 waiting 标记 |
 | 字幕预览、烧录、生成 | 按钮和同名工具会拉起 `oil-subtitle` 脚本 |
 | 生成封面 | 按钮和工具拉起 `oil-cover` 脚本；标题先用文件夹名 |
-| 发布状态 | 读 `{标题}.auto-publish.json`；点状态胶囊从菜单里选未发布 / 草稿 / 已发布，手写优先 |
+| 发布状态 | 读 `{标题}.auto-publish.json`；点状态胶囊从菜单里选未发布 / 草稿 / 已发布，手写优先；选择已发布时记录实际日期，任一平台已发布即完成主发布步骤 |
 | 已发布数据 | 检查器「同步已发布」只对当前这一期：找到标题就停翻页，overlay 也只写这一条。`oil_sync_publish` 不传 id 才同步整库 |
 | API Key | 设置 → 插件 → 内容工作台；和视觉识别共用官方凭据 |
 | 公众号 | 只显示目录里有没有 `公众号文章/`，不生成 |

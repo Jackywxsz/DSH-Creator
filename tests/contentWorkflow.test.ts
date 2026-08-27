@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   contentProgress,
   contentStepIsSkipped,
+  publishProgress,
   readTopicSummary,
   replaceTopicCore,
 } from "../src/client/contentWorkflow.ts";
@@ -119,5 +120,30 @@ describe("content asset progress", () => {
     const progress = contentProgress(next, false);
     expect(progress.steps.find((step) => step.id === "presentation")?.status).toBe("done");
     expect(contentStepIsSkipped(next, "presentation")).toBe(false);
+  });
+
+  it("completes the main publish step after any enabled platform is published", () => {
+    const next = detail({
+      publish: {
+        bilibili: { status: "published", source: "overlay", publishedAt: 1_000 },
+        douyin: { status: "unpublished", source: "none" },
+        wechat: { status: "unpublished", source: "none" },
+        xiaohongshu: { status: "unpublished", source: "none" },
+      },
+    });
+    expect(publishProgress(next.publish, ["bilibili", "douyin", "wechat", "xiaohongshu"]))
+      .toEqual({ published: 1, total: 4, completed: true });
+    expect(publishProgress(next.publish, ["douyin", "wechat", "xiaohongshu"]))
+      .toEqual({ published: 0, total: 3, completed: false });
+    expect(publishProgress(detail().publish, ["bilibili", "douyin", "wechat", "xiaohongshu"]))
+      .toEqual({ published: 0, total: 4, completed: false });
+  });
+
+  it("does not reopen an earlier asset step after the content is published", () => {
+    const progress = contentProgress(detail(), true);
+    expect(progress.current).toBe("publish");
+    expect(progress.steps.find((step) => step.id === "script")?.status).toBe("pending");
+    expect(progress.steps.find((step) => step.id === "publish")?.status).toBe("done");
+    expect(progress.steps.some((step) => step.status === "current")).toBe(false);
   });
 });

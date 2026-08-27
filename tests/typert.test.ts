@@ -71,6 +71,7 @@ describe("handwritten TYPERT", () => {
       "updateScheduleItem",
       "deleteScheduleItem",
       "updateSettings",
+      "saveManualReviewDraft",
       "confirmReview",
       "saveRule",
       "saveTemplate",

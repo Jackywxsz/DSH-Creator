@@ -6,6 +6,7 @@ import {
   mapPublisherStatus,
   mergePublish,
   nextPublishMark,
+  patchOverlayPublish,
   pickAutoPublishName,
   publishFromAutoPublish,
 } from "../src/publishStatus.ts";
@@ -61,6 +62,31 @@ describe("nextPublishMark", () => {
     expect(nextPublishMark("unpublished")).toBe("draft");
     expect(nextPublishMark("draft")).toBe("published");
     expect(nextPublishMark("published")).toBe("unpublished");
+  });
+});
+
+describe("patchOverlayPublish", () => {
+  it("updates an existing publication date when an explicit date is provided", () => {
+    const next = patchOverlayPublish(
+      { bilibili: { status: "published", publishedAt: 1_000 } },
+      "bilibili",
+      "published",
+      undefined,
+      3_000,
+      2_000,
+    );
+    expect(next.bilibili?.publishedAt).toBe(2_000);
+  });
+
+  it("keeps an existing publication date when no explicit date is provided", () => {
+    const next = patchOverlayPublish(
+      { bilibili: { status: "published", publishedAt: 1_000 } },
+      "bilibili",
+      "published",
+      undefined,
+      3_000,
+    );
+    expect(next.bilibili?.publishedAt).toBe(1_000);
   });
 });
 

@@ -39,6 +39,7 @@ import {
   contentProgress,
   contentStepHasAsset,
   contentStepIsSkipped,
+  publishProgress,
   readTopicSummary,
   replaceTopicCore,
   type ContentProgressStep,
@@ -734,13 +735,12 @@ export function ContentInspector({
     && (detail.covers["3x4"] !== undefined || detail.covers["4x3"] !== undefined || detail.covers["16x9"] !== undefined);
   const platformSettingsPending = enabledPlatforms === undefined;
   const visiblePlatforms = platformSettingsPending ? [] : selectEnabledPublishPlatforms(enabledPlatforms);
-  const publishedCount = detail === undefined
-    ? 0
-    : visiblePlatforms.filter((platform) => detail.publish[platform.key].status === "published").length;
+  const publication = detail === undefined
+    ? { published: 0, total: visiblePlatforms.length, completed: false }
+    : publishProgress(detail.publish, visiblePlatforms.map((platform) => platform.key));
   const anyPublishMarked = detail !== undefined
     && visiblePlatforms.some((platform) => detail.publish[platform.key].status !== "unpublished");
-  const publishStepDone = visiblePlatforms.length > 0 && publishedCount === visiblePlatforms.length;
-  const progress = detail === undefined ? undefined : contentProgress(detail, publishStepDone);
+  const progress = detail === undefined ? undefined : contentProgress(detail, publication.completed);
   const currentStep = progress?.current ?? "script";
   const presentationHasAsset = detail !== undefined && contentStepHasAsset(detail, "presentation");
   const subtitleHasAsset = detail !== undefined && contentStepHasAsset(detail, "subtitle");
@@ -1064,6 +1064,97 @@ export function ContentInspector({
             {actionError !== undefined && (
               <JobNote tone="error">{actionError}</JobNote>
             )}
+            <Surface
+              title={t("inspector.publish.statusTitle" as CreatorKey)}
+              hint={t("inspector.publish.confirmHint" as CreatorKey)}
+            >
+              {platformSettingsPending
+                ? <div className="empty">{t("inspector.publish.platformsLoading" as CreatorKey)}</div>
+                : visiblePlatforms.length === 0
+                  ? <div className="empty">{t("inspector.publish.enablePlatforms" as CreatorKey)}</div>
+                  : (
+                    <details
+                      className="publishStatusDisclosure"
+                      open={currentStep === "publish" || detail.workflow === "publish" || anyPublishMarked}
+                    >
+                      <summary>
+                        <span>
+                          <StatusPill tone={publication.completed ? "success" : "neutral"}>
+                            {t((publication.completed
+                              ? "inspector.publish.statusPublished"
+                              : "inspector.publish.statusUnpublished") as CreatorKey)}
+                          </StatusPill>
+                          <strong>{publication.published}/{publication.total}</strong>
+                        </span>
+                        <em>{t("inspector.publish.manage" as CreatorKey)}</em>
+                      </summary>
+                      <p className="publishStatusRule">
+                        {t("inspector.publish.distribution" as CreatorKey)
+                          .replace("{published}", String(publication.published))
+                          .replace("{total}", String(publication.total))}
+                      </p>
+                      <div className="publishGrid">
+                        {visiblePlatforms.map((platform) => {
+                          const row = detail.publish[platform.key];
+                          const metrics = metricParts(row, t);
+                          return (
+                            <div key={platform.id} className="publishCard">
+                              <div className="publishRow">
+                                <span className="publishName">
+                                  <PlatformMark id={platform.id} size={16} />
+                                  {t(platform.label)}
+                                </span>
+                                <Menu
+                                  portal={true}
+                                  align="end"
+                                  open={publishMenu === platform.key}
+                                  anchor={(
+                                    <StatusPill
+                                      tone={PUBLISH_TONE[row.status]}
+                                      disabled={publishPending === platform.key}
+                                      aria-haspopup="menu"
+                                      aria-label={`${t(platform.label)}：${t(PUBLISH_KEY[row.status])}`}
+                                      onClick={() => {
+                                        setPublishMenu(publishMenu === platform.key ? null : platform.key);
+                                      }}
+                                    >
+                                      {t(PUBLISH_KEY[row.status])}
+                                    </StatusPill>
+                                  )}
+                                  items={PUBLISH_MARKS.map((mark) => ({ id: mark, label: t(PUBLISH_KEY[mark]) }))}
+                                  selectedId={row.status}
+                                  onSelect={(id) => {
+                                    if (isPublishMark(id)) applyPublish(platform.key, id);
+                                  }}
+                                  onClose={() => { setPublishMenu(null); }}
+                                />
+                              </div>
+                              {metrics.length > 0 && (
+                                <div className="publishMetrics">{metrics.join(" · ")}</div>
+                              )}
+                              {row.status === "published" && (
+                                <label className="publishDate">
+                                  <span>{t("inspector.publish.publishedAt")}</span>
+                                  <input
+                                    type="date"
+                                    value={dateInputValue(row.publishedAt)}
+                                    disabled={publishPending === platform.key}
+                                    onChange={(event) => { applyPublishedAt(platform.key, event.target.value); }}
+                                  />
+                                </label>
+                              )}
+                              {row.status === "published" && row.url !== undefined && (
+                                <a className="publishUrl" href={row.url} target="_blank" rel="noreferrer">
+                                  {t("inspector.publish.open" as CreatorKey)}
+                                </a>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </details>
+                  )}
+            </Surface>
             {(currentStep === "publish" || detail.workflow === "publish" || anyPublishMarked || detail.hasArticle) && (
               <>
                 <Surface
@@ -1085,69 +1176,6 @@ export function ContentInspector({
                     </ActionButton>
                   </ActionBar>
                 </Surface>
-                {visiblePlatforms.length > 0 && (
-                  <Surface title={t("inspector.platforms" as CreatorKey)}>
-                    <div className="publishGrid">
-                      {visiblePlatforms.map((platform) => {
-                        const row = detail.publish[platform.key];
-                        const metrics = metricParts(row, t);
-                        return (
-                          <div key={platform.id} className="publishCard">
-                            <div className="publishRow">
-                              <span className="publishName">
-                                <PlatformMark id={platform.id} size={16} />
-                                {t(platform.label)}
-                              </span>
-                              <Menu
-                                portal={true}
-                                align="end"
-                                open={publishMenu === platform.key}
-                                anchor={(
-                                  <StatusPill
-                                    tone={PUBLISH_TONE[row.status]}
-                                    disabled={publishPending === platform.key}
-                                    aria-haspopup="menu"
-                                    aria-label={`${t(platform.label)}：${t(PUBLISH_KEY[row.status])}`}
-                                    onClick={() => {
-                                      setPublishMenu(publishMenu === platform.key ? null : platform.key);
-                                    }}
-                                  >
-                                    {t(PUBLISH_KEY[row.status])}
-                                  </StatusPill>
-                                )}
-                                items={PUBLISH_MARKS.map((mark) => ({ id: mark, label: t(PUBLISH_KEY[mark]) }))}
-                                selectedId={row.status}
-                                onSelect={(id) => {
-                                  if (isPublishMark(id)) applyPublish(platform.key, id);
-                                }}
-                                onClose={() => { setPublishMenu(null); }}
-                              />
-                            </div>
-                            {metrics.length > 0 && (
-                              <div className="publishMetrics">{metrics.join(" · ")}</div>
-                            )}
-                            {row.status === "published" && (
-                              <label className="publishDate">
-                                <span>{t("inspector.publish.publishedAt")}</span>
-                                <input
-                                  type="date"
-                                  value={dateInputValue(row.publishedAt)}
-                                  disabled={publishPending === platform.key}
-                                  onChange={(event) => { applyPublishedAt(platform.key, event.target.value); }}
-                                />
-                              </label>
-                            )}
-                            {row.status === "published" && row.url !== undefined && (
-                              <a className="publishUrl" href={row.url} target="_blank" rel="noreferrer">
-                                {t("inspector.publish.open" as CreatorKey)}
-                              </a>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </Surface>
-                )}
                 <Surface title={t("inspector.article" as CreatorKey)}>
                   <button
                     type="button"

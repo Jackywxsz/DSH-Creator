@@ -19,7 +19,7 @@ DSH Desktop 和 Jacky Creator 均为社区项目。
 ### 2. 运行安装命令
 
 ~~~bash
-dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.3/jacky-creator-0.1.0-beta.3.tgz
+dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.4/jacky-creator-0.1.0-beta.4.tgz
 ~~~
 
 等待命令结束，不要在安装过程中重复执行。

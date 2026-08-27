@@ -182,6 +182,7 @@ export function patchOverlayPublish(
   status: PublishMark,
   url?: string,
   now = Date.now(),
+  publishedAt?: number,
 ): NonNullable<OverlayItem["publish"]> {
   const next: NonNullable<OverlayItem["publish"]> = { ...current };
   const previous = current?.[platform];
@@ -189,7 +190,7 @@ export function patchOverlayPublish(
     status,
     ...(previous === undefined ? {} : copyOverlayMetrics(previous)),
   };
-  if (status === "published") entry.publishedAt = previous?.publishedAt ?? now;
+  if (status === "published") entry.publishedAt = publishedAt ?? previous?.publishedAt ?? now;
   if (status === "published" && url !== undefined && url.trim() !== "") {
     entry.url = url.trim();
   } else if (previous?.url !== undefined && status === "published") {

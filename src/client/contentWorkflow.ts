@@ -1,4 +1,4 @@
-import type { ContentDetail, ContentOptionalStep } from "../types.ts";
+import type { ContentDetail, ContentOptionalStep, ContentPublish, PublishPlatform } from "../types.ts";
 
 export const CONTENT_PROGRESS_STEPS = [
   "topic",
@@ -129,6 +129,18 @@ export function contentStepIsSkipped(detail: ContentDetail, step: ContentOptiona
   return !contentStepHasAsset(detail, step) && (detail.skippedSteps ?? []).includes(step);
 }
 
+export function publishProgress(
+  publish: ContentPublish,
+  enabledPlatforms: PublishPlatform[],
+): { published: number; total: number; completed: boolean } {
+  const publishedCount = enabledPlatforms.filter((platform) => publish[platform].status === "published").length;
+  return {
+    published: publishedCount,
+    total: enabledPlatforms.length,
+    completed: publishedCount > 0,
+  };
+}
+
 export function contentProgress(
   detail: ContentDetail,
   publishDone: boolean,
@@ -143,6 +155,18 @@ export function contentProgress(
     article: detail.hasArticle || detail.article.trim() !== "",
     publish: publishDone,
   };
+  if (publishDone) {
+    return {
+      current: "publish",
+      steps: CONTENT_PROGRESS_STEPS.map((id): ContentProgressItem => {
+        if (actual[id]) return { id, status: "done" };
+        if (id === "presentation" || id === "subtitle" || id === "article") {
+          if (contentStepIsSkipped(detail, id)) return { id, status: "skipped" };
+        }
+        return { id, status: "pending" };
+      }),
+    };
+  }
   let current: ContentProgressStep = "publish";
   let foundCurrent = false;
   const steps = CONTENT_PROGRESS_STEPS.map((id): ContentProgressItem => {

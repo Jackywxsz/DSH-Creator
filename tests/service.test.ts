@@ -288,6 +288,35 @@ describe("OilCreatorService.syncPublish", () => {
   });
 });
 
+describe("OilCreatorService.setPublish", () => {
+  it("forwards an explicit publication date when updating a published item", async () => {
+    const service = await syncService({ enabledPlatforms: ["bilibili"] });
+    const overlayItem: OverlayItem = {
+      publish: { bilibili: { status: "published", publishedAt: 1_000 } },
+    };
+    const probe = service as unknown as {
+      patchItem: (
+        id: string,
+        mutate: (item: OverlayItem) => void,
+        signal: AbortSignal,
+      ) => Promise<ContentDetail>;
+    };
+    probe.patchItem = async (_id, mutate) => {
+      mutate(overlayItem);
+      return undefined as never;
+    };
+
+    await service.setPublish({
+      id: "2026-08-13_demo",
+      platform: "bilibili",
+      status: "published",
+      publishedAt: 2_000,
+    }, new AbortController().signal);
+
+    expect(overlayItem.publish?.bilibili?.publishedAt).toBe(2_000);
+  });
+});
+
 describe("OilCreatorService subtitle job reconcile", () => {
   async function overlayService(item: OverlayItem) {
     const dataDir = await mkdtemp(join(tmpdir(), "oil-service-job-"));

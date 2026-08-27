@@ -14,6 +14,7 @@ import type {
   PromoteIdeaRequest,
   PromotionResult,
   RestoreCockpitStateRequest,
+  SaveManualReviewDraftRequest,
 } from "../../cockpit/schemas.ts";
 
 export interface CreatorCockpitFace {
@@ -35,6 +36,7 @@ export interface CreatorCockpitFace {
   updateScheduleItem: (request: UpdateScheduleItemRequest) => Promise<CockpitState>;
   deleteScheduleItem: (id: string) => Promise<CockpitState>;
   updateSettings: (request: UpdateCockpitSettingsRequest) => Promise<CockpitState>;
+  saveManualReviewDraft: (request: SaveManualReviewDraftRequest) => Promise<CockpitState>;
   confirmReview: (contentId: string, id: string) => Promise<CockpitState>;
   saveRule: (request: KnowledgeRequest) => Promise<{ state: CockpitState; path: string; entryId: string }>;
   saveTemplate: (request: KnowledgeRequest) => Promise<{ state: CockpitState; path: string; entryId: string }>;

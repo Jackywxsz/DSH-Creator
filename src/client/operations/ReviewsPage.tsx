@@ -33,6 +33,50 @@ function MetricsEditor({ item, meta, face, t, commit }: {
   </div></details>;
 }
 
+function ReviewDraftEditor({ item, face, t, commit }: {
+  item: ContentSummary;
+  face: CreatorCockpitFace;
+  t: (key: CreatorKey) => string;
+  commit: (operation: Promise<CockpitState>) => Promise<void>;
+}) {
+  const [rating, setRating] = useState("");
+  const [analysis, setAnalysis] = useState("");
+  const [learnedRule, setLearnedRule] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  const save = async (): Promise<void> => {
+    if (analysis.trim() === "" || saving) return;
+    setSaving(true);
+    setError(undefined);
+    try {
+      await commit(face.saveManualReviewDraft({
+        contentId: item.id,
+        ...(rating === "" ? {} : { rating: Number(rating) }),
+        analysis: analysis.trim(),
+        ...(learnedRule.trim() === "" ? {} : { learnedRule: learnedRule.trim() }),
+      }));
+      setRating("");
+      setAnalysis("");
+      setLearnedRule("");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("operations.state.writeFailed"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return <section className="operationsManualReview">
+    <header><div><strong>{t("operations.reviews.manual")}</strong><small>{t("operations.reviews.manualHint")}</small></div></header>
+    <div className="operationsManualReviewFields">
+      <label><span>{t("operations.reviews.rating")}</span><select value={rating} onChange={(event) => { setRating(event.target.value); }}><option value="">{t("operations.reviews.ratingOptional")}</option>{[5, 4, 3, 2, 1].map((value) => <option key={value} value={value}>{value} / 5</option>)}</select></label>
+      <label className="full"><span>{t("operations.reviews.analysis")}</span><textarea value={analysis} placeholder={t("operations.reviews.analysisPlaceholder")} onChange={(event) => { setAnalysis(event.target.value); }} /></label>
+      <label className="full"><span>{t("operations.reviews.learnedRule")}</span><input value={learnedRule} placeholder={t("operations.reviews.learnedRulePlaceholder")} onChange={(event) => { setLearnedRule(event.target.value); }} /></label>
+    </div>
+    <div className="operationsManualReviewActions">{error !== undefined && <span role="alert">{error}</span>}<button type="button" disabled={saving || analysis.trim() === ""} onClick={() => { void save(); }}>{saving ? t("settings.saving") : t("operations.reviews.saveDraft")}</button></div>
+  </section>;
+}
+
 export function ReviewsPage({ state, items, face, t, commit, openContent }: {
   state: CockpitState;
   items: ContentSummary[];
@@ -69,12 +113,14 @@ export function ReviewsPage({ state, items, face, t, commit, openContent }: {
       <header><button type="button" className="reviewTitle" onClick={() => { openContent(item.id); }}><strong>{item.title}</strong><span>{at === undefined ? t("operations.reviews.dateUnknown") : `发布于 ${inputDate(at)} · ${completed ? "已复盘" : isOverdue ? `已到 T+${state.settings.reviewDelayDays}` : `T+${state.settings.reviewDelayDays} 待复盘`}`}</span></button><button type="button" onClick={() => { const sent = sendCockpitInstruction(`请为 Jacky 运营看板中 contentId=${item.id} 的《${item.title}》生成发布后复盘草稿。先调用 cockpit_get_review_context 读取真实内容、发布数据、补充指标和最新评分，再分析有效做法、问题、下一步实验，并调用 cockpit_save_review_draft 保存为草稿。不得替用户确认复盘，也不得直接沉淀规则或模板。`); if (!sent) window.alert(t("operations.ai.noSession")); }}>{latest === undefined ? t("operations.reviews.ai") : t("operations.reviews.aiAgain")}</button></header>
       <div className="operationsPublishedMetrics">{visibleMetrics.map(({ key, value }) => <span key={key}><small>{t(`operations.metric.${key}` as CreatorKey)}</small><strong>{value === undefined ? t("operations.notRecorded") : value.toLocaleString()}</strong></span>)}<span><small>{t("operations.metric.saves")}</small><strong>{meta?.supplementalMetrics?.saves?.toLocaleString() ?? t("operations.notRecorded")}</strong></span></div>
       <MetricsEditor item={item} {...(meta === undefined ? {} : { meta })} face={face} t={t} commit={commit} />
+      {!completed && latest?.status !== "draft" && <ReviewDraftEditor item={item} face={face} t={t} commit={commit} />}
       {latest !== undefined && <section className="operationsReviewDraft"><div><span>{latest.status === "draft" ? t("operations.reviews.draft") : t("operations.reviews.confirmed")}{latest.rating === undefined ? "" : ` · ${latest.rating}/5`}</span><p>{latest.analysis}</p>{latest.learnedRule && <blockquote>{latest.learnedRule}</blockquote>}</div>{latest.status === "draft" ? <button type="button" onClick={() => { if (window.confirm(t("operations.reviews.confirmPrompt"))) void commit(face.confirmReview(item.id, latest.id)); }}>{t("operations.reviews.confirm")}</button> : <div className="operationsKnowledgeActions">{latest.learnedRule && <button type="button" onClick={() => { saveKnowledge(item, latest, "rule", latest.learnedRule ?? ""); }}>{t("operations.reviews.saveRule")}</button>}<button type="button" onClick={() => { saveKnowledge(item, latest, "template", latest.analysis); }}>{t("operations.reviews.saveTemplate")}</button></div>}</section>}
       {completed && confirmed !== undefined && latest?.id !== confirmed.id && <small>最近一次人工确认：{inputDate(confirmed.confirmedAt ?? confirmed.createdAt)}</small>}
     </article>;
   };
 
   return <section className="reviewCockpit">
+    <section className="operationsReviewGuide"><strong>{t("operations.reviews.ruleTitle")}</strong><p>{t("operations.reviews.ruleHint")}</p></section>
     <div className="reviewKpis">
       <article><span>发布样本</span><strong>{published.length}</strong><small>全部已发布内容</small></article>
       <article className={overdue.length > 0 ? "risk" : ""}><span>待复盘</span><strong>{pending.length}</strong><small>{overdue.length > 0 ? `${overdue.length} 条已到 T+${state.settings.reviewDelayDays}` : "当前没有逾期复盘"}</small></article>
@@ -84,7 +130,7 @@ export function ReviewsPage({ state, items, face, t, commit, openContent }: {
     </div>
 
     <div className="reviewLedgers">
-      <section><header><div><span>TO REVIEW</span><h2>待复盘</h2><p>AI 草稿仍属于待复盘，人工确认后才会离开这里。</p></div><strong>{pending.length}</strong></header>{pending.length === 0 ? <div className="operationsInlineEmpty">{t("operations.today.none")}</div> : pending.map((item) => <ReviewCard key={item.id} item={item} completed={false} />)}</section>
+      <section><header><div><span>TO REVIEW</span><h2>待复盘</h2><p>人工填写或 AI 起草都只是草稿，确认后才会离开这里。</p></div><strong>{pending.length}</strong></header>{pending.length === 0 ? <div className="operationsInlineEmpty">{t("operations.today.none")}</div> : pending.map((item) => <ReviewCard key={item.id} item={item} completed={false} />)}</section>
       <section><header><div><span>REVIEWED</span><h2>已复盘</h2><p>已完成定型，可继续沉淀为规则或模板。</p></div><strong>{reviewed.length}</strong></header>{reviewed.length === 0 ? <div className="operationsInlineEmpty">{t("operations.today.none")}</div> : reviewed.map((item) => <ReviewCard key={item.id} item={item} completed />)}</section>
     </div>
 

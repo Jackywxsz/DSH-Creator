@@ -581,7 +581,14 @@ export class OilCreatorService extends TypertRemoteService {
       throw new Error(`publish platform is disabled: ${request.platform}`);
     }
     return this.patchItem(request.id, (item) => {
-      item.publish = patchOverlayPublish(item.publish, request.platform, request.status, request.url, request.publishedAt ?? Date.now());
+      item.publish = patchOverlayPublish(
+        item.publish,
+        request.platform,
+        request.status,
+        request.url,
+        Date.now(),
+        request.publishedAt,
+      );
     }, signal);
   }
 

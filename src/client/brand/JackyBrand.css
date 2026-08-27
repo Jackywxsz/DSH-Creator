@@ -506,95 +506,33 @@ html[data-jacky-creator-brand="paper-growth"] [data-surface="content-inspector"]
   }
 }
 
-/* Keep the Creator Cockpit utility skin isolated from the immersive Jacky surfaces. */
-html[data-jacky-creator-brand="paper-growth"] [data-plugin="jacky-creator"][data-surface="sidebar"].operationsTheme[data-cockpit-theme] {
-  border-right: 1px solid var(--cockpit-stroke);
-  background: var(--cockpit-sidebar-bg);
-  color: var(--cockpit-ink);
-  --dsh-scrollbar-thumb: color-mix(in srgb, var(--cockpit-ink) 28%, transparent);
-  --dsh-scrollbar-thumb-hover: color-mix(in srgb, var(--cockpit-ink) 48%, transparent);
-}
-
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .oilBrandText,
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .brandButton,
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .iconButton,
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .tabButton {
-  color: var(--cockpit-ink);
-}
-
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .tabButton {
-  min-height: 34px;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  font-weight: 800;
-}
-
-@media (hover: hover) {
-  html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .tabButton:hover,
-  html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsNavItem:hover {
-    border-color: var(--cockpit-stroke);
-    background: var(--cockpit-surface);
-    color: var(--cockpit-ink);
-    box-shadow: var(--cockpit-shadow-small);
-  }
-}
-
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .tabButton.active {
-  border-color: var(--cockpit-stroke);
-  background: var(--cockpit-ink);
-  box-shadow: 2px 2px 0 var(--cockpit-surface);
-  color: var(--cockpit-inverse-ink);
-}
-
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .quickIdeaButton {
-  width: 36px;
-  height: 36px;
-  border: 2px solid var(--cockpit-stroke);
-  border-radius: 8px;
-  background: var(--cockpit-surface);
-  box-shadow: var(--cockpit-shadow-small);
-  color: var(--cockpit-blue);
-}
-
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .quickIdeaButton:active,
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsNavItem:active,
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsThemeToggle:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--cockpit-stroke);
-}
-
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsNavCaption,
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsVersion {
-  color: var(--cockpit-muted);
-  font-weight: 750;
-}
-
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsNavItem {
-  min-height: 44px;
-  padding: 9px 11px;
-  border: 2px solid transparent;
-  border-radius: 9px;
-  color: var(--cockpit-ink);
-  font-weight: 800;
-}
-
+/* Keep the operations workspace theme independent from the shared sidebar shell. */
 html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsNavItem.active {
-  border-color: var(--cockpit-stroke);
-  background: var(--cockpit-surface);
-  box-shadow: var(--cockpit-shadow-small);
-  color: var(--cockpit-ink);
+  border: 2px solid #111111;
+  background: #ffffff;
+  box-shadow: 3px 3px 0 #111111;
+  color: #111111;
+  font-weight: 800;
 }
 
 html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsNavItem.active svg {
-  color: var(--cockpit-blue);
+  color: var(--jacky-cobalt);
 }
 
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .jackySproutIcon {
-  --jacky-sprout-ink: var(--cockpit-ink);
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsThemeToggle {
+  border: 1px solid var(--jacky-line);
+  background: var(--jacky-paper-raised);
+  box-shadow: var(--jacky-shadow-raised);
+  color: var(--jacky-ink);
 }
 
-html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .settingsArea button {
-  color: var(--cockpit-ink);
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsThemeToggle i {
+  border-color: var(--jacky-line-strong);
+  background: var(--jacky-paper-deep);
+}
+
+html[data-jacky-creator-brand="paper-growth"] [data-surface="sidebar"].operationsTheme[data-cockpit-theme] .operationsThemeToggle i b {
+  background: var(--jacky-cobalt);
 }
 
 html[data-jacky-creator-brand="paper-growth"] [data-plugin="jacky-creator"][data-surface="operations-workspace"][data-cockpit-theme] {

@@ -52,4 +52,12 @@
 
 2026-08-25 Beta 门禁：`pnpm check` 通过。TypeScript 检查通过，47 个测试文件共 282 个测试全部通过，Host、Typert 和 Client 构建成功。预构建 `dsh-oil-creator-0.1.0-beta.1.tgz` 共 23 个条目，包含最新 Host、Client、Typert、采集脚本、Bundle Patch、README、安装/分发文档、安全策略和品牌说明；不包含测试缓存、实验目录、用户内容或本机绝对路径。
 
+### 2026-08-27 发布与复盘闭环复核
+
+- **主发布判定：PASS。** 只有启用平台参与统计；零个平台发布时保持待发布，任一启用平台发布后进入已发布和复盘，其余平台只显示分发进度。已发布内容不会因旧的可选资产缺失而重新打开前置步骤；手动修改实际发布日期会覆盖旧值，重复确认但未指定日期时仍保留原值。
+- **人工复盘：PASS。** 无 AI 会话时可直接保存复盘草稿；Host 自行读取最新发布上下文并生成指纹。草稿确认后才写入 `knowledge/reviews`，规则和模板仍各自弹出第二次确认。
+- **AI 权限：PASS。** 六维评分降为展开策略内的可选发布前诊断，不阻塞发布；建议只有用户点击采纳才写入下一步。模型仍没有确认复盘或沉淀知识的工具。
+- **真实浏览器：PASS。** 隔离 Lab 中完成了人工草稿保存、确认写入、规则二次确认、未开始内容始终可见的 `0/4` 发布状态、`1/4` 分发进度和诊断折叠验证；1280px、390px、浅色和深色均可操作，控制台无错误。
+- **最终门禁：PASS。** `pnpm check` 通过，50 个测试文件共 307 个测试全部通过，TypeScript、Host、Typert 与 Client 构建成功。
+
 使用 DSH Desktop 2.0.2 自带的 DeepSeek Harness 0.1.1-rc.2 CLI，在全新的临时 `DSH_HOME` / `web` Profile 中从该 tarball 安装成功；组合配置中只有一个 `dsh-oil-creator` Bundle，默认 `ui-sidebar` 被该 Bundle 按设计替换。执行 `dsh plugin remove dsh-oil-creator` 后，插件 Bundle 消失且默认侧栏恢复。隔离 Web 进程尝试启动时受到当前 macOS 全局文件监听上限影响，报 `EMFILE: too many open files, watch`；因此本轮不把临时 Web 启动计为通过。正式 DSH Desktop UI 已在同一代码分支完成过可见验收，发布后仍要求用户从 GitHub Release 再做一次真实安装与重启验收。

@@ -48,6 +48,9 @@ function MetadataEditor({
   t,
   commit,
   openContent,
+  evaluation,
+  evaluationFresh,
+  requestEvaluation,
 }: {
   item: ContentSummary;
   meta?: ContentOperationsMeta;
@@ -56,6 +59,9 @@ function MetadataEditor({
   t: (key: CreatorKey) => string;
   commit: (operation: Promise<CockpitState>) => Promise<void>;
   openContent: (id: string) => void;
+  evaluation?: ContentOperationsMeta["evaluations"][number];
+  evaluationFresh?: boolean;
+  requestEvaluation: () => void;
 }) {
   const [contentType, setContentType] = useState(meta?.contentType ?? "");
   const [tier, setTier] = useState(meta?.tier ?? "");
@@ -120,6 +126,7 @@ function MetadataEditor({
         <small>{t(`inspector.stage.${item.workflow}` as CreatorKey)} · {t(`operations.pipeline.${item.pipeline}` as CreatorKey)}</small>
       </button>
       <div className="operationsMetaQuickActions">
+        {item.workflow === "publish" && <button type="button" className="publish" onClick={() => { openContent(item.id); }}>{t("operations.publish.confirm")}</button>}
         <button type="button" disabled={nextScheduled !== undefined} onClick={() => { void commit(face.createScheduleItem({ kind: "content", milestone: item.workflow === "idle" ? "topic" : item.workflow === "record" ? "recording" : item.workflow === "publish" ? "publishing" : item.workflow === "live" ? "review" : "editing", title: meta?.nextAction || item.title, contentId: item.id, plannedAt: new Date().setHours(12, 0, 0, 0), note: meta?.nextAction ?? "" })); }}><IconPlusOutline16 size={14} />{nextScheduled === undefined ? "安排今天" : `已排 ${localDate(nextScheduled.plannedAt)}`}</button>
         <button type="button" aria-expanded={expanded} onClick={() => { setExpanded((value) => !value); }}><IconEditOutline16 size={14} />{expanded ? "收起策略" : "编辑策略"}</button>
       </div>
@@ -136,6 +143,11 @@ function MetadataEditor({
         <fieldset className="full"><legend>{t("operations.meta.goals")}</legend>{state.goals.length === 0 ? <span>{t("operations.goals.empty")}</span> : state.goals.map((goal) => <label key={goal.id} className="check"><input type="checkbox" checked={goalIds.includes(goal.id)} onChange={(event) => { setGoalIds(event.target.checked ? [...goalIds, goal.id] : goalIds.filter((id) => id !== goal.id)); }} />{goal.name}</label>)}</fieldset>
         <fieldset className="full"><legend>{t("operations.meta.knowledge")}</legend>{state.knowledgeItems.filter((entry) => entry.active).length === 0 ? <span>{t("operations.knowledge.empty")}</span> : state.knowledgeItems.filter((entry) => entry.active).map((entry) => <label key={entry.id} className="check"><input type="checkbox" checked={knowledgeIds.includes(entry.id)} onChange={(event) => { setKnowledgeIds(event.target.checked ? [...knowledgeIds, entry.id] : knowledgeIds.filter((id) => id !== entry.id)); }} />{entry.kind === "rule" ? "规则" : "模板"} · {entry.title}</label>)}</fieldset>
       </div>
+      <section className="operationsEvaluationPanel">
+        <header><div><strong>{t("operations.evaluation.title")}</strong><small>{t("operations.evaluation.hint")}</small></div><span>{evaluation === undefined ? t("operations.evaluation.none") : `${evaluation.total} / 30`}{evaluation !== undefined && evaluationFresh === false ? ` · ${t("operations.evaluation.stale")}` : ""}</span></header>
+        <button type="button" onClick={requestEvaluation}>{evaluation === undefined ? t("operations.evaluation.ai") : t("operations.evaluation.again")}</button>
+        {evaluation !== undefined && <details className="operationsEvaluationDetails"><summary>{t("operations.evaluation.details")}</summary><div className="operationsScoreGrid">{Object.entries(EVALUATION_LABELS).map(([key, label]) => <article key={key}><span>{label}</span><strong>{evaluation.scores[key as keyof typeof evaluation.scores]}<small>/5</small></strong><p>{evaluation.evidence[key] || "暂未记录证据"}</p></article>)}</div>{evaluation.suggestions.length > 0 && <div className="operationsSuggestions"><strong>下一步改进</strong>{evaluation.suggestions.map((value) => <p key={value}>· {value}</p>)}<button type="button" onClick={() => { void commit(face.setContentMeta({ contentId: item.id, patch: { nextAction: evaluation.suggestions[0] ?? null } })); }}>{t("operations.evaluation.adopt")}</button></div>}</details>}
+      </section>
       <div className="operationsEditorActions">
         <button type="button" onClick={() => { openContent(item.id); }}>{t("operations.openContent")}</button>
         {meta !== undefined && <button type="button" className="danger" onClick={() => { if (window.confirm(t("operations.meta.deleteConfirm"))) void commit(face.deleteContentMeta(item.id)).catch(() => {}); }}><IconTrashOutline16 size={14} />{t("operations.meta.clear")}</button>}
@@ -271,7 +283,7 @@ export function ContentOperationsPage({
         {columns.map((column) => <section key={column.id} className="operationsPipelineColumn"><header><strong>{column.label}</strong><span>{column.items.length}</span></header><div>{column.items.length === 0 ? <div className="operationsColumnEmpty">{t("operations.today.none")}</div> : column.items.map((item) => {
           const meta = state.contentMeta[item.id];
           const evaluation = meta?.evaluations.at(-1);
-          return <div key={item.id} className="operationsContentMetaGroup"><MetadataEditor item={item} {...(meta === undefined ? {} : { meta })} state={state} face={face} t={t} commit={commit} openContent={openContent} /><div className="operationsEvaluationRow"><span>{evaluation === undefined ? t("operations.evaluation.none") : `${evaluation.total} / 30`}</span>{evaluation !== undefined && freshness[item.id] === false && <em>{t("operations.evaluation.stale")}</em>}<button type="button" onClick={() => { const sent = sendCockpitInstruction(`请为 Jacky 运营看板中 contentId=${item.id} 的《${item.title}》执行六维评分。先调用 cockpit_get_evaluation_context 读取当前内容与评分标准，逐项给出 0 到 5 的整数分、对应证据和改进建议，再调用 cockpit_save_evaluation 保存。不要伪造总分，Host 会重新计算。`); if (!sent) window.alert(t("operations.ai.noSession")); }}>{evaluation === undefined ? t("operations.evaluation.ai") : t("operations.evaluation.again")}</button></div>{evaluation !== undefined && <details className="operationsEvaluationDetails"><summary>查看六维证据与建议</summary><div className="operationsScoreGrid">{Object.entries(EVALUATION_LABELS).map(([key, label]) => <article key={key}><span>{label}</span><strong>{evaluation.scores[key as keyof typeof evaluation.scores]}<small>/5</small></strong><p>{evaluation.evidence[key] || "暂未记录证据"}</p></article>)}</div>{evaluation.suggestions.length > 0 && <div className="operationsSuggestions"><strong>下一步改进</strong>{evaluation.suggestions.map((value) => <p key={value}>· {value}</p>)}</div>}</details>}</div>;
+          return <div key={item.id} className="operationsContentMetaGroup"><MetadataEditor item={item} {...(meta === undefined ? {} : { meta })} state={state} face={face} t={t} commit={commit} openContent={openContent} {...(evaluation === undefined ? {} : { evaluation })} {...(freshness[item.id] === undefined ? {} : { evaluationFresh: freshness[item.id] })} requestEvaluation={() => { const sent = sendCockpitInstruction(`请为 Jacky 运营看板中 contentId=${item.id} 的《${item.title}》执行六维评分。先调用 cockpit_get_evaluation_context 读取当前内容与评分标准，逐项给出 0 到 5 的整数分、对应证据和改进建议，再调用 cockpit_save_evaluation 保存。不要伪造总分，Host 会重新计算。`); if (!sent) window.alert(t("operations.ai.noSession")); }} /></div>;
         })}</div></section>)}
       </div>
       {orphanIds.length > 0 && <section className="operationsOrphans"><h3>{t("operations.meta.orphans")}</h3><p>{t("operations.meta.orphansHint")}</p>{orphanIds.map((id) => <div key={id}><code>{id}</code><button type="button" onClick={() => { if (window.confirm(t("operations.meta.deleteConfirm"))) void commit(face.deleteContentMeta(id)).catch(() => {}); }}>{t("operations.meta.clear")}</button></div>)}</section>}
