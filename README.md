@@ -46,7 +46,7 @@ Jacky Creator 把 DeepSeek Harness 的对话能力和本地创作目录连起来
 打开 DSH Desktop 的内置终端，复制下面一行并回车：
 
 ```bash
-dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.4/jacky-creator-0.1.0-beta.4.tgz
+dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.5/jacky-creator-0.1.0-beta.5.tgz
 ```
 
 安装完成后彻底退出并重新打开 DSH Desktop。侧边栏左上角出现 **Jacky Creator**，并能进入“内容 / 运营 / 灵感”，即表示安装成功。
