@@ -43,13 +43,29 @@ Jacky Creator 把 DeepSeek Harness 的对话能力和本地创作目录连起来
 
 ### 2. 安装 Jacky Creator
 
+可以通过插件市场一键安装，也可以在 DSH Desktop 的内置终端直接安装当前版本。
+
+#### 方式一：通过插件市场安装
+
+先打开 DSH Desktop 的内置终端，安装可视化插件市场：
+
+```bash
+dsh plugin --profile web add dshmarket
+```
+
+彻底退出并重新打开 DSH Desktop，然后进入“设置 → 插件市场”，搜索 `DSH-Creator` 或 `Jacky Creator`，打开插件卡片并点击安装。
+
+插件市场目录按周期同步。如果市场显示的版本低于 GitHub 最新版本，可以改用下面的命令行方式。
+
+#### 方式二：通过命令行安装最新版
+
 打开 DSH Desktop 的内置终端，复制下面一行并回车：
 
 ```bash
-dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.5/jacky-creator-0.1.0-beta.5.tgz
+dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.5/jacky-creator-0.1.0-beta.5.tgz
 ```
 
-安装完成后彻底退出并重新打开 DSH Desktop。侧边栏左上角出现 **Jacky Creator**，并能进入“内容 / 运营 / 灵感”，即表示安装成功。
+无论使用哪种方式，安装完成后都要彻底退出并重新打开 DSH Desktop。侧边栏左上角出现 **Jacky Creator**，并能进入“内容 / 运营 / 灵感”，即表示安装成功。
 
 ### 3. 完成首次配置
 
@@ -115,7 +131,7 @@ dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0
 
 ## 插件市场
 
-Jacky Creator 已收录到 [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)，并由 [dsh-market](https://github.com/dsh-market/dsh-market) 同步市场卡片。也可以使用上面的固定版本安装命令。
+Jacky Creator 已收录到 [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)，并由 [dsh-market](https://github.com/dsh-market/dsh-market) 同步市场卡片。安装 `dshmarket` 后，可以在 DSH Desktop 的“设置 → 插件市场”中搜索 `DSH-Creator` 并一键安装。市场版本尚未同步时，请使用上面的固定版本安装命令。
 
 ## 文档与开发
 
