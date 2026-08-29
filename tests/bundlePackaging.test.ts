@@ -105,7 +105,7 @@ describe("DeepSeek Harness bundle packaging", () => {
     );
 
     expect(readme).toContain(
-      "dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.6/jacky-creator-0.1.0-beta.6.tgz",
+      "dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.6/jacky-creator-0.1.0-beta.6.tgz",
     );
     expect(readme).not.toContain("dsh plugin remove dsh-oil-creator");
     expect(implementation).toContain("dsh.bundle.patch");
@@ -174,6 +174,9 @@ describe("DeepSeek Harness bundle packaging", () => {
       expect(
         [...packedFiles].some((entry) => entry.startsWith("assets/readme/source/")),
       ).toBe(false);
+      expect([...packedFiles].some((entry) => entry.endsWith(".map"))).toBe(false);
+      expect(readFileSync(resolve(root, "lib/client.js"), "utf8"))
+        .not.toContain("sourceMappingURL=");
       const internalDocs = [
         "docs/adversarial-review.md",
         "docs/cockpit-design.md",

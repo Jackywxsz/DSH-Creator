@@ -83,7 +83,7 @@ export default defineConfig([
     target: "es2022",
     fixedExtension: false,
     dts: false,
-    sourcemap: true,
+    sourcemap: false,
     clean: false,
     deps: {
       neverBundle: [...CLIENT_EXTERNALS],
