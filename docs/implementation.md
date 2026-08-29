@@ -2,7 +2,7 @@
 
 Jacky Creator 的包名、Bundle ID 和设置命名空间统一为 `jacky-creator`。它是挂在 DeepSeek Harness 配置上的单一插件，把对话、内容生产和运营沉淀收进同一块界面，同时保留本地文件夹作为正文真源。
 
-安装：`dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.5/jacky-creator-0.1.0-beta.5.tgz`。预构建包避免 pnpm 10 对 Git 源码 `prepare` 的构建授权门槛。外部 CLI 必须显式选择目标 Profile；本地开发使用目录路径。
+安装：`dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.6/jacky-creator-0.1.0-beta.6.tgz`。预构建包避免 pnpm 10 对 Git 源码 `prepare` 的构建授权门槛。外部 CLI 必须显式选择目标 Profile；本地开发使用目录路径。
 
 卸载：`npx @deepseek-ai/dsh plugin --profile web remove jacky-creator`
 
