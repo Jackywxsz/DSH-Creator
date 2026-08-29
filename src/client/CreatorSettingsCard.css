@@ -181,8 +181,8 @@
 
 [data-plugin="jacky-creator"][data-surface="settings-card"] .capabilityGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 12px;
+  grid-template-columns: 1fr;
+  gap: 8px;
   margin-top: 8px;
 }
 
@@ -192,15 +192,84 @@
   justify-content: space-between;
   gap: 8px;
   min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
   color: var(--dsw-alias-label-secondary);
   font-size: 12px;
   line-height: 20px;
 }
 
+[data-plugin="jacky-creator"][data-surface="settings-card"] .capabilityCopy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
 [data-plugin="jacky-creator"][data-surface="settings-card"] .capabilityName {
   overflow: hidden;
+  color: var(--dsw-alias-label-primary);
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+[data-plugin="jacky-creator"][data-surface="settings-card"] .capabilityDetail {
+  overflow: hidden;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  line-height: 17px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-plugin="jacky-creator"][data-surface="settings-card"] .capabilityActions,
+[data-plugin="jacky-creator"][data-surface="settings-card"] .platformActions,
+[data-plugin="jacky-creator"][data-surface="settings-card"] .sectionActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+[data-plugin="jacky-creator"][data-surface="settings-card"] .sectionActions {
+  margin-top: 4px;
+}
+
+[data-plugin="jacky-creator"][data-surface="settings-card"] .platformRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+  padding: 4px 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+}
+
+[data-plugin="jacky-creator"][data-surface="settings-card"] .platformChoice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+[data-plugin="jacky-creator"][data-surface="settings-card"] .inlineMessage {
+  margin: 4px 0 0;
+}
+
+@media (max-width: 620px) {
+  [data-plugin="jacky-creator"][data-surface="settings-card"] .capabilityItem,
+  [data-plugin="jacky-creator"][data-surface="settings-card"] .platformRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  [data-plugin="jacky-creator"][data-surface="settings-card"] .capabilityActions,
+  [data-plugin="jacky-creator"][data-surface="settings-card"] .platformActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 [data-plugin="jacky-creator"][data-surface="settings-card"] .secretHead {

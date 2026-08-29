@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { CollectResult } from "../src/collectPublish.ts";
 
 const collect = vi.hoisted(() => ({
   calls: [] as Array<{ platforms?: readonly string[] }>,
@@ -11,10 +12,11 @@ const collect = vi.hoisted(() => ({
     _script: string,
     _signal: AbortSignal,
     options: { platforms?: readonly string[] } = {},
-  ) => {
+  ): Promise<CollectResult> => {
     collect.calls.push(options.platforms === undefined ? {} : { platforms: options.platforms });
     return { collected: [] };
   }),
+  open: vi.fn(async () => undefined),
 }));
 
 const chained = vi.hoisted(() => ({
@@ -31,7 +33,7 @@ const preview = vi.hoisted(() => ({
 
 vi.mock("../src/collectEgo.ts", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../src/collectEgo.ts")>();
-  return { ...actual, runCollectPublish: collect.run };
+  return { ...actual, runCollectPublish: collect.run, openCreatorPlatform: collect.open };
 });
 
 vi.mock("../src/subtitle.ts", async (importOriginal) => {
@@ -287,6 +289,54 @@ describe("OilCreatorService.syncPublish", () => {
     expect(collect.calls).toEqual([]);
   });
 });
+
+describe("OilCreatorService platform login setup", () => {
+  beforeEach(() => {
+    collect.run.mockClear();
+    collect.open.mockClear();
+  });
+
+  it("does not claim authentication from an empty but reachable creator page", async () => {
+    collect.run.mockResolvedValueOnce({
+      collected: [
+        { platform: "xiaohongshu", items: [{ platform: "xiaohongshu", title: "demo" }] },
+        { platform: "douyin", items: [] },
+        { platform: "bilibili", items: [], loginRequired: true },
+        { platform: "wechat", items: [], error: "page failed" },
+      ],
+    });
+    const service = Object.create(OilCreatorService.prototype) as OilCreatorService;
+    (service as unknown as { dataDir: string }).dataDir = await mkdtemp(join(tmpdir(), "login-check-"));
+    const result = await service.checkPlatformLogins({
+      platforms: ["xiaohongshu", "douyin", "bilibili", "wechat"],
+    }, new AbortController().signal);
+
+    expect(result.platforms).toEqual([
+      { platform: "xiaohongshu", state: "authenticated" },
+      { platform: "douyin", state: "unknown", detail: expect.stringContaining("无法") },
+      { platform: "bilibili", state: "loginRequired" },
+      { platform: "wechat", state: "error", detail: "page failed" },
+    ]);
+    expect(collect.run.mock.calls[0]?.[2]).toMatchObject({
+      platforms: ["xiaohongshu", "douyin", "bilibili", "wechat"],
+      maxPages: 1,
+      xhsScrollSteps: 1,
+      cleanupStale: false,
+    });
+  });
+
+  it("opens only the requested creator backend and leaves publishing untouched", async () => {
+    const signal = new AbortController().signal;
+    await expect(serviceOfPrototype().openPlatformLogin({ platform: "douyin" }, signal))
+      .resolves.toEqual({ opened: true });
+    expect(collect.open).toHaveBeenCalledWith("douyin", signal);
+    expect(collect.run).not.toHaveBeenCalled();
+  });
+});
+
+function serviceOfPrototype(): OilCreatorService {
+  return Object.create(OilCreatorService.prototype) as OilCreatorService;
+}
 
 describe("OilCreatorService.setPublish", () => {
   it("forwards an explicit publication date when updating a published item", async () => {

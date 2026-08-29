@@ -30,6 +30,7 @@ import {
   type Config,
 } from "./config.ts";
 import { inspectCreatorSetup } from "./capabilities.ts";
+import { configurePublisher, installCreatorCapability } from "./capabilityInstall.ts";
 import { creatorGuideText } from "./guide.ts";
 import { applyOrganize, previewOrganize, remapOverlayItems } from "./organize.ts";
 import { cacheIsFresh, loadCollectCache, nextCollectCacheScope, saveCollectCache } from "./collectCache.ts";
@@ -45,7 +46,7 @@ import {
   type CollectResult,
   type CollectTarget,
 } from "./collectPublish.ts";
-import { collectScriptPath, runCollectPublish } from "./collectEgo.ts";
+import { collectScriptPath, openCreatorPlatform, runCollectPublish } from "./collectEgo.ts";
 import { pickCoverLaunch, pickSubtitleWorkflow, resolveCoverSkill, type GenerateStep } from "./generate.ts";
 import { startLibraryWatch } from "./libraryWatch.ts";
 import {
@@ -93,6 +94,9 @@ import type {
   ContentDetail,
   CoverThumbResult,
   CreatorCapabilities,
+  CreatorInstallResult,
+  CreatorInstallTarget,
+  CreatorPlatformLoginResult,
   CreatorSetupRequest,
   CreatorSetupResult,
   CreatorSetupStatus,
@@ -102,6 +106,7 @@ import type {
   IdRequest,
   OverlayItem,
   OverlayStore,
+  PublishPlatform,
   SetContentStageRequest,
   SetContentSkipRequest,
   LibrarySettings,
@@ -438,6 +443,74 @@ export class OilCreatorService extends TypertRemoteService {
       coverSkillDir: this.coverSkillDir(),
       settings,
     });
+  }
+
+  async installCapability(
+    request: { target: CreatorInstallTarget; confirmed: true },
+    signal: AbortSignal,
+  ): Promise<CreatorInstallResult> {
+    signal.throwIfAborted();
+    const before = request.target === "publisher" ? await this.getCreatorSetupStatus(signal) : undefined;
+    if (request.target === "publisher" && before?.settings.profile.enabledPlatforms.length === 0) {
+      throw new Error("请先选择至少一个确实拥有账号的平台并保存，再配置自动发布。");
+    }
+    const existingPublisher = before?.capabilities.publishSkill.path;
+    const installed = request.target === "publisher" && existingPublisher !== undefined
+      ? { changed: false, detail: `已保留现有 ${before?.capabilities.publishSkill.skillName ?? "发布 Skill"}。`, path: existingPublisher }
+      : await installCreatorCapability(request.target, { signal });
+    let detail = installed.detail;
+    let changed = installed.changed;
+    if (request.target === "publisher") {
+      const settings = before?.settings ?? await this.getSettings({}, signal);
+      await configurePublisher(installed.path, settings.libraryRoot, settings.profile.enabledPlatforms, undefined, signal);
+      detail = `${detail} 已按当前启用平台完成首次发布配置。`;
+      changed = true;
+    }
+    signal.throwIfAborted();
+    const status = await this.getCreatorSetupStatus(signal);
+    return { target: request.target, changed, detail, capabilities: status.capabilities };
+  }
+
+  async checkPlatformLogins(
+    request: { platforms?: PublishPlatform[] },
+    signal: AbortSignal,
+  ): Promise<CreatorPlatformLoginResult> {
+    signal.throwIfAborted();
+    const platforms = request.platforms === undefined
+      ? (await this.getSettings({}, signal)).profile.enabledPlatforms
+      : normalizeEnabledPlatforms(request.platforms);
+    if (platforms.length === 0) return { platforms: [] };
+    const collected = await runCollectPublish(collectScriptPath(), signal, {
+      platforms,
+      maxPages: 1,
+      xhsScrollSteps: 1,
+      cleanupStale: false,
+      registryPath: collectRegistryPathForDataDir(this.dataDir),
+    });
+    return {
+      platforms: platforms.map((platform) => {
+        const page = collected.collected.find((item) => item.platform === platform);
+        if (page?.loginRequired === true) return { platform, state: "loginRequired" as const };
+        if (page?.error !== undefined && page.error !== "") {
+          return { platform, state: "error" as const, detail: page.error.slice(0, 300) };
+        }
+        if ((page?.items.length ?? 0) > 0) return { platform, state: "authenticated" as const };
+        return {
+          platform,
+          state: "unknown" as const,
+          detail: "后台可访问，但没有读取到作品，无法仅凭空列表确认登录状态。",
+        };
+      }),
+    };
+  }
+
+  async openPlatformLogin(
+    request: { platform: PublishPlatform },
+    signal: AbortSignal,
+  ): Promise<{ opened: boolean }> {
+    signal.throwIfAborted();
+    await openCreatorPlatform(request.platform, signal);
+    return { opened: true };
   }
 
   async configureCreator(

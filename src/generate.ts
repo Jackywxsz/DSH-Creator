@@ -1,4 +1,4 @@
-import { mkdir } from "node:fs/promises";
+import { link, mkdir, rm } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -68,10 +68,13 @@ export async function pickSubtitleWorkflow(
   item: ContentSummary,
   skillRoot: string,
 ): Promise<{ steps: GenerateStep[]; output: string }> {
-  const video = item.videoRaw ?? item.videoSubtitled;
-  if (video === undefined) throw new Error("no video to transcribe");
+  const sourceVideo = item.videoRaw ?? item.videoSubtitled;
+  if (sourceVideo === undefined) throw new Error("no video to transcribe");
   const work = workDirOf(item);
   await mkdir(work, { recursive: true });
+  const video = join(work, `.subtitle-source${extname(sourceVideo)}`);
+  await rm(video, { force: true });
+  await link(sourceVideo, video);
   const transcript = join(work, "transcript.json");
   const reviewed = join(work, "reviewed-transcript.json");
   const prepared = join(work, "subtitle-transcript.json");

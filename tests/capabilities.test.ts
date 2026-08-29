@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { defaultFindSkillDir, findExecutable, inspectCreatorSetup } from "../src/capabilities.ts";
+import { defaultFindDshSkillDir, defaultFindSkillDir, findExecutable, inspectCreatorSetup } from "../src/capabilities.ts";
 import type { LibrarySettings } from "../src/types.ts";
 
 function settings(libraryRoot: string, configured = true): LibrarySettings {
@@ -25,6 +25,8 @@ describe("creator setup inspection", () => {
     const subtitleRoot = join(root, "oil-subtitle");
     const coverRoot = join(root, "oil-cover");
     const jackyCoverRoot = join(root, "skills", "jacky-cover");
+    const publisherRoot = join(root, "skills", "jacky-video-publisher");
+    const publisherConfig = join(root, "publisher-config.json");
     const bin = join(root, "bin");
     await Promise.all([
       mkdir(libraryRoot, { recursive: true }),
@@ -35,6 +37,7 @@ describe("creator setup inspection", () => {
       mkdir(join(jackyCoverRoot, "references"), { recursive: true }),
       mkdir(join(jackyCoverRoot, "scripts"), { recursive: true }),
       mkdir(join(jackyCoverRoot, "assets"), { recursive: true }),
+      mkdir(join(publisherRoot, "scripts", "v2"), { recursive: true }),
       mkdir(bin, { recursive: true }),
     ]);
     await writeFile(join(subtitleRoot, "setup.sh"), "#!/bin/bash\n");
@@ -50,10 +53,20 @@ describe("creator setup inspection", () => {
       join(jackyCoverRoot, "scripts", "validate_run.py"),
       join(jackyCoverRoot, "assets", "jacky-reference-front.jpg"),
       join(jackyCoverRoot, "assets", "jacky-reference-casual.jpg"),
+      join(publisherRoot, "SKILL.md"),
+      join(publisherRoot, "scripts", "config.mjs"),
+      join(publisherRoot, "scripts", "run-safe-platforms.sh"),
+      join(publisherRoot, "scripts", "v2", "publisher.mjs"),
       join(bin, "ego-browser"),
     ];
     await Promise.all(files.map((path) => writeFile(path, "")));
     await chmod(join(bin, "ego-browser"), 0o755);
+    await writeFile(publisherConfig, JSON.stringify({
+      schemaVersion: 2,
+      onboarding: { completed: true },
+      availablePlatforms: ["xiaohongshu", "douyin", "bilibili", "wechat_channels"],
+      defaultPlatforms: ["xiaohongshu", "douyin", "bilibili", "wechat_channels"],
+    }));
 
     const result = await inspectCreatorSetup({
       libraryRoot,
@@ -64,6 +77,8 @@ describe("creator setup inspection", () => {
       platform: "linux",
       env: { PATH: bin },
       findSkillDir: (name) => join(root, "skills", name),
+      findDshSkillDir: (name) => join(root, "skills", name),
+      publisherConfigPath: publisherConfig,
     });
 
     expect(result.capabilities.library.state).toBe("ready");
@@ -74,6 +89,8 @@ describe("creator setup inspection", () => {
     expect(result.capabilities.editingSkill.state).toBe("ready");
     expect(result.capabilities.editingSkill.path).toBe(join(root, "skills", "screen-studio-editor"));
     expect(result.capabilities.publishSkill.state).toBe("ready");
+    expect(result.capabilities.publishSkill.skillName).toBe("jacky-video-publisher");
+    expect(result.capabilities.presentationSkill.state).toBe("ready");
     expect(result.capabilities.articleSkill.state).toBe("ready");
     expect(result.recommendations).toEqual([]);
   });
@@ -90,6 +107,7 @@ describe("creator setup inspection", () => {
       env: { PATH: "" },
       home: root,
       findSkillDir: () => undefined,
+      findDshSkillDir: () => undefined,
     });
 
     expect(result.capabilities.library.state).toBe("missing");
@@ -121,6 +139,7 @@ describe("creator setup inspection", () => {
       env: { PATH: "" },
       home: root,
       findSkillDir: () => undefined,
+      findDshSkillDir: () => undefined,
     });
 
     expect(result.capabilities.subtitleSkill.state).toBe("missing");
@@ -167,6 +186,143 @@ describe("defaultFindSkillDir", () => {
     await mkdir(grok, { recursive: true });
     await writeFile(join(grok, "SKILL.md"), "# video-publisher\n");
     expect(defaultFindSkillDir("video-publisher", home)).toBe(grok);
+  });
+
+  it("uses only DSH-supported roots for callable Skills", async () => {
+    const home = await mkdtemp(join(tmpdir(), "dsh-skill-home-"));
+    const codex = join(home, ".codex", "skills", "video-publisher");
+    const agents = join(home, ".agents", "skills", "video-publisher");
+    await mkdir(codex, { recursive: true });
+    await writeFile(join(codex, "SKILL.md"), "# codex only\n");
+    expect(defaultFindDshSkillDir("video-publisher", home)).toBeUndefined();
+    await mkdir(agents, { recursive: true });
+    await writeFile(join(agents, "SKILL.md"), "# dsh visible\n");
+    expect(defaultFindDshSkillDir("video-publisher", home)).toBe(agents);
+  });
+});
+
+describe("publisher capability", () => {
+  it("accepts the compatible publisher only when onboarding matches enabled platforms", async () => {
+    const root = await mkdtemp(join(tmpdir(), "publisher-capability-"));
+    const configPath = join(root, "config.json");
+    const publisherRoot = join(root, "video-publisher");
+    await mkdir(join(publisherRoot, "scripts", "v2"), { recursive: true });
+    await Promise.all([
+      writeFile(join(publisherRoot, "SKILL.md"), "# publisher\n"),
+      writeFile(join(publisherRoot, "scripts", "config.mjs"), ""),
+      writeFile(join(publisherRoot, "scripts", "run-safe-platforms.sh"), ""),
+      writeFile(join(publisherRoot, "scripts", "v2", "publisher.mjs"), ""),
+    ]);
+    await writeFile(configPath, JSON.stringify({
+      schemaVersion: 2,
+      onboarding: { completed: true },
+      availablePlatforms: ["douyin"],
+      defaultPlatforms: ["douyin"],
+    }));
+    const configured = settings(root);
+    configured.profile.enabledPlatforms = ["douyin"];
+    const inspect = () => inspectCreatorSetup({
+      libraryRoot: root,
+      dataDir: join(root, "data"),
+      subtitleSkillDir: join(root, "missing-subtitle"),
+      coverSkillDir: join(root, "missing-cover"),
+      settings: configured,
+      platform: "linux",
+      env: { PATH: "" },
+      home: root,
+      findSkillDir: () => undefined,
+      findDshSkillDir: (name) => name === "video-publisher" ? publisherRoot : undefined,
+      publisherConfigPath: configPath,
+    });
+
+    const ready = await inspect();
+    expect(ready.capabilities.publishSkill.state).toBe("ready");
+    expect(ready.capabilities.publishSkill.skillName).toBe("video-publisher");
+
+    configured.profile.enabledPlatforms = ["bilibili"];
+    const stale = await inspect();
+    expect(stale.capabilities.publishSkill.state).toBe("missing");
+    expect(stale.capabilities.publishSkill.detail).toContain("当前启用平台不一致");
+  });
+
+  it("does not report an incomplete publisher directory as ready", async () => {
+    const root = await mkdtemp(join(tmpdir(), "publisher-incomplete-"));
+    const publisherRoot = join(root, "video-publisher");
+    const configPath = join(root, "config.json");
+    await mkdir(publisherRoot, { recursive: true });
+    await writeFile(join(publisherRoot, "SKILL.md"), "# incomplete\n");
+    await writeFile(configPath, JSON.stringify({
+      schemaVersion: 2,
+      onboarding: { completed: true },
+      availablePlatforms: ["douyin"],
+      defaultPlatforms: ["douyin"],
+    }));
+    const configured = settings(root);
+    configured.profile.enabledPlatforms = ["douyin"];
+
+    const result = await inspectCreatorSetup({
+      libraryRoot: root,
+      dataDir: join(root, "data"),
+      subtitleSkillDir: join(root, "missing-subtitle"),
+      coverSkillDir: join(root, "missing-cover"),
+      settings: configured,
+      platform: "linux",
+      env: { PATH: "" },
+      home: root,
+      findSkillDir: () => undefined,
+      findDshSkillDir: (name) => name === "video-publisher" ? publisherRoot : undefined,
+      publisherConfigPath: configPath,
+    });
+
+    expect(result.capabilities.publishSkill.state).toBe("missing");
+    expect(result.capabilities.publishSkill.detail).toContain("安装不完整");
+    expect(result.capabilities.publishSkill.detail).toContain("scripts/config.mjs");
+  });
+
+  it("falls back to a complete compatible publisher when the branded directory is incomplete", async () => {
+    const root = await mkdtemp(join(tmpdir(), "publisher-fallback-"));
+    const jackyRoot = join(root, "jacky-video-publisher");
+    const compatibleRoot = join(root, "video-publisher");
+    const configPath = join(root, "config.json");
+    await mkdir(jackyRoot, { recursive: true });
+    await writeFile(join(jackyRoot, "SKILL.md"), "# incomplete branded publisher\n");
+    await mkdir(join(compatibleRoot, "scripts", "v2"), { recursive: true });
+    await Promise.all([
+      writeFile(join(compatibleRoot, "SKILL.md"), "# compatible publisher\n"),
+      writeFile(join(compatibleRoot, "scripts", "config.mjs"), ""),
+      writeFile(join(compatibleRoot, "scripts", "run-safe-platforms.sh"), ""),
+      writeFile(join(compatibleRoot, "scripts", "v2", "publisher.mjs"), ""),
+      writeFile(configPath, JSON.stringify({
+        schemaVersion: 2,
+        onboarding: { completed: true },
+        availablePlatforms: ["douyin"],
+        defaultPlatforms: ["douyin"],
+      })),
+    ]);
+    const configured = settings(root);
+    configured.profile.enabledPlatforms = ["douyin"];
+
+    const result = await inspectCreatorSetup({
+      libraryRoot: root,
+      dataDir: join(root, "data"),
+      subtitleSkillDir: join(root, "missing-subtitle"),
+      coverSkillDir: join(root, "missing-cover"),
+      settings: configured,
+      platform: "linux",
+      env: { PATH: "" },
+      home: root,
+      findSkillDir: () => undefined,
+      findDshSkillDir: (name) => name === "jacky-video-publisher"
+        ? jackyRoot
+        : name === "video-publisher"
+          ? compatibleRoot
+          : undefined,
+      publisherConfigPath: configPath,
+    });
+
+    expect(result.capabilities.publishSkill.state).toBe("ready");
+    expect(result.capabilities.publishSkill.skillName).toBe("video-publisher");
+    expect(result.capabilities.publishSkill.path).toBe(compatibleRoot);
   });
 });
 
@@ -215,6 +371,7 @@ describe("inspectCreatorSetup windows and mac paths", () => {
       env: { Path: bin, PATHEXT: ".EXE" },
       home: root,
       findSkillDir: (name) => name === "jacky-cover" ? jackyCoverRoot : undefined,
+      findDshSkillDir: () => undefined,
     });
 
     expect(result.capabilities.subtitleSkill.state).toBe("ready");
@@ -237,6 +394,7 @@ describe("inspectCreatorSetup windows and mac paths", () => {
       env: { PATH: "" },
       home,
       findSkillDir: () => undefined,
+      findDshSkillDir: () => undefined,
     });
     expect(result.capabilities.publishSync.state).toBe("missing");
     expect(result.capabilities.publishSync.path).toBe(app);

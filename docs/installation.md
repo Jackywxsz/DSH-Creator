@@ -44,7 +44,7 @@ dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0
 
 > 帮我配置 Jacky Creator：选择本地内容目录，先预览准备修改的设置，确认后再保存。
 
-Jacky Creator 会检查内容目录和可选能力，只显示凭据是否已配置，不会把 API Key 读回对话。创建目录或保存设置前，会先展示准备修改的内容。
+Jacky Creator 会检查内容目录和可选能力，只显示凭据是否已配置，不会把 API Key 读回对话。也可以直接打开“设置 → 插件 → Jacky Creator”：逐项重新检测能力，只选择确实拥有账号的平台，用 Ego Browser 检测/打开各平台登录，并在确认后安装可验证的公开依赖。新安装默认不启用任何发布平台；创建目录、安装依赖或保存设置前都会明确展示或确认。
 
 `minimal` Agent 没有完整的 Skill 和文件工具，不适合首次配置。
 

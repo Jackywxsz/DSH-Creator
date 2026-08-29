@@ -132,6 +132,8 @@ export interface CreatorCapability {
   required: boolean;
   detail: string;
   path?: string;
+  skillName?: string;
+  installTarget?: CreatorInstallTarget;
 }
 
 export interface CreatorCapabilities {
@@ -144,7 +146,29 @@ export interface CreatorCapabilities {
   publishSync: CreatorCapability;
   editingSkill: CreatorCapability;
   publishSkill: CreatorCapability;
+  presentationSkill: CreatorCapability;
   articleSkill: CreatorCapability;
+}
+
+export type CreatorInstallTarget = "subtitle" | "coverBase" | "editing" | "publisher";
+
+export type CreatorPlatformLoginState = "authenticated" | "loginRequired" | "unknown" | "error";
+
+export interface CreatorPlatformLogin {
+  platform: PublishPlatform;
+  state: CreatorPlatformLoginState;
+  detail?: string;
+}
+
+export interface CreatorPlatformLoginResult {
+  platforms: CreatorPlatformLogin[];
+}
+
+export interface CreatorInstallResult {
+  target: CreatorInstallTarget;
+  changed: boolean;
+  detail: string;
+  capabilities: CreatorCapabilities;
 }
 
 export interface CreatorSetupStatus {

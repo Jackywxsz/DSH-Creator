@@ -41,14 +41,14 @@ function coverLines(capabilities: CreatorSetupStatus["capabilities"]): string[] 
   return lines.length === 0 ? ["- 当前封面能力可用。"] : lines;
 }
 
-function publishPlatformLine(enabledPlatforms: readonly PublishPlatform[]): string {
+function publishPlatformLine(enabledPlatforms: readonly PublishPlatform[], publisherName: string): string {
   if (enabledPlatforms.length === 0) {
-    return "- 当前 enabledPlatforms 为空（[]）：不要调用 video-publisher，也不要调用 oil_sync_publish；先用 oil_creator_setup 配置启用平台，用户确认后再继续。";
+    return `- 当前 enabledPlatforms 为空（[]）：不要调用 ${publisherName}，也不要调用 oil_sync_publish；先用 oil_creator_setup 配置启用平台，用户确认后再继续。`;
   }
   const names = enabledPlatforms
     .map((platform) => `${PUBLISH_PLATFORM_DEFINITIONS[platform].name}（${platform}）`)
     .join("、");
-  return `- 当前 enabledPlatforms：${names}。video-publisher 与 oil_sync_publish 只处理这些平台，不得上传或同步其他平台。`;
+  return `- 当前 enabledPlatforms：${names}。${publisherName} 与 oil_sync_publish 只处理这些平台，不得上传或同步其他平台。`;
 }
 
 /**
@@ -60,6 +60,7 @@ export function creatorGuideText(status: CreatorSetupStatus): string {
   const { capabilities, settings } = status;
   const scriptRules = settings.scriptRules;
   const enabledPlatforms = settings.profile.enabledPlatforms;
+  const publisherName = capabilities.publishSkill.skillName ?? "jacky-video-publisher（兼容 video-publisher）";
   const lines: string[] = [
     "# 内容工作台自举指引",
     "",
@@ -74,7 +75,8 @@ export function creatorGuideText(status: CreatorSetupStatus): string {
     capabilityLine("封面凭据 ZENMUX_API_KEY", capabilities.coverCredential),
     capabilityLine("Ego Browser（自动发布与数据回收）", capabilities.publishSync),
     capabilityLine("剪辑 skill screen-studio-editor", capabilities.editingSkill),
-    capabilityLine("发布 skill video-publisher", capabilities.publishSkill),
+    capabilityLine(`发布 skill ${publisherName}`, capabilities.publishSkill),
+    capabilityLine("演示 skill jacky-motion2-0", capabilities.presentationSkill),
     capabilityLine("脚本转 Markdown 文章", capabilities.articleSkill),
     "",
     "## 内容管理",
@@ -114,19 +116,21 @@ export function creatorGuideText(status: CreatorSetupStatus): string {
     "",
     "## 自动发布与数据回收",
     "- 这两项都依赖 Ego Browser（PATH 里的 ego-browser 命令）和已登录的各平台创作者后台。",
-    publishPlatformLine(enabledPlatforms),
+    "- 发布配置会写入 ~/.config/video-publisher，作业状态会写入 ~/.video-publisher；在 DSH 中运行配置或生产编排器时，首次运行就申请宿主写权限，不要先在沙箱内失败后再重试。",
+    "- 某个平台需要登录或安全验证时，只暂停该平台，其余已登录平台继续准备草稿；完成登录后用同一发布包和任务后缀续跑，不要新建重复作业。",
+    publishPlatformLine(enabledPlatforms, publisherName),
     capabilities.publishSync.state === "ready"
       ? enabledPlatforms.length === 0
         ? "- 已发现 Ego Browser，但当前没有启用平台，不执行自动发布和数据回收。"
-        : "- 当前已发现 Ego Browser。上传发布走外部 skill video-publisher，停在最终发表按钮前由用户点；发布后或用户要求时用 oil_sync_publish 回收播放、赞、评论并写回工作台。"
+        : `- 当前已发现 Ego Browser。上传发布走外部 skill ${publisherName}，停在最终发表按钮前由用户点；发布后或用户要求时用 oil_sync_publish 回收播放、赞、评论并写回工作台。`
       : "- 当前未发现 Ego Browser：自动发布和 oil_sync_publish 数据回收都不可用。告诉用户到 https://lite.ego.app 下载 ego lite，完成首次引导后 ego-browser 命令可用，再登录各平台创作者后台；片库、脚本、字幕、封面不受影响，不要假装能同步。",
     capabilities.publishSkill.state === "ready"
       ? enabledPlatforms.length === 0
-        ? "- 已发现 video-publisher，但当前没有启用平台，不使用它。"
-        : "- 已发现 video-publisher。"
+        ? `- 已发现 ${publisherName}，但当前没有启用平台，不使用它。`
+        : `- 已发现 ${publisherName}，并且首次发布配置与当前启用平台一致。`
       : enabledPlatforms.length === 0
-        ? "- 当前没有启用平台，先配置 enabledPlatforms，再考虑安装 video-publisher。"
-        : "- 缺 video-publisher：征得用户同意后执行 `git clone https://github.com/oil-oil/video-publisher-skill ~/.agents/skills/video-publisher`；没有它时在插件里手动标记发布状态即可。",
+        ? `- 当前没有启用平台，先配置 enabledPlatforms，再考虑安装或配置 ${publisherName}。`
+        : "- 发布 Skill 缺失或首次配置不一致：让用户在 设置 → 插件 → Jacky Creator 中确认后点一键安装/配置；公开兼容包仍使用 video-publisher 身份，不伪装成 jacky-video-publisher。没有它时可在插件里手动标记发布状态。",
     "",
     "## 公众号图文",
     "- 文章以 script.md 为主要输入，在当前会话里改写，不依赖额外的图文转换 skill。",

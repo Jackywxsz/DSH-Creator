@@ -1,4 +1,4 @@
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -57,6 +57,12 @@ describe("pickSubtitleWorkflow", () => {
     expect(workflow.steps.map((step) => step.env)).toEqual(["subtitle", "subtitle", "none"]);
     expect(workflow.steps[1]?.args).toContain("--frames-dir");
     expect(workflow.steps[2]?.args).toContain("--chapters-output");
+    const stableVideo = workflow.steps[0]?.args[0];
+    expect(stableVideo).toContain(".subtitle-source.mp4");
+    expect(workflow.steps[1]?.args).toContain(stableVideo);
+    expect(workflow.steps[2]?.args).toContain(stableVideo);
+    await unlink(video);
+    expect(await readFile(stableVideo!, "utf8")).toBe("v");
     expect(workflow.output.endsWith("subtitle-transcript.json")).toBe(true);
     expect(workflow.steps.some((step) => step.script.endsWith("burn_subtitles.py"))).toBe(false);
   });

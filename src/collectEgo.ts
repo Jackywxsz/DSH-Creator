@@ -14,6 +14,7 @@ import {
   unregisterCollectSpace,
 } from "./collectSpaces.ts";
 import type { PublishPlatform } from "./types.ts";
+import { PUBLISH_PLATFORM_DEFINITIONS } from "./platforms.ts";
 
 export function collectScriptPath(): string {
   return join(dirname(fileURLToPath(import.meta.url)), "collect-publish.mjs");
@@ -52,6 +53,42 @@ export interface CollectRunOptions {
 }
 
 export { defaultCollectSpaceName } from "./collectSpaces.ts";
+
+export async function openCreatorPlatform(
+  platform: PublishPlatform,
+  signal: AbortSignal,
+): Promise<void> {
+  const name = `jacky-creator-login-${platform}`;
+  const url = PUBLISH_PLATFORM_DEFINITIONS[platform].collectUrl;
+  const source = [
+    `const task = await useOrCreateTaskSpace(${JSON.stringify(name)});`,
+    `await openOrReuseTab(${JSON.stringify(url)}, { wait: true, timeout: 35 });`,
+    "cliLog(JSON.stringify({ ok: true, taskId: task.id }));",
+  ].join("\n");
+  await new Promise<void>((resolve, reject) => {
+    if (signal.aborted) {
+      reject(signal.reason ?? new Error("aborted"));
+      return;
+    }
+    const child = spawn("ego-browser", ["nodejs"], { stdio: ["pipe", "ignore", "pipe"], env: process.env });
+    let stderr = "";
+    child.stderr?.on("data", (chunk: Buffer | string) => { stderr += String(chunk); });
+    child.stdin?.end(source);
+    const onAbort = () => { child.kill("SIGTERM"); };
+    signal.addEventListener("abort", onAbort, { once: true });
+    child.once("error", (cause) => {
+      signal.removeEventListener("abort", onAbort);
+      reject((cause as NodeJS.ErrnoException).code === "ENOENT"
+        ? new Error("ego-browser not found; install Ego Lite")
+        : cause);
+    });
+    child.once("exit", (code) => {
+      signal.removeEventListener("abort", onAbort);
+      if (code === 0) resolve();
+      else reject(new Error(`打开创作者后台失败：${stderr.trim().slice(-300) || `ego-browser exited ${code}`}`));
+    });
+  });
+}
 
 export async function runCollectPublish(
   scriptPath: string,

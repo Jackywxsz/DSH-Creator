@@ -69,9 +69,10 @@ export function defaultCoverSkillDir(): string {
 
 export function skillDirCandidates(skillName: string, home = homedir()): string[] {
   return [
+    join(home, ".dsh", "skills", skillName),
+    join(home, ".agents", "skills", skillName),
     join(home, ".claude", "skills", skillName),
     join(home, ".codex", "skills", skillName),
-    join(home, ".agents", "skills", skillName),
     join(home, ".grok", "skills", skillName),
   ];
 }

@@ -117,9 +117,10 @@ describe("portable config defaults", () => {
 
   it("discovers common skill roots without overriding explicit choices", () => {
     expect(skillDirCandidates("oil-cover")).toEqual([
+      join(homedir(), ".dsh", "skills", "oil-cover"),
+      join(homedir(), ".agents", "skills", "oil-cover"),
       join(homedir(), ".claude", "skills", "oil-cover"),
       join(homedir(), ".codex", "skills", "oil-cover"),
-      join(homedir(), ".agents", "skills", "oil-cover"),
       join(homedir(), ".grok", "skills", "oil-cover"),
     ]);
     expect(resolveSkillDir("/opt/custom-skill", "oil-cover", "/opt/from-env")).toBe("/opt/custom-skill");

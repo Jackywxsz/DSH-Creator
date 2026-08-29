@@ -45,7 +45,7 @@ export function libraryConventionText(
     "写或改 script.md 必须遵循用户的脚本规则（人设）：先用 oil_script_rules 读取；还没配置时主动问清语气、结构和禁忌，再用 oil_script_rules 存下来。",
     "为已有内容起草脚本时，再调用 cockpit_get_script_context 读取用户在运营看板选中的开头、结构、标签、复盘规则和模板。运营知识只提供创作依据，成稿仍写入这条真实内容的 script.md。",
     `插件工具只做文件做不到的事：配置工作台、按约定建文件夹、绑/开 Screen Studio、等导出、生成或烧录字幕、生成封面、同步已发布数据、整理文件夹名。工作台状态在 ${dataDir}/overlay.json，不是正文。`,
-    "自动发布（video-publisher skill）和已发布数据回收（oil_sync_publish）都依赖 Ego Browser；能力检查显示缺失时明确告诉用户，不要假装能同步。",
+    "自动发布优先使用已发现的 jacky-video-publisher，兼容公开 video-publisher；不要把兼容包假称为 Jacky Skill。它和已发布数据回收（oil_sync_publish）都依赖 Ego Browser；能力检查显示缺失时明确告诉用户，不要假装能同步。",
   ];
   if (enabledPlatforms !== undefined) {
     lines.push(

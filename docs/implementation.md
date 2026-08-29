@@ -24,8 +24,8 @@ Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最�
 4. **等导出**：导出开始后，插件盯着影片目录，成片稳定落盘再往下走。这段时间可以并行做字幕和封面。
 5. **字幕**：用百炼 Key 转录；`oil-subtitle` 首次 clone 后必须运行 `bash ~/.agents/skills/oil-subtitle/setup.sh`；人在 skill 自带的预览编辑器里改稿，确认后再烧进视频。
 6. **封面**：有 ZenMux Key 就出 3:4 / 4:3 / 16:9。封面主标题和错别字由对话里的 Agent 核对，不交给脚本自行发挥。
-7. **标签与发布包**：`publish-package.json` 给四个视频平台，只需要标题和 tags，不写平台长文案。`enabledPlatforms` 默认启用小红书、抖音、B 站、视频号四个平台，关闭的平台不参与 AI 发布和数据同步。公众号文章是旁边的 Markdown，不是第五个视频平台，走 `oil-video-article`，成稿在 `公众号文章/`。
-8. **发布**：`video-publisher` 只为 `enabledPlatforms` 中的平台准备草稿，做到最终发布按钮前，人自己点发布。插件记录每平台未发布 / 草稿已备 / 已发布；任一启用平台为已发布时主 workflow 进入 `live`，其余平台只作为分发进度。
+7. **标签与发布包**：`publish-package.json` 给视频平台，只需要标题和 tags，不写平台长文案。新安装的 `enabledPlatforms` 默认为空，用户只启用确实拥有账号的平台；关闭的平台不参与 AI 发布和数据同步。公众号文章是旁边的 Markdown，不是第五个视频平台，走 `oil-video-article`，成稿在 `公众号文章/`。
+8. **发布**：优先使用 DSH 已发现的 `jacky-video-publisher`，否则兼容公开 `video-publisher`，且只为 `enabledPlatforms` 中的平台准备草稿，做到最终发布按钮前，人自己点发布。兼容包保留自己的 Skill 身份。插件记录每平台未发布 / 草稿已备 / 已发布；任一启用平台为已发布时主 workflow 进入 `live`，其余平台只作为分发进度。
 9. **回收**：用 Ego Lite 打开已登录的创作者后台，只翻 `enabledPlatforms` 中平台的已发布列表，按标题或已存 id 对到本地文件夹，写下播放 / 赞 / 评论。不是公开站爬虫；平台上有、本地没有文件夹的不会自动建条目。
 
 一条片子对应影片目录里的一个子文件夹。工程在 Screen Studio 工程目录里，用绑定连起来。
@@ -145,7 +145,7 @@ ego-browser nodejs < scripts/collect-publish.mjs
 | 演示 | `jacky-motion2-0` | 标准全局 Skill 目录 | 页签提交逐字稿、画幅和输出路径 | 完成审稿、分镜、风格三个确认门 |
 | 发布文案语气 | `oil-tone` | `~/.agents/skills/oil-tone` | 不执行；写标题简介时读档案 | 成稿必须过 `tone_lint.py` 再通读 |
 | 公众号图文 | `oil-video-article` | `~/.agents/skills/oil-video-article` | 识别 `公众号文章/` | 从无头像屏幕轨截图、按 oil-tone 写文章 |
-| 四平台视频草稿 | `video-publisher` | `~/.agents/skills/video-publisher` | 读 `auto-publish.json` 显示状态 | Ego 上传、停在最终发布按钮前、人点发布 |
+| 视频草稿 | `jacky-video-publisher`，兼容 `video-publisher` | `~/.dsh/skills` 或 `~/.agents/skills` | 读 `auto-publish.json` 显示状态 | Ego 上传、停在最终发布按钮前、人点发布 |
 
 字幕脚本入口以 oil-subtitle 为准：`bailian_transcribe.py` → `review_subtitles.py` → `prepare_subtitles.py` → `preview_editor.py`，用户确认后再 `burn_subtitles.py`。封面调用仓库内 `scripts/generate_jacky_cover.py`，它复用 Oil Cover 的分析与 ZenMux 请求逻辑，注入 Jacky Cover 品牌补丁、Oil gallery 和两张身份参考。全局 Skill 真源不修改。
 
