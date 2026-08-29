@@ -48,7 +48,7 @@ describe("Jacky Creator product terminology", () => {
     const identitySurfaces = [patch, host, contract, settings, build].join("\n");
 
     expect(manifest.name).toBe("jacky-creator");
-    expect(manifest.version).toBe("0.1.0-beta.4");
+    expect(manifest.version).toBe("0.1.0-beta.5");
     expect(identitySurfaces).toContain("jacky-creator");
     expect(identitySurfaces).not.toContain("dsh-oil-creator");
   });
@@ -71,7 +71,7 @@ describe("Jacky Creator product terminology", () => {
     expect(readme).not.toContain("dsh plugin remove dsh-oil-creator");
     expect(installation.match(/dsh plugin remove dsh-oil-creator/g)).toHaveLength(1);
     expect(onboarding).not.toContain("dsh-oil-creator-0.1.0-beta.2.tgz");
-    expect(onboarding).toContain("jacky-creator-0.1.0-beta.4.tgz");
+    expect(onboarding).toContain("jacky-creator-0.1.0-beta.5.tgz");
     expect(publicDocs).not.toContain("~/.dsh-oil-creator");
     expect(publicDocs).not.toContain("今天做一期 DeepSeek Harness 安装上手");
     expect(hero).not.toContain("<circle");
