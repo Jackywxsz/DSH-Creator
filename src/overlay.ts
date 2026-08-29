@@ -1,12 +1,12 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
-import { normalizeEnabledPlatforms, PUBLISH_PLATFORMS } from "./platforms.ts";
+import { normalizeEnabledPlatforms } from "./platforms.ts";
 import { decodeBurnJob, decodeOverlayPublish } from "./publishStatus.ts";
 import type { CreatorProfile, OverlayItem, OverlayStore, PublishPlatform } from "./types.ts";
 
 export { normalizeEnabledPlatforms } from "./platforms.ts";
-export const DEFAULT_ENABLED_PLATFORMS: readonly PublishPlatform[] = PUBLISH_PLATFORMS;
+export const DEFAULT_ENABLED_PLATFORMS: readonly PublishPlatform[] = [];
 
 export function emptyProfile(): CreatorProfile {
   return { enabledPlatforms: [...DEFAULT_ENABLED_PLATFORMS] };

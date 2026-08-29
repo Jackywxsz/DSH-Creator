@@ -1,5 +1,5 @@
 import { constants, existsSync } from "node:fs";
-import { access, stat } from "node:fs/promises";
+import { access, readFile, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { delimiter, join } from "node:path";
 
@@ -14,6 +14,7 @@ import { resolveSubtitleSkill, subtitleInstallCommand } from "./subtitle.ts";
 import type {
   CreatorCapabilities,
   CreatorCapability,
+  CreatorInstallTarget,
   CreatorSecrets,
   CreatorSetupStatus,
   LibrarySettings,
@@ -29,10 +30,23 @@ interface InspectCreatorSetupOptions {
   env?: NodeJS.ProcessEnv;
   home?: string;
   findSkillDir?: (skillName: string) => string | undefined;
+  findDshSkillDir?: (skillName: string) => string | undefined;
+  publisherConfigPath?: string;
 }
 
 export function defaultFindSkillDir(skillName: string, home = homedir()): string | undefined {
   return skillDirCandidates(skillName, home).find((candidate) => existsSync(join(candidate, "SKILL.md")));
+}
+
+export function dshSkillDirCandidates(skillName: string, home = homedir()): string[] {
+  return [
+    join(home, ".dsh", "skills", skillName),
+    join(home, ".agents", "skills", skillName),
+  ];
+}
+
+export function defaultFindDshSkillDir(skillName: string, home = homedir()): string | undefined {
+  return dshSkillDirCandidates(skillName, home).find((candidate) => existsSync(join(candidate, "SKILL.md")));
 }
 
 function capability(
@@ -80,23 +94,23 @@ async function subtitleCapability(
 ): Promise<CreatorCapability> {
   const info = await stat(path).catch(() => undefined);
   if (info === undefined || !info.isDirectory()) {
-    return capability(
+    return { ...capability(
       "missing",
       false,
       `未发现 oil-subtitle；执行 ${subtitleInstallCommand(path)} 后重试。`,
       path,
-    );
+    ), installTarget: "subtitle" };
   }
   try {
     const resolved = await resolveSubtitleSkill(path, platform);
     return capability("ready", false, "已发现字幕工作流。", resolved.root);
   } catch {
-    return capability(
+    return { ...capability(
       "missing",
       false,
       `已发现 oil-subtitle 目录，但尚未完成 setup.sh；执行 bash "${join(path, "setup.sh")}" 后重试。字幕生成和预览暂不可用。`,
       path,
-    );
+    ), installTarget: "subtitle" };
   }
 }
 
@@ -105,11 +119,14 @@ async function coverCapability(
   platform: NodeJS.Platform,
   jackySkillDir?: string,
 ): Promise<CreatorCapability> {
+  const baseInstalled = await stat(path).then((info) => info.isDirectory(), () => false);
   try {
     const resolved = await resolveCoverSkill(path, platform, jackySkillDir);
     return capability("ready", false, "已发现 Jacky Cover + ZenMux 封面工作流。", resolved.jackyRoot);
   } catch {
-    return capability("missing", false, "Jacky Cover 依赖不完整；封面生成不可用。", path);
+    return baseInstalled
+      ? capability("missing", false, "已发现 oil-cover，但 Jacky Cover 品牌 Skill 缺失或不完整；当前没有可验证的公开一键安装源。", path)
+      : { ...capability("missing", false, "未发现 oil-cover 基础依赖；安装后仍需要 Jacky Cover 品牌 Skill。", path), installTarget: "coverBase" };
   }
 }
 
@@ -122,11 +139,81 @@ function credentialCapability(secret: CreatorSecrets[keyof CreatorSecrets], labe
 function skillCapability(
   findSkillDir: (skillName: string) => string | undefined,
   skillName: string,
+  installTarget?: CreatorInstallTarget,
 ): CreatorCapability {
   const found = findSkillDir(skillName);
   return found === undefined
-    ? capability("missing", false, `未发现 ${skillName}。`)
-    : capability("ready", false, `已发现 ${skillName}。`, found);
+    ? { ...capability("missing", false, `未发现 ${skillName}。`), ...(installTarget === undefined ? {} : { installTarget }) }
+    : { ...capability("ready", false, `已发现 ${skillName}。`, found), skillName };
+}
+
+function publisherConfigPath(env: NodeJS.ProcessEnv, home: string): string {
+  if (env.VIDEO_PUBLISHER_CONFIG?.trim()) return env.VIDEO_PUBLISHER_CONFIG;
+  const configHome = env.XDG_CONFIG_HOME?.trim() || join(home, ".config");
+  return join(configHome, "video-publisher", "config.json");
+}
+
+async function publisherCapability(
+  findSkillDir: (skillName: string) => string | undefined,
+  configPath: string,
+  enabledPlatforms: LibrarySettings["profile"]["enabledPlatforms"],
+): Promise<CreatorCapability> {
+  const candidates = ["jacky-video-publisher", "video-publisher"]
+    .map((skillName) => ({ skillName, path: findSkillDir(skillName) }))
+    .filter((item): item is { skillName: string; path: string } => item.path !== undefined);
+  if (candidates.length === 0) {
+    return { ...capability("missing", false, "未发现 Jacky 视频发布或兼容的 video-publisher。"), installTarget: "publisher" };
+  }
+  const requiredFiles = [
+    "SKILL.md",
+    join("scripts", "config.mjs"),
+    join("scripts", "run-safe-platforms.sh"),
+    join("scripts", "v2", "publisher.mjs"),
+  ];
+  const inspected = await Promise.all(candidates.map(async ({ skillName, path }) => {
+    const missingFiles = (
+      await Promise.all(requiredFiles.map(async (relativePath) => ({
+        relativePath,
+        exists: await stat(join(path, relativePath)).then((info) => info.isFile(), () => false),
+      })))
+    ).filter((item) => !item.exists).map((item) => item.relativePath);
+    return { skillName, path, missingFiles };
+  }));
+  const selected = inspected.find((item) => item.missingFiles.length === 0);
+  if (selected === undefined) {
+    const incomplete = inspected[0]!;
+    return {
+      ...capability(
+        "missing",
+        false,
+        `已发现 ${incomplete.skillName} 目录，但安装不完整，缺少：${incomplete.missingFiles.join("、")}。为避免覆盖现有文件，请先备份或移走该目录后再一键安装。`,
+        incomplete.path,
+      ),
+      skillName: incomplete.skillName,
+      installTarget: "publisher",
+    };
+  }
+  const { skillName, path } = selected;
+  const raw = await readFile(configPath, "utf8").then((text) => JSON.parse(text) as {
+    schemaVersion?: number;
+    onboarding?: { completed?: boolean };
+    availablePlatforms?: unknown[];
+    defaultPlatforms?: unknown[];
+  }).catch(() => undefined);
+  const publisherPlatforms = enabledPlatforms.map((platform) => (
+    platform === "wechat" ? "wechat_channels" : platform
+  ));
+  const samePlatforms = (values: unknown[] | undefined): boolean => Array.isArray(values)
+    && values.length === publisherPlatforms.length
+    && publisherPlatforms.every((platform) => values.includes(platform));
+  const configured = raw?.schemaVersion === 2
+    && raw.onboarding?.completed === true
+    && publisherPlatforms.length > 0
+    && samePlatforms(raw.availablePlatforms)
+    && samePlatforms(raw.defaultPlatforms);
+  return configured
+    ? { ...capability("ready", false, `已发现 ${skillName}，首次发布配置已完成。`, path), skillName }
+    : { ...capability("missing", false, `已发现 ${skillName}，但发布配置与当前启用平台不一致或尚未完成。`, path), skillName, installTarget: "publisher" };
 }
 
 export async function findExecutable(
@@ -209,7 +296,14 @@ function recommendationsOf(capabilities: CreatorCapabilities): string[] {
     );
   }
   if (capabilities.editingSkill.state !== "ready") recommendations.push("自动剪辑：git clone https://github.com/oil-oil/screen-studio-editor ~/.agents/skills/screen-studio-editor");
-  if (capabilities.publishSkill.state !== "ready") recommendations.push("自动发布：git clone https://github.com/oil-oil/video-publisher-skill ~/.agents/skills/video-publisher");
+  if (capabilities.publishSkill.state !== "ready") {
+    recommendations.push(
+      capabilities.publishSkill.path === undefined
+        ? "自动发布：安装 Jacky 视频发布的兼容公开包，再完成账号平台配置。"
+        : "自动发布：发布 Skill 已安装，还需要完成账号平台与发布偏好配置。",
+    );
+  }
+  if (capabilities.presentationSkill.state !== "ready") recommendations.push("演示：安装 jacky-motion2-0 后再制作录屏演示。");
   return recommendations;
 }
 
@@ -220,6 +314,12 @@ export async function inspectCreatorSetup(
   const env = options.env ?? process.env;
   const home = options.home ?? homedir();
   const findSkillDir = options.findSkillDir ?? ((name: string) => defaultFindSkillDir(name, home));
+  const findDshSkillDir = options.findDshSkillDir ?? ((name: string) => defaultFindDshSkillDir(name, home));
+  const publishSkill = await publisherCapability(
+    findDshSkillDir,
+    options.publisherConfigPath ?? publisherConfigPath(env, home),
+    options.settings.profile.enabledPlatforms,
+  );
   const capabilities: CreatorCapabilities = {
     library: await libraryCapability(options.libraryRoot),
     screenStudio: await screenStudioCapability(platform, home),
@@ -228,8 +328,9 @@ export async function inspectCreatorSetup(
     coverSkill: await coverCapability(options.coverSkillDir, platform, findSkillDir("jacky-cover")),
     coverCredential: credentialCapability(options.settings.secrets.cover, "封面"),
     publishSync: egoCapability(await findEgo(platform, env, home)),
-    editingSkill: skillCapability(findSkillDir, "screen-studio-editor"),
-    publishSkill: skillCapability(findSkillDir, "video-publisher"),
+    editingSkill: skillCapability(findDshSkillDir, "screen-studio-editor", "editing"),
+    publishSkill,
+    presentationSkill: skillCapability(findDshSkillDir, "jacky-motion2-0"),
     articleSkill: capability("ready", false, "当前会话可基于 script.md 生成标准 Markdown 文章。"),
   };
   return {

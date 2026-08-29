@@ -4,6 +4,9 @@ import type {
   ContentOptionalStep,
   CoverThumbResult,
   CreatorCapabilities,
+  CreatorInstallResult,
+  CreatorInstallTarget,
+  CreatorPlatformLoginResult,
   CreatorProfile,
   LibrarySettings,
   ListContentsResult,
@@ -30,6 +33,9 @@ export interface CreatorViewFace {
   openFolder: (path: string) => Promise<void>;
   getSettings: () => Promise<LibrarySettings>;
   getCapabilities: () => Promise<CreatorCapabilities>;
+  installCapability: (target: CreatorInstallTarget) => Promise<CreatorInstallResult>;
+  checkPlatformLogins: (platforms?: PublishPlatform[]) => Promise<CreatorPlatformLoginResult>;
+  openPlatformLogin: (platform: PublishPlatform) => Promise<void>;
   setLibraryRoot: (path: string) => Promise<void>;
   setProfile: (profile: CreatorProfile) => Promise<void>;
   setScriptRules: (text: string) => Promise<void>;

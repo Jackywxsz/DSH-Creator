@@ -22,6 +22,9 @@ describe("handwritten TYPERT", () => {
       "getSubtitleText",
       "getSettings",
       "getCapabilities",
+      "installCapability",
+      "checkPlatformLogins",
+      "openPlatformLogin",
       "getRevision",
       "setLibraryRoot",
       "refreshCatalog",
@@ -50,6 +53,18 @@ describe("handwritten TYPERT", () => {
       expect("_zod" in item.result.schema).toBe(true);
       expect(typeof item.result.schema.parse).toBe("function");
     }
+  });
+
+  it("requires an explicit confirmation on the mutating Skill installer endpoint", () => {
+    const install = OIL_CREATOR_INVOCATIONS.find((item) => item.method === "installCapability");
+    const schema = install?.parameters[0]?.codec.mode === "strict"
+      ? install.parameters[0].codec.schema
+      : undefined;
+    expect(() => schema?.parse({ target: "editing" })).toThrow();
+    expect(schema?.parse({ target: "editing", confirmed: true })).toEqual({
+      target: "editing",
+      confirmed: true,
+    });
   });
 
   it("keeps Creator Cockpit in a separate remote namespace", () => {

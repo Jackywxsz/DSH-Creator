@@ -250,6 +250,13 @@ export const revisionResultSchema = z.object({
   revision: z.number().int().nonnegative(),
 });
 
+export const creatorInstallTargetSchema = z.union([
+  z.literal("subtitle"),
+  z.literal("coverBase"),
+  z.literal("editing"),
+  z.literal("publisher"),
+]);
+
 const capabilitySchema = z.object({
   state: z.union([
     z.literal("ready"),
@@ -259,6 +266,8 @@ const capabilitySchema = z.object({
   required: z.boolean(),
   detail: z.string(),
   path: z.string().optional(),
+  skillName: z.string().optional(),
+  installTarget: creatorInstallTargetSchema.optional(),
 });
 
 export const capabilitiesResultSchema = z.object({
@@ -272,8 +281,46 @@ export const capabilitiesResultSchema = z.object({
     publishSync: capabilitySchema,
     editingSkill: capabilitySchema,
     publishSkill: capabilitySchema,
+    presentationSkill: capabilitySchema,
     articleSkill: capabilitySchema,
   }),
+});
+
+export const installCapabilityRequestSchema = z.object({
+  target: creatorInstallTargetSchema,
+  confirmed: z.literal(true),
+});
+
+export const installCapabilityResultSchema = z.object({
+  target: creatorInstallTargetSchema,
+  changed: z.boolean(),
+  detail: z.string(),
+  capabilities: capabilitiesResultSchema.shape.capabilities,
+});
+
+export const platformLoginRequestSchema = z.object({
+  platforms: z.array(publishPlatformSchema).optional(),
+});
+
+export const platformLoginResultSchema = z.object({
+  platforms: z.array(z.object({
+    platform: publishPlatformSchema,
+    state: z.union([
+      z.literal("authenticated"),
+      z.literal("loginRequired"),
+      z.literal("unknown"),
+      z.literal("error"),
+    ]),
+    detail: z.string().optional(),
+  })),
+});
+
+export const openPlatformLoginRequestSchema = z.object({
+  platform: publishPlatformSchema,
+});
+
+export const openPlatformLoginResultSchema = z.object({
+  opened: z.boolean(),
 });
 
 export const waitExportRequestSchema = z.object({

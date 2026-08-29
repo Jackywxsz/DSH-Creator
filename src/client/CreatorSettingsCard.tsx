@@ -3,9 +3,16 @@ import { IconChevronDownOutline14 } from "@deepseek-ai/dsh-client-ui-primitives"
 import type { InjectFace, PropsLocale, PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots";
 import type {} from "@deepseek-ai/dsh-client-ui-settings-plugins/client";
 
-import { normalizeEnabledPlatforms, PUBLISH_PLATFORMS } from "../platforms.ts";
+import { normalizeEnabledPlatforms } from "../platforms.ts";
 import { COVER_KEY_REFS, SUBTITLE_KEY_REFS } from "../secrets.ts";
-import type { CreatorCapabilities, CreatorProfile, CreatorSecrets, PublishPlatform } from "../types.ts";
+import type {
+  CreatorCapabilities,
+  CreatorInstallTarget,
+  CreatorPlatformLogin,
+  CreatorProfile,
+  CreatorSecrets,
+  PublishPlatform,
+} from "../types.ts";
 import type { CredentialsClient, SecretDraft } from "./credentialsApi.ts";
 import { applyDescribed, secretDraftOf } from "./credentialsApi.ts";
 import type { CreatorViewFace } from "./face.ts";
@@ -19,7 +26,7 @@ export type CreatorSettingsCardProps =
   & PropsRuntime<"settings.plugin.item">
   & PropsLocale<"dsh.jacky.creator">
   & InjectFace<
-    Pick<CreatorViewFace, "ready" | "getSettings" | "getCapabilities" | "setLibraryRoot" | "setProfile" | "setScriptRules" | "pickDirectory">
+    Pick<CreatorViewFace, "ready" | "getSettings" | "getCapabilities" | "installCapability" | "checkPlatformLogins" | "openPlatformLogin" | "setLibraryRoot" | "setProfile" | "setScriptRules" | "pickDirectory">
     & { credentials: CredentialsClient | undefined }
   >;
 
@@ -28,7 +35,7 @@ const EMPTY_SECRETS: CreatorSecrets = {
   cover: { kind: "cover", ref: COVER_KEY_REFS[0], configured: false, writable: true },
 };
 
-const EMPTY_PROFILE: CreatorProfile = { enabledPlatforms: [...PUBLISH_PLATFORMS] };
+const EMPTY_PROFILE: CreatorProfile = { enabledPlatforms: [] };
 
 const CAPABILITY_ROWS: ReadonlyArray<{ id: keyof CreatorCapabilities; label: CreatorKey }> = [
   { id: "library", label: "settings.capability.library" },
@@ -37,6 +44,7 @@ const CAPABILITY_ROWS: ReadonlyArray<{ id: keyof CreatorCapabilities; label: Cre
   { id: "coverSkill", label: "settings.capability.cover" },
   { id: "editingSkill", label: "settings.capability.editing" },
   { id: "publishSkill", label: "settings.capability.publish" },
+  { id: "presentationSkill", label: "settings.capability.presentation" },
   { id: "articleSkill", label: "settings.capability.article" },
   { id: "publishSync", label: "settings.capability.ego" },
 ];
@@ -60,6 +68,21 @@ function sameProfile(left: CreatorProfile, right: CreatorProfile): boolean {
     && left.enabledPlatforms.every((platform, index) => platform === right.enabledPlatforms[index]);
 }
 
+function loginTone(state: CreatorPlatformLogin["state"] | undefined): StatusTone {
+  if (state === "authenticated") return "success";
+  if (state === "loginRequired" || state === "error") return "error";
+  if (state === "unknown") return "pending";
+  return "neutral";
+}
+
+function loginStateKey(state: CreatorPlatformLogin["state"] | undefined): CreatorKey {
+  if (state === "authenticated") return "settings.login.authenticated";
+  if (state === "loginRequired") return "settings.login.required";
+  if (state === "unknown") return "settings.login.unknown";
+  if (state === "error") return "settings.login.error";
+  return "settings.login.unchecked";
+}
+
 export function CreatorSettingsCard({
   t,
   ready,
@@ -69,6 +92,9 @@ export function CreatorSettingsCard({
   setScriptRules,
   pickDirectory,
   getCapabilities,
+  installCapability,
+  checkPlatformLogins,
+  openPlatformLogin,
   credentials,
 }: CreatorSettingsCardProps) {
   const [open, setOpen] = useState(false);
@@ -84,10 +110,18 @@ export function CreatorSettingsCard({
   ]);
   const [loaded, setLoaded] = useState(false);
   const [capabilities, setCapabilities] = useState<CreatorCapabilities | undefined>(undefined);
+  const [capabilitiesLoaded, setCapabilitiesLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
   const [saved, setSaved] = useState(false);
   const [keyFailed, setKeyFailed] = useState(false);
+  const [capabilityBusy, setCapabilityBusy] = useState<CreatorInstallTarget | "refresh" | undefined>();
+  const [capabilityMessage, setCapabilityMessage] = useState("");
+  const [capabilityFailed, setCapabilityFailed] = useState(false);
+  const [loginRows, setLoginRows] = useState<Partial<Record<PublishPlatform, CreatorPlatformLogin>>>({});
+  const [loginBusy, setLoginBusy] = useState<PublishPlatform | "check" | undefined>();
+  const [loginMessage, setLoginMessage] = useState("");
+  const [loginFailed, setLoginFailed] = useState(false);
 
   useEffect(() => {
     if (!ready()) return;
@@ -138,9 +172,12 @@ export function CreatorSettingsCard({
   useEffect(() => {
     if (!open || !ready()) return;
     let cancelled = false;
+    setCapabilitiesLoaded(false);
     void getCapabilities().then((next) => {
       if (!cancelled) setCapabilities(next);
-    }, () => undefined);
+    }, () => undefined).finally(() => {
+      if (!cancelled) setCapabilitiesLoaded(true);
+    });
     return () => {
       cancelled = true;
     };
@@ -206,16 +243,94 @@ export function CreatorSettingsCard({
       if (dirtyProfile) {
         await setProfile(draftProfile);
         setSavedProfile(cloneProfile(draftProfile));
+        setLoginRows({});
       }
       if (dirtyRules) {
         await setScriptRules(draftRules);
         setSavedRules(draftRules);
+      }
+      try {
+        setCapabilities(await getCapabilities());
+      } catch {
+        setCapabilityFailed(true);
+        setCapabilityMessage(t("settings.capability.loadFailed" as CreatorKey));
       }
       setSaved(true);
     } catch {
       setFailed(true);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const refreshCapabilities = async () => {
+    if (capabilityBusy !== undefined) return;
+    setCapabilityBusy("refresh");
+    setCapabilitiesLoaded(false);
+    setCapabilityFailed(false);
+    setCapabilityMessage("");
+    try {
+      setCapabilities(await getCapabilities());
+    } catch {
+      setCapabilityFailed(true);
+    } finally {
+      setCapabilitiesLoaded(true);
+      setCapabilityBusy(undefined);
+    }
+  };
+
+  const onInstall = async (target: CreatorInstallTarget) => {
+    if (capabilityBusy !== undefined) return;
+    if (target === "publisher" && (dirtyProfile || draftProfile.enabledPlatforms.length === 0)) {
+      setCapabilityFailed(true);
+      setCapabilityMessage(t("settings.install.savePlatformsFirst" as CreatorKey));
+      return;
+    }
+    if (!window.confirm(t("settings.install.confirm" as CreatorKey))) return;
+    setCapabilityBusy(target);
+    setCapabilityFailed(false);
+    setCapabilityMessage("");
+    try {
+      const result = await installCapability(target);
+      setCapabilities(result.capabilities);
+      setCapabilityMessage(result.detail);
+    } catch (cause) {
+      setCapabilityFailed(true);
+      setCapabilityMessage(cause instanceof Error ? cause.message : t("settings.install.failed" as CreatorKey));
+    } finally {
+      setCapabilityBusy(undefined);
+    }
+  };
+
+  const onCheckLogins = async () => {
+    if (loginBusy !== undefined || draftProfile.enabledPlatforms.length === 0) return;
+    setLoginBusy("check");
+    setLoginFailed(false);
+    setLoginMessage("");
+    try {
+      const result = await checkPlatformLogins(draftProfile.enabledPlatforms);
+      setLoginRows(Object.fromEntries(result.platforms.map((item) => [item.platform, item])));
+    } catch (cause) {
+      setLoginFailed(true);
+      setLoginMessage(cause instanceof Error ? cause.message : t("settings.login.checkFailed" as CreatorKey));
+    } finally {
+      setLoginBusy(undefined);
+    }
+  };
+
+  const onOpenLogin = async (platform: PublishPlatform) => {
+    if (loginBusy !== undefined) return;
+    setLoginBusy(platform);
+    setLoginFailed(false);
+    setLoginMessage("");
+    try {
+      await openPlatformLogin(platform);
+      setLoginMessage(t("settings.login.opened" as CreatorKey));
+    } catch (cause) {
+      setLoginFailed(true);
+      setLoginMessage(cause instanceof Error ? cause.message : t("settings.login.openFailed" as CreatorKey));
+    } finally {
+      setLoginBusy(undefined);
     }
   };
 
@@ -237,25 +352,58 @@ export function CreatorSettingsCard({
       </button>
       {open && (
         <div className="body">
-          {capabilities !== undefined && (
-            <div className="field">
+          <div className="field">
               <span className="fieldLabel">{t("settings.capabilities" as CreatorKey)}</span>
               <span className="fieldHint">{t("settings.capabilitiesHint" as CreatorKey)}</span>
-              <div className="capabilityGrid">
+              <div className="sectionActions">
+                <ActionButton disabled={capabilityBusy !== undefined} onClick={() => { void refreshCapabilities(); }}>
+                  {t((capabilityBusy === "refresh" ? "settings.capability.checking" : "settings.capability.recheck") as CreatorKey)}
+                </ActionButton>
+              </div>
+              {capabilities !== undefined && <div className="capabilityGrid">
                 {CAPABILITY_ROWS.map((row) => {
                   const item = capabilities[row.id];
+                  const installTarget = item.installTarget;
                   return (
-                    <span key={row.id} className="capabilityItem" title={item.detail}>
-                      <span className="capabilityName">{t(row.label)}</span>
-                      <StatusPill tone={capabilityTone(item.state)}>
-                        {t(capabilityStateKey(item.state))}
-                      </StatusPill>
-                    </span>
+                    <div key={row.id} className="capabilityItem" title={item.detail}>
+                      <span className="capabilityCopy">
+                        <span className="capabilityName">{t(row.label)}</span>
+                        <span className="capabilityDetail">{item.detail}</span>
+                      </span>
+                      <span className="capabilityActions">
+                        <StatusPill tone={capabilityTone(item.state)}>
+                          {t(capabilityStateKey(item.state))}
+                        </StatusPill>
+                        {item.state !== "ready" && installTarget !== undefined && (
+                          <ActionButton
+                            disabled={capabilityBusy !== undefined || (installTarget === "publisher" && (dirtyProfile || draftProfile.enabledPlatforms.length === 0))}
+                            onClick={() => { void onInstall(installTarget); }}
+                          >
+                            {t((
+                              capabilityBusy === installTarget
+                                ? "settings.install.installing"
+                                : installTarget === "publisher" && item.path !== undefined
+                                  ? "settings.install.configure"
+                                  : installTarget === "coverBase"
+                                    ? "settings.install.coverBase"
+                                    : "settings.install.action"
+                            ) as CreatorKey)}
+                          </ActionButton>
+                        )}
+                      </span>
+                    </div>
                   );
                 })}
-              </div>
+              </div>}
+              {capabilities === undefined && capabilitiesLoaded && capabilityBusy !== "refresh" && (
+                <p className="failed inlineMessage" role="status">{t("settings.capability.loadFailed" as CreatorKey)}</p>
+              )}
+              {capabilityMessage !== "" && (
+                <p className={capabilityFailed ? "failed inlineMessage" : "ok inlineMessage"} role="status">
+                  {capabilityMessage}
+                </p>
+              )}
             </div>
-          )}
           <label className="field">
             <span className="fieldLabel">{t("settings.libraryRoot" as CreatorKey)}</span>
             <span className="fieldHint">{t("settings.libraryRootHint" as CreatorKey)}</span>
@@ -271,18 +419,43 @@ export function CreatorSettingsCard({
           <div className="field">
             <span className="fieldLabel">{t("settings.enabledPlatforms" as CreatorKey)}</span>
             <span className="fieldHint">{t("settings.enabledPlatformsHint" as CreatorKey)}</span>
-            {CREATOR_SETTINGS_PLATFORMS.map((platform) => (
-              <label className="inputLabel" key={platform.key}>
-                <span>
+            <div className="sectionActions">
+              <ActionButton
+                disabled={loginBusy !== undefined || draftProfile.enabledPlatforms.length === 0}
+                onClick={() => { void onCheckLogins(); }}
+              >
+                {t((loginBusy === "check" ? "settings.login.checking" : "settings.login.check") as CreatorKey)}
+              </ActionButton>
+            </div>
+            {CREATOR_SETTINGS_PLATFORMS.map((platform) => {
+              const row = loginRows[platform.key];
+              const enabled = draftProfile.enabledPlatforms.includes(platform.key);
+              return (
+              <div className="platformRow" key={platform.key}>
+                <label className="platformChoice">
                   <input
                     type="checkbox"
-                    checked={draftProfile.enabledPlatforms.includes(platform.key)}
+                    checked={enabled}
                     onChange={(event) => { patchProfile(platform.key, event.target.checked); }}
                   />
                   {t(platform.label)}
-                </span>
-              </label>
-            ))}
+                </label>
+                {enabled && (
+                  <span className="platformActions" title={row?.detail}>
+                    <StatusPill tone={loginTone(row?.state)}>{t(loginStateKey(row?.state))}</StatusPill>
+                    {(row === undefined || row.state !== "authenticated") && (
+                      <ActionButton disabled={loginBusy !== undefined} onClick={() => { void onOpenLogin(platform.key); }}>
+                        {t((loginBusy === platform.key ? "settings.login.opening" : "settings.login.open") as CreatorKey)}
+                      </ActionButton>
+                    )}
+                  </span>
+                )}
+              </div>
+              );
+            })}
+            {loginMessage !== "" && (
+              <p className={loginFailed ? "failed inlineMessage" : "ok inlineMessage"} role="status">{loginMessage}</p>
+            )}
           </div>
           <div className="field">
             <span className="fieldLabel">{t("settings.scriptRules" as CreatorKey)}</span>

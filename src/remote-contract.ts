@@ -28,6 +28,12 @@ import {
   videoPlaybackResultSchema,
   articleMediaResultSchema,
   waitExportRequestSchema,
+  installCapabilityRequestSchema,
+  installCapabilityResultSchema,
+  platformLoginRequestSchema,
+  platformLoginResultSchema,
+  openPlatformLoginRequestSchema,
+  openPlatformLoginResultSchema,
 } from "./schemas.ts";
 
 export const PACKAGE_NAME = "jacky-creator";
@@ -79,6 +85,9 @@ export const OIL_CREATOR_INVOCATIONS: readonly InvocationDescriptor[] = [
   invocation("getSubtitleText", idRequestSchema, subtitleTextResultSchema),
   invocation("getSettings", emptyObjectSchema, librarySettingsSchema),
   invocation("getCapabilities", emptyObjectSchema, capabilitiesResultSchema),
+  invocation("installCapability", installCapabilityRequestSchema, installCapabilityResultSchema),
+  invocation("checkPlatformLogins", platformLoginRequestSchema, platformLoginResultSchema),
+  invocation("openPlatformLogin", openPlatformLoginRequestSchema, openPlatformLoginResultSchema),
   invocation("getRevision", emptyObjectSchema, revisionResultSchema),
   invocation("setLibraryRoot", setLibraryRootRequestSchema, librarySettingsSchema),
   invocation("refreshCatalog", emptyObjectSchema, listContentsResultSchema),

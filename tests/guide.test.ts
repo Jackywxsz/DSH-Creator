@@ -36,6 +36,7 @@ function statusOf(overrides: {
       publishSync: overrides.publishSync ?? capability("ready"),
       editingSkill: capability("ready"),
       publishSkill: capability("ready"),
+      presentationSkill: capability("ready"),
       articleSkill: capability("ready"),
     },
     recommendations: [],
@@ -69,20 +70,24 @@ describe("creatorGuideText", () => {
   it("confirms publish and sync when Ego Browser is ready", () => {
     const guide = creatorGuideText(statusOf({}));
     expect(guide).toContain("当前已发现 Ego Browser");
+    expect(guide).toContain("首次运行就申请宿主写权限");
+    expect(guide).toContain("~/.config/video-publisher");
+    expect(guide).toContain("~/.video-publisher");
+    expect(guide).toContain("其余已登录平台继续准备草稿");
     expect(guide).not.toContain("不要假装能同步");
   });
 
   it("lists enabled platforms and limits publishing and sync to them", () => {
     const guide = creatorGuideText(statusOf({ enabledPlatforms: ["douyin", "bilibili"] }));
     expect(guide).toContain("当前 enabledPlatforms：抖音（douyin）、B站（bilibili）");
-    expect(guide).toContain("video-publisher 与 oil_sync_publish 只处理这些平台");
+    expect(guide).toContain("jacky-video-publisher（兼容 video-publisher） 与 oil_sync_publish 只处理这些平台");
     expect(guide).not.toContain("小红书（xiaohongshu）");
   });
 
   it("stops automatic publishing and sync when no platform is enabled", () => {
     const guide = creatorGuideText(statusOf({ enabledPlatforms: [] }));
     expect(guide).toContain("当前 enabledPlatforms 为空（[]）");
-    expect(guide).toContain("不要调用 video-publisher，也不要调用 oil_sync_publish");
+    expect(guide).toContain("不要调用 jacky-video-publisher（兼容 video-publisher），也不要调用 oil_sync_publish");
     expect(guide).toContain("先用 oil_creator_setup 配置启用平台");
     expect(guide).toContain("不执行自动发布和数据回收");
   });
@@ -151,7 +156,8 @@ describe("creatorGuideText", () => {
     const status = statusOf({});
     status.capabilities.publishSkill = capability("missing");
     const guide = creatorGuideText(status);
-    expect(guide).toContain("git clone https://github.com/oil-oil/video-publisher-skill ~/.agents/skills/video-publisher");
+    expect(guide).toContain("设置 → 插件 → Jacky Creator");
+    expect(guide).toContain("公开兼容包仍使用 video-publisher 身份");
     expect(guide).toContain("当前会话里改写");
     expect(guide).not.toContain("git clone https://github.com/oil-oil/oil-video-article");
   });

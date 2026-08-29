@@ -22,6 +22,9 @@ import type {
   CoverThumbResult,
   CreateContentResult,
   CreatorCapabilities,
+  CreatorInstallResult,
+  CreatorInstallTarget,
+  CreatorPlatformLoginResult,
   CreatorProfile,
   LibrarySettings,
   ListContentsResult,
@@ -99,6 +102,9 @@ interface OilCreatorRemote {
   getSubtitleText: (request: { id: string }) => Promise<RemoteAnswer<{ text: string; cues: Array<{ text: string; at?: string }> }>>;
   getSettings: (request: Record<string, never>) => Promise<RemoteAnswer<LibrarySettings>>;
   getCapabilities: (request: Record<string, never>) => Promise<RemoteAnswer<{ capabilities: CreatorCapabilities }>>;
+  installCapability: (request: { target: CreatorInstallTarget; confirmed: true }) => Promise<RemoteAnswer<CreatorInstallResult>>;
+  checkPlatformLogins: (request: { platforms?: PublishPlatform[] }) => Promise<RemoteAnswer<CreatorPlatformLoginResult>>;
+  openPlatformLogin: (request: { platform: PublishPlatform }) => Promise<RemoteAnswer<{ opened: boolean }>>;
   getRevision: (request: Record<string, never>) => Promise<RemoteAnswer<{ revision: number }>>;
   setLibraryRoot: (request: { path: string }) => Promise<RemoteAnswer<LibrarySettings>>;
   setProfile: (request: { profile: CreatorProfile }) => Promise<RemoteAnswer<LibrarySettings>>;
@@ -360,6 +366,24 @@ export function apply(ctx: ClientContext): void {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
       return unwrap(await remote.getCapabilities({}), "capabilities failed").capabilities;
+    },
+    installCapability: async (target) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      return unwrap(await remote.installCapability({ target, confirmed: true }), "capability install failed");
+    },
+    checkPlatformLogins: async (platforms) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      return unwrap(
+        await remote.checkPlatformLogins(platforms === undefined ? {} : { platforms }),
+        "platform login check failed",
+      );
+    },
+    openPlatformLogin: async (platform) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      unwrap(await remote.openPlatformLogin({ platform }), "open platform login failed");
     },
     getRevision: async () => {
       const remote = remoteOf();

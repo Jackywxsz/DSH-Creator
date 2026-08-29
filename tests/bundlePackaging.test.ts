@@ -50,7 +50,7 @@ describe("DeepSeek Harness bundle packaging", () => {
     );
 
     expect(manifest.name).toBe("jacky-creator");
-    expect(manifest.version).toBe("0.1.0-beta.5");
+    expect(manifest.version).toBe("0.1.0-beta.6");
     expect(manifest.dsh?.bundle?.patch).toBe("./cordis.patch.yml");
     expect(manifest.files).toContain("cordis.patch.yml");
     expect(manifest.files).toContain("README.md");
@@ -105,7 +105,7 @@ describe("DeepSeek Harness bundle packaging", () => {
     );
 
     expect(readme).toContain(
-      "dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.5/jacky-creator-0.1.0-beta.5.tgz",
+      "dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.6/jacky-creator-0.1.0-beta.6.tgz",
     );
     expect(readme).not.toContain("dsh plugin remove dsh-oil-creator");
     expect(implementation).toContain("dsh.bundle.patch");
@@ -141,7 +141,7 @@ describe("DeepSeek Harness bundle packaging", () => {
       );
       const metadata = parsePackMetadata(output);
       const filename = metadata[0]?.filename;
-      expect(filename).toBe("jacky-creator-0.1.0-beta.5.tgz");
+      expect(filename).toBe("jacky-creator-0.1.0-beta.6.tgz");
 
       const tarball = resolve(packDirectory, filename!);
       expect(existsSync(tarball)).toBe(true);
@@ -174,6 +174,9 @@ describe("DeepSeek Harness bundle packaging", () => {
       expect(
         [...packedFiles].some((entry) => entry.startsWith("assets/readme/source/")),
       ).toBe(false);
+      expect([...packedFiles].some((entry) => entry.endsWith(".map"))).toBe(false);
+      expect(readFileSync(resolve(root, "lib/client.js"), "utf8"))
+        .not.toContain("sourceMappingURL=");
       const internalDocs = [
         "docs/adversarial-review.md",
         "docs/cockpit-design.md",

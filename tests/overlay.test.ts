@@ -20,10 +20,8 @@ import {
 import { creatorProfileSchema } from "../src/schemas.ts";
 
 describe("creator profile", () => {
-  it("enables all supported platforms by default", () => {
-    expect(emptyProfile()).toEqual({
-      enabledPlatforms: ["xiaohongshu", "douyin", "bilibili", "wechat"],
-    });
+  it("requires an explicit platform selection by default", () => {
+    expect(emptyProfile()).toEqual({ enabledPlatforms: [] });
     expect(decodeProfile(undefined)).toEqual(emptyProfile());
   });
 
@@ -46,7 +44,7 @@ describe("creator profile", () => {
         bilibili: "https://bilibili.example/creator",
       },
     }],
-  ])("ignores %s and defaults all platforms", (_label, legacy) => {
+  ])("ignores %s and defaults to no enabled platform", (_label, legacy) => {
     expect(decodeProfile(legacy)).toEqual(emptyProfile());
     expect(decodeOverlay({ profile: legacy, items: {} }).profile).toEqual(emptyProfile());
   });
