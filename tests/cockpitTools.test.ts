@@ -16,16 +16,16 @@ function tools(): Map<string, RegisteredTool> {
 describe("Creator Cockpit tool contract", () => {
   it("registers the five Harness-native AI tools", () => {
     expect([...tools().keys()]).toEqual([
-      "cockpit_get_script_context",
-      "cockpit_get_evaluation_context",
-      "cockpit_save_evaluation",
-      "cockpit_get_review_context",
-      "cockpit_save_review_draft",
+      "jacky_creator_get_script_context",
+      "jacky_creator_get_evaluation_context",
+      "jacky_creator_save_evaluation",
+      "jacky_creator_get_review_context",
+      "jacky_creator_save_review_draft",
     ]);
   });
 
   it("requires bounded dimension scores and never accepts a model total", () => {
-    const parameters = tools().get("cockpit_save_evaluation")?.parameters.properties;
+    const parameters = tools().get("jacky_creator_save_evaluation")?.parameters.properties;
     expect(parameters).not.toHaveProperty("total");
     const scores = parameters?.scores as { properties: Record<string, { type: string; enum: number[] }> };
     expect(Object.keys(scores.properties)).toEqual(["audience", "pain", "differentiation", "assets", "hook", "structure"]);

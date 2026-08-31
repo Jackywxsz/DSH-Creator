@@ -49,10 +49,10 @@ describe("creatorGuideText", () => {
     expect(guide).toContain("/Movies/视频项目");
     expect(guide).toContain("YYYY-MM-DD_可读标题");
     expect(guide).toContain("script.md");
-    expect(guide).toContain("oil_organize_library");
-    expect(guide).toContain("oil_generate_subtitles");
-    expect(guide).toContain("oil_generate_cover");
-    expect(guide).toContain("oil_sync_publish");
+    expect(guide).toContain("jacky_creator_organize_library");
+    expect(guide).toContain("jacky_creator_generate_subtitles");
+    expect(guide).toContain("jacky_creator_generate_cover");
+    expect(guide).toContain("jacky_creator_sync_publish");
     expect(guide).toContain("video-publisher");
   });
 
@@ -62,7 +62,7 @@ describe("creatorGuideText", () => {
     }));
     expect(guide).toContain("未发现 Ego Browser");
     expect(guide).toContain("自动发布");
-    expect(guide).toContain("oil_sync_publish");
+    expect(guide).toContain("jacky_creator_sync_publish");
     expect(guide).toContain("lite.ego.app");
     expect(guide).toContain("不要假装能同步");
   });
@@ -80,22 +80,22 @@ describe("creatorGuideText", () => {
   it("lists enabled platforms and limits publishing and sync to them", () => {
     const guide = creatorGuideText(statusOf({ enabledPlatforms: ["douyin", "bilibili"] }));
     expect(guide).toContain("当前 enabledPlatforms：抖音（douyin）、B站（bilibili）");
-    expect(guide).toContain("jacky-video-publisher（兼容 video-publisher） 与 oil_sync_publish 只处理这些平台");
+    expect(guide).toContain("jacky-video-publisher（兼容 video-publisher） 与 jacky_creator_sync_publish 只处理这些平台");
     expect(guide).not.toContain("小红书（xiaohongshu）");
   });
 
   it("stops automatic publishing and sync when no platform is enabled", () => {
     const guide = creatorGuideText(statusOf({ enabledPlatforms: [] }));
     expect(guide).toContain("当前 enabledPlatforms 为空（[]）");
-    expect(guide).toContain("不要调用 jacky-video-publisher（兼容 video-publisher），也不要调用 oil_sync_publish");
-    expect(guide).toContain("先用 oil_creator_setup 配置启用平台");
+    expect(guide).toContain("不要调用 jacky-video-publisher（兼容 video-publisher），也不要调用 jacky_creator_sync_publish");
+    expect(guide).toContain("先用 jacky_creator_setup 配置启用平台");
     expect(guide).toContain("不执行自动发布和数据回收");
   });
 
   it("asks for a persona before writing scripts when rules are unset", () => {
     const guide = creatorGuideText(statusOf({}));
     expect(guide).toContain("当前没有配置脚本规则（人设）");
-    expect(guide).toContain("oil_script_rules");
+    expect(guide).toContain("jacky_creator_script_rules");
   });
 
   it("tells the model to follow existing rules when configured", () => {

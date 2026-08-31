@@ -24,7 +24,7 @@
 9. **AI 草稿是否会直接沉淀规则：PASS。** 模型只拥有保存草稿工具。确认复盘、规则和模板都是 UI Remote，且后两者要求已确认 review 和再次确认。
 10. **去掉测试 patch 后是否能回滚：PASS。** patch 只作为隔离启动参数存在，没有写入正式 profile；停止实验进程后，正常 DSH Desktop 继续使用原安装。
 11. **旧数据能否安全进入 v3：PASS。** v0、v1、v2 迁移补齐选项目录、统一档期、知识索引、标签和知识关系，不创造内容事实；旧 `dueAt` 只迁移成一条关联内容的档期事项。第一次写回前备份原始 state。旧代码回滚时需要恢复迁移前备份。
-12. **运营知识是否会复制或覆盖脚本：PASS。** `cockpit_get_script_context` 只返回真实 topic、策略和已选知识，不返回第二份脚本；系统提示和脚本页指令都要求读取 `oil_script_rules`，最终写入真实 `script.md`。
+12. **运营知识是否会复制或覆盖脚本：PASS。** `jacky_creator_get_script_context` 只返回真实 topic、策略和已选知识，不返回第二份脚本；系统提示和脚本页指令都要求读取 `jacky_creator_script_rules`，最终写入真实 `script.md`。
 13. **知识索引是否能绕过人工确认：PASS。** 模型没有保存知识的工具。规则和模板只能从已确认 review 的 UI 操作生成，Markdown 成功落盘后才建立 state 索引。
 14. **窄屏是否产生页面级横向溢出：PASS。** 375×812 下 `scrollWidth === clientWidth === 375`。灵感双栏折为单列，管线和档期只在自身区域滚动。
 15. **备份恢复是否可能静默覆盖并发更新：PASS。** 导入先迁移并严格校验 schema，再校验用户打开恢复时的 expected revision；串行写入前再次校验 revision。替换前自动备份当前 state，导入的知识 Markdown 在受控知识目录重建，内容正文和素材不在恢复范围内。

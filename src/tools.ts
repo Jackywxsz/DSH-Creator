@@ -30,7 +30,7 @@ const JSON_VALUE = { type: "json" } as const;
 
 export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorService): void {
   ctx.tools.register(defineTool({
-    name: "oil_creator_guide",
+    name: "jacky_creator_guide",
     description:
       "Self-bootstrap guide for this plugin. Call this when the user asks what this plugin does, "
       + "how to use it, or when you are unsure which step comes next. "
@@ -51,7 +51,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
-    name: "oil_script_rules",
+    name: "jacky_creator_script_rules",
     description:
       "Read or update the creator's script rules (persona): tone, structure, audience, and taboos "
       + "that every script.md must follow. Omit text to read. Send text to save. Empty text clears. "
@@ -78,7 +78,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
-    name: "oil_creator_setup",
+    name: "jacky_creator_setup",
     description:
       "Inspect the creator workspace, optional local capabilities, credential status, and current configuration. "
       + "Omit fields for a read-only diagnosis. Proposed changes are previewed unless apply=true. "
@@ -118,7 +118,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
-    name: "oil_create_content",
+    name: "jacky_creator_create_content",
     description:
       "Create an empty dated library folder named YYYY-MM-DD_title using today's date and a readable title.",
     parameters: {
@@ -143,7 +143,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
-    name: "oil_update_content",
+    name: "jacky_creator_update_content",
     description:
       "Write overlay-only marks for one episode: readyToRecord, bind a Screen Studio project, "
       + "or set a platform publish status. To change topic.md or script.md, write those files "
@@ -199,7 +199,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
-    name: "oil_creator_profile",
+    name: "jacky_creator_profile",
     description:
       "Read or update the list of enabled publishing platforms. "
       + "Omit the list to read. Send the complete list to replace it.",
@@ -227,7 +227,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
-    name: "oil_organize_library",
+    name: "jacky_creator_organize_library",
     description:
       "Preview or apply library folder cleanup to YYYY-MM-DD_readable title. "
       + "Adds a date from the recording/folder time when missing, and turns hyphens/underscores in titles into spaces. "
@@ -256,7 +256,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
-    name: "oil_sync_publish",
+    name: "jacky_creator_sync_publish",
     description:
       "Sync published titles, URLs, and counts from logged-in creator dashboards. "
       + "Pass id to update one episode only and stop paging once that title is found. "
@@ -305,7 +305,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
-    name: "oil_open_studio",
+    name: "jacky_creator_open_studio",
     description:
       "Open the bound Screen Studio project for this episode so the user can review and export.",
     parameters: {
@@ -326,7 +326,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
-    name: "oil_wait_export",
+    name: "jacky_creator_wait_export",
     description:
       "Start watching the episode folder for a finished MP4/MOV (Screen Studio export) and return immediately. "
       + "When the file is stable, the folder has the video and waitingForExport clears. "
@@ -363,7 +363,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
-    name: "oil_open_subtitle_preview",
+    name: "jacky_creator_open_subtitle_preview",
     description:
       "Open the oil-subtitle preview editor in the browser for this episode (video + editable cues).",
     parameters: {
@@ -388,10 +388,10 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
-    name: "oil_burn_subtitles",
+    name: "jacky_creator_burn_subtitles",
     description:
       "Burn the current oil-subtitle draft onto the raw video after the user has previewed and confirmed it. "
-      + "Do not call this before oil_open_subtitle_preview (or the preview opened by oil_generate_subtitles). "
+      + "Do not call this before jacky_creator_open_subtitle_preview (or the preview opened by jacky_creator_generate_subtitles). "
       + "Returns immediately. When finished, the episode folder has a *_subtitled.mp4.",
     parameters: {
       id: { type: "string", required: true, description: "Folder id." },
@@ -411,10 +411,10 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
-    name: "oil_generate_subtitles",
+    name: "jacky_creator_generate_subtitles",
     description:
       "Run the oil-subtitle draft workflow: transcribe, auto-review, and lay out captions. "
-      + "Does not burn. When it finishes, a preview editor opens; wait for the user to proofread, then call oil_burn_subtitles. "
+      + "Does not burn. When it finishes, a preview editor opens; wait for the user to proofread, then call jacky_creator_burn_subtitles. "
       + "Requires DASHSCOPE_API_KEY in Settings → Plugins → 内容工作台. "
       + "Returns immediately. Completion is subtitle-transcript.json / subtitle-manifest.json, not *_subtitled.mp4.",
     parameters: {
@@ -435,7 +435,7 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
-    name: "oil_generate_cover",
+    name: "jacky_creator_generate_cover",
     description:
       "Generate 3x4 / 4x3 / 16x9 covers with the Jacky Cover brand patch and ZenMux backend. "
       + "Extract a cover title first from the episode script or subtitles (Jacky Cover evidence rule: do not leave this to the image model). "

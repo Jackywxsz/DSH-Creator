@@ -2,7 +2,7 @@
 
 Jacky Creator 的包名、Bundle ID 和设置命名空间统一为 `jacky-creator`。它是挂在 DeepSeek Harness 配置上的单一插件，把对话、内容生产和运营沉淀收进同一块界面，同时保留本地文件夹作为正文真源。
 
-安装：优先使用 `dsh plugin --profile web add jacky-creator`；npm 通道不可用时，使用 `dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.6/jacky-creator-0.1.0-beta.6.tgz`。两种入口都是预构建成品包，避免 pnpm 10 对 Git 源码 `prepare` 的构建授权门槛；本地开发使用目录路径。
+安装：优先使用 `dsh plugin --profile web add jacky-creator`；npm 通道不可用时，使用 `dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.7/jacky-creator-0.1.0-beta.7.tgz`。两种入口都是预构建成品包，避免 pnpm 10 对 Git 源码 `prepare` 的构建授权门槛；本地开发使用目录路径。
 
 卸载：`npx @deepseek-ai/dsh plugin --profile web remove jacky-creator`
 
@@ -35,13 +35,13 @@ Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最�
 | 环节 | 现状 |
 | --- | --- |
 | 列表与检查器 | 自定义侧栏「内容」页；检查器叠在对话左边，聊天不关；概览用状态标签标明阶段，只展开当前步骤的操作 |
-| 建内容、选题笔记 | 面板新建；`oil_create_content` 建文件夹；选题写 `topic.md` |
-| 绑定 / 打开工程 | 面板换绑、打开；`oil_open_studio` |
-| 等导出 | `oil_wait_export` 立刻返回并开始盯目录；成片稳定后清掉 waiting 标记 |
+| 建内容、选题笔记 | 面板新建；`jacky_creator_create_content` 建文件夹；选题写 `topic.md` |
+| 绑定 / 打开工程 | 面板换绑、打开；`jacky_creator_open_studio` |
+| 等导出 | `jacky_creator_wait_export` 立刻返回并开始盯目录；成片稳定后清掉 waiting 标记 |
 | 字幕预览、烧录、生成 | 按钮和同名工具会拉起 `oil-subtitle` 脚本 |
 | 生成封面 | 按钮和工具拉起 `oil-cover` 脚本；标题先用文件夹名 |
 | 发布状态 | 读 `{标题}.auto-publish.json`；点状态胶囊从菜单里选未发布 / 草稿 / 已发布，手写优先；选择已发布时记录实际日期，任一平台已发布即完成主发布步骤 |
-| 已发布数据 | 检查器「同步已发布」只对当前这一期：找到标题就停翻页，overlay 也只写这一条。`oil_sync_publish` 不传 id 才同步整库 |
+| 已发布数据 | 检查器「同步已发布」只对当前这一期：找到标题就停翻页，overlay 也只写这一条。`jacky_creator_sync_publish` 不传 id 才同步整库 |
 | API Key | 设置 → 插件 → 内容工作台；和视觉识别共用官方凭据 |
 | 公众号 | 只显示目录里有没有 `公众号文章/`，不生成 |
 | 剪辑、多平台上传 | 还没从插件里调度，对话里继续用原来的 skill |
@@ -77,17 +77,17 @@ DeepSeek Harness `0.1.1-rc.2` 会先从 Host 的 `settings.describe` 取得插�
 执行分工：
 
 - **磁盘文件**：片子的正文。约定见 [files.md](files.md)。模型用系统自带的列文件 / 读文件 / 写文件。
-- **插件**：侧栏、检查器、阶段推导、官方凭据、给模型的文件约定（`systemPrompt` 段落 `oil:library`）。核心界面和 `oil_*` 工具不依赖专用 Agent Preset。
-- **内置 Skill**：`creator-workbench` 负责首次体检、配置预览、目录整理和发布安全流程。普通带 Skill 与文件工具的 Agent 就能使用，推荐 `standard` 或 `code`；`minimal` 不适合这条引导。专用 Creator Preset 以后只作为可选入口。
-- **Harness 工具**：用官方 `defineTool` 注册。只做文件做不到的事，或启动一项已经约定好的脚本。长任务立刻返回，完成与否看文件夹里有没有产物。`oil_wait_export` 也是启动监视，不把 `execute` 阻塞到导出结束。
+- **插件**：侧栏、检查器、阶段推导、官方凭据、给模型的文件约定（`systemPrompt` 段落 `oil:library`）。核心界面和 `jacky_creator_*` 工具不依赖专用 Agent Preset。
+- **内置 Skill**：`jacky-creator-workbench` 负责首次体检、配置预览、目录整理和发布安全流程。普通带 Skill 与文件工具的 Agent 就能使用，推荐 `standard` 或 `code`；`minimal` 不适合这条引导。专用 Creator Preset 以后只作为可选入口。
+- **Harness 工具**：用官方 `defineTool` 注册。只做文件做不到的事，或启动一项已经约定好的脚本。长任务立刻返回，完成与否看文件夹里有没有产物。`jacky_creator_wait_export` 也是启动监视，不把 `execute` 阻塞到导出结束。
 - **Skill 脚本**：ASR、FFmpeg 烧录、选帧生图。不要把 Python 和 SOP 整份搬进 `execute()`。
 - **对话里的 Agent**：校对字幕、提炼封面主标题、看封面错别字、审查剪辑报告。这些判断留在对话里。
 
 对话里的插件工具：
 
-`oil_creator_guide`、`oil_script_rules`、`oil_creator_setup`、`oil_create_content`、`oil_update_content`、`oil_creator_profile`、`oil_organize_library`、`oil_sync_publish`、`oil_open_studio`、`oil_wait_export`、`oil_open_subtitle_preview`、`oil_burn_subtitles`、`oil_generate_subtitles`、`oil_generate_cover`
+`jacky_creator_guide`、`jacky_creator_script_rules`、`jacky_creator_setup`、`jacky_creator_create_content`、`jacky_creator_update_content`、`jacky_creator_profile`、`jacky_creator_organize_library`、`jacky_creator_sync_publish`、`jacky_creator_open_studio`、`jacky_creator_wait_export`、`jacky_creator_open_subtitle_preview`、`jacky_creator_burn_subtitles`、`jacky_creator_generate_subtitles`、`jacky_creator_generate_cover`
 
-`oil_creator_guide` 是自举入口：用户不知道插件能做什么、或模型不确定下一步时调用，返回带当前能力状态的完整指引，包括 Ego Browser 缺失时自动发布和数据回收不可用。`oil_script_rules` 读写脚本规则（人设），存在 overlay 里；写或改 `script.md` 前模型先读它。`oil_creator_setup` 无参数时只读检查目录、操作系统、Screen Studio、字幕、封面、凭据和 Ego Browser。带配置字段但 `apply=false` 时只返回提案；只有用户确认后才用 `apply=true` 写入。可选依赖缺失只降级对应能力，不影响片库核心。
+`jacky_creator_guide` 是自举入口：用户不知道插件能做什么、或模型不确定下一步时调用，返回带当前能力状态的完整指引，包括 Ego Browser 缺失时自动发布和数据回收不可用。`jacky_creator_script_rules` 读写脚本规则（人设），存在 overlay 里；写或改 `script.md` 前模型先读它。`jacky_creator_setup` 无参数时只读检查目录、操作系统、Screen Studio、字幕、封面、凭据和 Ego Browser。带配置字段但 `apply=false` 时只返回提案；只有用户确认后才用 `apply=true` 写入。可选依赖缺失只降级对应能力，不影响片库核心。
 
 检查器中间栏可以拉到约 800px，走 `shell.overlay`，不占用官方右侧「详情」栏。官方详情栏保持关闭。发布区拆成同步、视频平台、公众号、标签几张卡。概览封面并排 3:4 和 4:3。视频页播放 `_subtitled` 成片，没有则播原片。脚本写在内容文件夹的 `script.md`，已经转好的 Markdown 在 `公众号文章/`。列表按文件夹名里的日期倒序，同一天按文件夹创建时间倒序；重导出或重新生成产物不会改变顺序。对话里 `@` 可以点一条片子或「当前详情」，`/current content` 引用当前打开的那条；发给模型的只有文件夹路径，正文和封面用系统列文件 / 读文件。
 
@@ -112,7 +112,7 @@ ego-browser nodejs < scripts/collect-publish.mjs
 
 采集脚本每次开一个新的 `oil-collect-*` 空间，跑完就关掉，并清掉登记表里已死进程留下的旧空间，以及历史遗留名 `oil-collect-publish`。它不会按前缀扫掉其他还在跑的 `oil-collect-*`。`pnpm build` 用原地覆写把 `scripts/collect-publish.mjs` 写进 `lib/`，避免 `cp` 断开 profile 里 `file:` 依赖的硬链接。翻页范围：小红书 `note/user/posted`（列表滚到底）、抖音 `work_list`（`max_cursor`）、B 站 `/x/web/archives`（`pn`）、视频号 `post/post_list`（`currentPage`）。对上之后把 `remoteId` 写进 overlay，下一次优先按这个 id 对齐，不再只靠标题。
 
-90 秒内再点同步会直接用 `~/.jacky-creator/collect-cache.json`。超过这个时间再跑 Ego。可用 `OIL_COLLECT_KEEP=1` 留下页面，`OIL_COLLECT_SPACE` 指定空间名，`OIL_COLLECT_PLATFORMS=wechat,douyin` 只跑其中几个。工作台按钮和 `oil_sync_publish` 走同一条脚本。
+90 秒内再点同步会直接用 `~/.jacky-creator/collect-cache.json`。超过这个时间再跑 Ego。可用 `OIL_COLLECT_KEEP=1` 留下页面，`OIL_COLLECT_SPACE` 指定空间名，`OIL_COLLECT_PLATFORMS=wechat,douyin` 只跑其中几个。工作台按钮和 `jacky_creator_sync_publish` 走同一条脚本。
 
 文件夹约定：`YYYY-MM-DD_可读标题`。发布包规范名是 `publish-package.json`。带字幕的成片文件名含 `_subtitled`。
 

@@ -68,7 +68,7 @@ dsh plugin --profile web add jacky-creator
 如果 npm 通道暂时不可用，可以改装同版本的 GitHub Release 成品包：
 
 ```bash
-dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.6/jacky-creator-0.1.0-beta.6.tgz
+dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.7/jacky-creator-0.1.0-beta.7.tgz
 ```
 
 无论使用哪种方式，安装完成后都要彻底退出并重新打开 DSH Desktop。侧边栏左上角出现 **Jacky Creator**，并能进入“内容 / 运营 / 灵感”，即表示安装成功。

@@ -5,9 +5,9 @@
 ## 当前状态
 
 - 发布阶段：GitHub Beta。
-- 当前版本：`v0.1.0-beta.6`。
+- 当前版本：`v0.1.0-beta.7`。
 - 安装来源：npm 包 `jacky-creator`；GitHub Release 的预构建 `.tgz` 作为固定版本备用入口。
-- npm：`jacky-creator@0.1.0-beta.6`，与同版本 GitHub Release 内容一致。
+- npm：`jacky-creator@0.1.0-beta.7`，与同版本 GitHub Release 内容一致。
 - 插件市场：已收录到 `awesome-dsh-plugin`，由 `dsh-market` 同步市场卡片。
 - 首要宿主：DSH Desktop 2.0.2 / DeepSeek Harness 0.1.1-rc.2。
 
@@ -39,7 +39,7 @@ dsh plugin --profile web add jacky-creator
 GitHub Release 保留固定版本备用入口：
 
 ```bash
-dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.6/jacky-creator-0.1.0-beta.6.tgz
+dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.7/jacky-creator-0.1.0-beta.7.tgz
 ```
 
 发布前必须：
@@ -79,7 +79,7 @@ Git 源码安装只供开发者使用。DeepSeek Harness rc.2 的 `dsh plugin` �
 url: https://github.com/Jackywxsz/DSH-Creator
 name: Jackywxsz/DSH-Creator
 category: workflow
-tarball: https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.6/jacky-creator-0.1.0-beta.6.tgz
+tarball: https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.7/jacky-creator-0.1.0-beta.7.tgz
 description:
   en: "Local-first content production and operations workspace for DSH: manage ideas, scripts, media assets, schedules, goals, publishing status, and post-publication reviews."
   zh: "面向 DSH 的本地内容生产与运营工作台：管理灵感、脚本、媒体资产、档期、目标、发布状态和发布后复盘。"

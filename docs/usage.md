@@ -29,13 +29,13 @@ DeepSeek Harness 打开后，左侧切到「内容」，中间是一条片子的
 
 环境状态中的“重新检测”会检查内容目录、Screen Studio、字幕、Jacky Cover、自动剪辑、自动发布、Jacky Motion 和 Ego Browser。公开依赖可以在明确确认后安装到 `~/.agents/skills`，不会覆盖已有目录；字幕安装会运行固定版本自带的 `setup.sh`。Jacky Cover 和 Jacky Motion 的品牌私有层没有可验证公开安装源时，页面只说明缺失，不伪造一键安装。自动发布的公开兼容包仍保留 `video-publisher` 身份，首次配置会按已保存的平台写入其发布偏好。
 
-脚本规则是写 `script.md` 时 AI 必须遵循的语气、结构和禁忌，也可以直接在对话里让 AI 记录，AI 会用 `oil_script_rules` 存到同一个地方。字幕转录使用百炼 `DASHSCOPE_API_KEY`，封面使用 ZenMux `ZENMUX_API_KEY`，两者和视觉识别共用官方凭据；页面只显示已配置或未配置，不会把 Key 读回来。
+脚本规则是写 `script.md` 时 AI 必须遵循的语气、结构和禁忌，也可以直接在对话里让 AI 记录，AI 会用 `jacky_creator_script_rules` 存到同一个地方。字幕转录使用百炼 `DASHSCOPE_API_KEY`，封面使用 ZenMux `ZENMUX_API_KEY`，两者和视觉识别共用官方凭据；页面只显示已配置或未配置，不会把 Key 读回来。
 
-首次使用推荐选 Harness 的 `standard` 或 `code` Agent preset，再直接说「检查并配置内容工作台」。内置 `creator-workbench` Skill 会让 AI 先调用 `oil_creator_setup` 检查环境。AI 能从系统发现的目录和能力不再逐项追问；任何写入都会先预览，用户确认后才应用。`minimal` preset 没有 Skill 和文件工具，不适合首次引导、自动整理目录或修改正文。
+首次使用推荐选 Harness 的 `standard` 或 `code` Agent preset，再直接说「检查并配置内容工作台」。内置 `jacky-creator-workbench` Skill 会让 AI 先调用 `jacky_creator_setup` 检查环境。AI 能从系统发现的目录和能力不再逐项追问；任何写入都会先预览，用户确认后才应用。`minimal` preset 没有 Skill 和文件工具，不适合首次引导、自动整理目录或修改正文。
 
-装完不知道能做什么时，直接问「这个插件怎么用」。AI 会调用 `oil_creator_guide`，拿到带当前能力状态的完整指引后告诉你：哪些环节现在就能用，哪些还缺依赖。自动发布和已发布数据回收都依赖 Ego Browser；没装的时候 AI 会明说这两项不可用，片库、脚本、字幕、封面不受影响。
+装完不知道能做什么时，直接问「这个插件怎么用」。AI 会调用 `jacky_creator_guide`，拿到带当前能力状态的完整指引后告诉你：哪些环节现在就能用，哪些还缺依赖。自动发布和已发布数据回收都依赖 Ego Browser；没装的时候 AI 会明说这两项不可用，片库、脚本、字幕、封面不受影响。
 
-候选影片目录不存在时，先让 AI 展示准备创建的完整路径；确认后创建目录，再重新预览配置并确认应用。`oil_creator_setup` 只接受已经存在的目录，不会暗中创建文件夹。
+候选影片目录不存在时，先让 AI 展示准备创建的完整路径；确认后创建目录，再重新预览配置并确认应用。`jacky_creator_setup` 只接受已经存在的目录，不会暗中创建文件夹。
 
 ## 对话里怎么读片子
 
@@ -45,20 +45,20 @@ DeepSeek Harness 打开后，左侧切到「内容」，中间是一条片子的
 
 | 工具 | 作用 |
 | --- | --- |
-| `oil_creator_guide` | 自举指引：返回完整工作流和当前能力状态，用户问「这个插件怎么用」时先调它 |
-| `oil_script_rules` | 读或写脚本规则（人设）；写改 script.md 前先读 |
-| `oil_creator_setup` | 只读检查环境，或先预览、确认后保存目录和启用平台 |
-| `oil_create_content` | 按今天的日期新建文件夹 |
-| `oil_update_content` | 标记待录制、绑定工程、改某一平台的发布标记 |
-| `oil_open_studio` | 打开已绑定的 Screen Studio 工程 |
-| `oil_wait_export` | 等到文件夹里出现稳定的 MP4 / MOV |
-| `oil_generate_subtitles` | 转录、自动校对、排版；立刻返回；完成后打开预览，出现 `subtitle-transcript.json`，不烧录 |
-| `oil_open_subtitle_preview` | 在浏览器打开字幕预览编辑器 |
-| `oil_burn_subtitles` | 用户预览确认后再烧进成片；立刻返回；完成后出现 `*_subtitled.mp4` |
-| `oil_generate_cover` | 用 Jacky Cover 品牌补丁和 ZenMux 一键生成 3:4 / 4:3 / 16:9 封面，立刻返回；完成后出现对应 png |
-| `oil_sync_publish` | 用 Ego 翻完启用平台的已发布列表，按标题或已存 id 写回播放 / 赞 / 评 |
-| `oil_creator_profile` | 读或改 `enabledPlatforms`，即 AI 发布和数据同步使用的平台列表 |
-| `oil_organize_library` | 预览或把文件夹改成 `日期_可读标题`，默认只预览 |
+| `jacky_creator_guide` | 自举指引：返回完整工作流和当前能力状态，用户问「这个插件怎么用」时先调它 |
+| `jacky_creator_script_rules` | 读或写脚本规则（人设）；写改 script.md 前先读 |
+| `jacky_creator_setup` | 只读检查环境，或先预览、确认后保存目录和启用平台 |
+| `jacky_creator_create_content` | 按今天的日期新建文件夹 |
+| `jacky_creator_update_content` | 标记待录制、绑定工程、改某一平台的发布标记 |
+| `jacky_creator_open_studio` | 打开已绑定的 Screen Studio 工程 |
+| `jacky_creator_wait_export` | 等到文件夹里出现稳定的 MP4 / MOV |
+| `jacky_creator_generate_subtitles` | 转录、自动校对、排版；立刻返回；完成后打开预览，出现 `subtitle-transcript.json`，不烧录 |
+| `jacky_creator_open_subtitle_preview` | 在浏览器打开字幕预览编辑器 |
+| `jacky_creator_burn_subtitles` | 用户预览确认后再烧进成片；立刻返回；完成后出现 `*_subtitled.mp4` |
+| `jacky_creator_generate_cover` | 用 Jacky Cover 品牌补丁和 ZenMux 一键生成 3:4 / 4:3 / 16:9 封面，立刻返回；完成后出现对应 png |
+| `jacky_creator_sync_publish` | 用 Ego 翻完启用平台的已发布列表，按标题或已存 id 写回播放 / 赞 / 评 |
+| `jacky_creator_profile` | 读或改 `enabledPlatforms`，即 AI 发布和数据同步使用的平台列表 |
+| `jacky_creator_organize_library` | 预览或把文件夹改成 `日期_可读标题`，默认只预览 |
 
 长任务都是先启动，再看文件夹里有没有产物，不要把一次启动当成已经完成。
 
@@ -66,15 +66,15 @@ DeepSeek Harness 打开后，左侧切到「内容」，中间是一条片子的
 
 先在右边说清楚内容主题，再让对话新建项目、整理选题或生成脚本初稿。
 
-对应工具是 `oil_create_content`。选题写进这一期的 `topic.md`，脚本写进 `script.md`，也可以之后在中间「脚本」页自己改。
+对应工具是 `jacky_creator_create_content`。选题写进这一期的 `topic.md`，脚本写进 `script.md`，也可以之后在中间「脚本」页自己改。
 
 录制用 Screen Studio。录完把 `.screenstudio` 工程绑到这一期，可以说：「把刚才的工程绑到这条，然后打开。」检查器里也可以点绑定或打开。
 
 剪辑在对话里喊 `screen-studio-editor`，对照绑定的工程清理停顿和误讲。工作台只负责打开工程，不替你改时间线。预览满意后，在 Screen Studio 里亲手导出 MP4，导出目标就是这一期的文件夹。
 
-导出开始后说：「等这条的成片落盘，落盘后生成字幕和封面。」`oil_wait_export` 会等到文件大小稳定。成片到了再用 `oil_generate_subtitles` 出字幕稿并打开预览；用户确认后再 `oil_burn_subtitles`。封面用 `oil_generate_cover`，调用前按 Jacky Cover 规则提炼主标题传入 `title`。生成后核对标题、人物身份和错别字。
+导出开始后说：「等这条的成片落盘，落盘后生成字幕和封面。」`jacky_creator_wait_export` 会等到文件大小稳定。成片到了再用 `jacky_creator_generate_subtitles` 出字幕稿并打开预览；用户确认后再 `jacky_creator_burn_subtitles`。封面用 `jacky_creator_generate_cover`，调用前按 Jacky Cover 规则提炼主标题传入 `title`。生成后核对标题、人物身份和错别字。
 
-首次 clone `oil-subtitle` 后必须运行 `bash ~/.agents/skills/oil-subtitle/setup.sh`，否则字幕工作流不会就绪。不要在预览前烧录。`oil_burn_subtitles` 不会覆盖已经带字幕的成片文件名习惯，产物文件名里带 `_subtitled`。
+首次 clone `oil-subtitle` 后必须运行 `bash ~/.agents/skills/oil-subtitle/setup.sh`，否则字幕工作流不会就绪。不要在预览前烧录。`jacky_creator_burn_subtitles` 不会覆盖已经带字幕的成片文件名习惯，产物文件名里带 `_subtitled`。
 
 每条内容的概览都固定显示发布状态；还没走到发布阶段时也能看到启用平台的进度，点「展开平台状态」可核对。成片、字幕、封面齐了，阶段会变成「待发布」。上传优先用已发现的 `jacky-video-publisher`，否则使用兼容的 `video-publisher`，并且只处理 `enabledPlatforms` 中启用的平台；做到各平台的最终发表按钮前停下，你自己点发表。在运营的待发布卡片点「去确认发布」，或直接打开内容详情，在真实发布的平台上把状态改成「已发布」。系统会默认记录当天为实际发布日期，也可以手动修改。任一启用平台确认发布后，主流程立即进入「已发布」并出现在复盘页；其余平台显示为分发进度，不会卡住复盘。
 
@@ -109,4 +109,4 @@ DeepSeek Harness 打开后，左侧切到「内容」，中间是一条片子的
 
 第一次用先让 AI 检查环境，再确认影片目录。字幕、封面、Screen Studio 和 Ego Lite 都是可选能力，缺少时不会影响片库和脚本管理。字幕和封面没有 Key 时，对应按钮会提示去设置里填写。有成片后，检查器里可以生成字幕稿并打开预览，确认后再烧录；封面也可以在检查器里生成，不用再走对话。
 
-文件夹名被连字符弄乱时，可以说：「预览整理影片目录。」确认后再让它真正重命名。`oil_organize_library` 默认只预览，不会删文件。
+文件夹名被连字符弄乱时，可以说：「预览整理影片目录。」确认后再让它真正重命名。`jacky_creator_organize_library` 默认只预览，不会删文件。

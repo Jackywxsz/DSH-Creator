@@ -72,7 +72,7 @@
 
 ## 运营知识回到内容创作
 
-内容脚本页会显示当前内容的运营标签、开头、结构和启用知识。用户选择规则或模板后，点击「按运营经验创作」会向当前 Harness 会话提交一条可见指令。Agent 先调用 `cockpit_get_script_context`，再调用 `oil_script_rules`，最后把成稿写入这条内容的真实 `script.md`。运营知识只提供依据，不保存第二份脚本。
+内容脚本页会显示当前内容的运营标签、开头、结构和启用知识。用户选择规则或模板后，点击「按运营经验创作」会向当前 Harness 会话提交一条可见指令。Agent 先调用 `jacky_creator_get_script_context`，再调用 `jacky_creator_script_rules`，最后把成稿写入这条内容的真实 `script.md`。运营知识只提供依据，不保存第二份脚本。
 
 ## 当前会话 AI 流程
 
@@ -80,11 +80,11 @@
 
 Host 注册五个严格工具：
 
-- `cockpit_get_script_context`
-- `cockpit_get_evaluation_context`
-- `cockpit_save_evaluation`
-- `cockpit_get_review_context`
-- `cockpit_save_review_draft`
+- `jacky_creator_get_script_context`
+- `jacky_creator_get_evaluation_context`
+- `jacky_creator_save_evaluation`
+- `jacky_creator_get_review_context`
+- `jacky_creator_save_review_draft`
 
 context 工具只返回完成任务所需的真实字段。save 工具拒绝未知字段、过期指纹和越界分数；六维总分永远由 Host 计算。运营页面轮询轻量 revision，保存成功后刷新状态。
 

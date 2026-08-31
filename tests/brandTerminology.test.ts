@@ -14,13 +14,24 @@ const runtimeCopyFiles = [
   "src/client/operations/ReviewsPage.tsx",
   "src/cockpit/service.ts",
   "src/cockpit/tools.ts",
+  "src/creatorSkill.ts",
   "src/guide.ts",
+  "src/libraryPrompt.ts",
   "src/capabilities.ts",
   "src/generate.ts",
   "src/tools.ts",
 ];
 
 describe("Jacky Creator product terminology", () => {
+  it("does not expose legacy Agent tool names in runtime sources", async () => {
+    const sources = await Promise.all(
+      runtimeCopyFiles.map(async (path) => `${path}\n${await readFile(`${root}/${path}`, "utf8")}`),
+    );
+    expect(sources.join("\n")).not.toMatch(
+      /\boil_(?:creator_guide|script_rules|creator_setup|create_content|update_content|creator_profile|organize_library|sync_publish|open_studio|wait_export|open_subtitle_preview|burn_subtitles|generate_subtitles|generate_cover)\b|\bcockpit_(?:get_script_context|get_evaluation_context|save_evaluation|get_review_context|save_review_draft)\b/,
+    );
+  });
+
   it("does not expose the upstream product brand in runtime copy", async () => {
     const sources = await Promise.all(
       runtimeCopyFiles.map(async (path) => `${path}\n${await readFile(`${root}/${path}`, "utf8")}`),
@@ -48,7 +59,7 @@ describe("Jacky Creator product terminology", () => {
     const identitySurfaces = [patch, host, contract, settings, build].join("\n");
 
     expect(manifest.name).toBe("jacky-creator");
-    expect(manifest.version).toBe("0.1.0-beta.6");
+    expect(manifest.version).toBe("0.1.0-beta.7");
     expect(identitySurfaces).toContain("jacky-creator");
     expect(identitySurfaces).not.toContain("dsh-oil-creator");
   });
@@ -71,7 +82,7 @@ describe("Jacky Creator product terminology", () => {
     expect(readme).not.toContain("dsh plugin remove dsh-oil-creator");
     expect(installation.match(/dsh plugin remove dsh-oil-creator/g)).toHaveLength(1);
     expect(onboarding).not.toContain("dsh-oil-creator-0.1.0-beta.2.tgz");
-    expect(onboarding).toContain("jacky-creator-0.1.0-beta.6.tgz");
+    expect(onboarding).toContain("jacky-creator-0.1.0-beta.7.tgz");
     expect(publicDocs).not.toContain("~/.dsh-oil-creator");
     expect(publicDocs).not.toContain("今天做一期 DeepSeek Harness 安装上手");
     expect(hero).not.toContain("<circle");

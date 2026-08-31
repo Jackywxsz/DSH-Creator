@@ -2,15 +2,16 @@ import { describe, expect, it, vi } from "vitest";
 
 import { CREATOR_WORKBENCH_SKILL, registerCreatorWorkbenchSkill } from "../src/creatorSkill.ts";
 
-describe("creator-workbench skill", () => {
+describe("jacky-creator-workbench skill", () => {
   it("registers a model-visible onboarding workflow", () => {
     const dispose = vi.fn();
     const register = vi.fn(() => dispose);
     expect(registerCreatorWorkbenchSkill({ skills: { register } })).toBe(dispose);
     expect(register).toHaveBeenCalledWith(CREATOR_WORKBENCH_SKILL);
-    expect(CREATOR_WORKBENCH_SKILL.content).toContain("oil_creator_guide");
-    expect(CREATOR_WORKBENCH_SKILL.content).toContain("oil_creator_setup");
-    expect(CREATOR_WORKBENCH_SKILL.content).toContain("oil_script_rules");
+    expect(CREATOR_WORKBENCH_SKILL.name).toBe("jacky-creator-workbench");
+    expect(CREATOR_WORKBENCH_SKILL.content).toContain("jacky_creator_guide");
+    expect(CREATOR_WORKBENCH_SKILL.content).toContain("jacky_creator_setup");
+    expect(CREATOR_WORKBENCH_SKILL.content).toContain("jacky_creator_script_rules");
     expect(CREATOR_WORKBENCH_SKILL.content).toContain("内容目录和 `enabledPlatforms`");
     expect(CREATOR_WORKBENCH_SKILL.content).toContain("这里不配置创作者名称或平台主页");
     expect(CREATOR_WORKBENCH_SKILL.content).toContain("脚本规则（人设）");
