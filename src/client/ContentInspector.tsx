@@ -427,7 +427,7 @@ function ScriptOperationsBridge({
   return (
     <section className="scriptOperationsBridge">
       <header><div><strong>{t("inspector.operations.title")}</strong><span>{t("inspector.operations.hint")}</span></div><button type="button" onClick={() => {
-        const sent = sendCockpitInstruction(`请为 contentId=${contentId} 创作口播脚本。先调用 cockpit_get_script_context 读取运营看板中已选的策略、规则和模板，再调用 oil_script_rules 读取长期人设规则。结合 topic.md 写出成稿，并保存到这条 Jacky 内容项目的 script.md。不要只把脚本发在对话里。`);
+        const sent = sendCockpitInstruction(`请为 contentId=${contentId} 创作口播脚本。先调用 jacky_creator_get_script_context 读取运营看板中已选的策略、规则和模板，再调用 jacky_creator_script_rules 读取长期人设规则。结合 topic.md 写出成稿，并保存到这条 Jacky 内容项目的 script.md。不要只把脚本发在对话里。`);
         if (!sent) window.alert(t("operations.ai.noSession"));
       }}>{t("inspector.operations.create")}</button></header>
       {error !== undefined && <p className="scriptOperationsError">{error}</p>}

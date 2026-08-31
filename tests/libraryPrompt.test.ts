@@ -14,9 +14,9 @@ describe("libraryConventionText", () => {
     expect(text).toContain("script.md");
     expect(text).toContain("公众号文章/");
     expect(text).toContain("系统自带的列文件、读文件、写文件工具");
-    expect(text).toContain("oil_creator_setup");
-    expect(text).toContain("oil_creator_guide");
-    expect(text).toContain("oil_script_rules");
+    expect(text).toContain("jacky_creator_setup");
+    expect(text).toContain("jacky_creator_guide");
+    expect(text).toContain("jacky_creator_script_rules");
     expect(text).toContain("Ego Browser");
     expect(text).toContain("/.jacky-creator/overlay.json");
     expect(text).not.toContain("oil_get_content");

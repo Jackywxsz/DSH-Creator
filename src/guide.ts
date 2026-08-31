@@ -18,10 +18,10 @@ function subtitleLines(capabilities: CreatorSetupStatus["capabilities"]): string
     const needsSetup = capabilities.subtitleSkill.detail.includes("尚未完成 setup.sh");
     lines.push(
       needsSetup && installedPath !== undefined
-        ? `- oil-subtitle 已下载但未初始化：征得用户同意后执行 \`bash "${installedPath}/setup.sh"\`，完成后重新调用 oil_creator_setup 确认。`
+        ? `- oil-subtitle 已下载但未初始化：征得用户同意后执行 \`bash "${installedPath}/setup.sh"\`，完成后重新调用 jacky_creator_setup 确认。`
         : installedPath === undefined
-          ? "- 缺 oil-subtitle：征得用户同意后执行 `git clone https://github.com/oil-oil/oil-subtitle ~/.agents/skills/oil-subtitle && bash ~/.agents/skills/oil-subtitle/setup.sh`，装完重新调用 oil_creator_setup 确认。"
-          : `- 缺 oil-subtitle：征得用户同意后按能力状态中给出的命令安装到当前配置目录 \`${installedPath}\`，装完重新调用 oil_creator_setup 确认。`,
+          ? "- 缺 oil-subtitle：征得用户同意后执行 `git clone https://github.com/oil-oil/oil-subtitle ~/.agents/skills/oil-subtitle && bash ~/.agents/skills/oil-subtitle/setup.sh`，装完重新调用 jacky_creator_setup 确认。"
+          : `- 缺 oil-subtitle：征得用户同意后按能力状态中给出的命令安装到当前配置目录 \`${installedPath}\`，装完重新调用 jacky_creator_setup 确认。`,
     );
   }
   if (capabilities.subtitleCredential.state !== "ready") {
@@ -33,7 +33,7 @@ function subtitleLines(capabilities: CreatorSetupStatus["capabilities"]): string
 function coverLines(capabilities: CreatorSetupStatus["capabilities"]): string[] {
   const lines: string[] = [];
   if (capabilities.coverSkill.state !== "ready") {
-    lines.push("- 缺 oil-cover：征得用户同意后执行 `git clone https://github.com/oil-oil/oil-cover ~/.agents/skills/oil-cover`，装完重新调用 oil_creator_setup 确认。");
+    lines.push("- 缺 oil-cover：征得用户同意后执行 `git clone https://github.com/oil-oil/oil-cover ~/.agents/skills/oil-cover`，装完重新调用 jacky_creator_setup 确认。");
   }
   if (capabilities.coverCredential.state !== "ready") {
     lines.push("- 缺 ZENMUX_API_KEY：让用户到 ZenMux（https://zenmux.ai）控制台申请，在 设置 → 插件 → 内容工作台 填写；不要让用户把 Key 明文发到对话里。");
@@ -43,12 +43,12 @@ function coverLines(capabilities: CreatorSetupStatus["capabilities"]): string[] 
 
 function publishPlatformLine(enabledPlatforms: readonly PublishPlatform[], publisherName: string): string {
   if (enabledPlatforms.length === 0) {
-    return `- 当前 enabledPlatforms 为空（[]）：不要调用 ${publisherName}，也不要调用 oil_sync_publish；先用 oil_creator_setup 配置启用平台，用户确认后再继续。`;
+    return `- 当前 enabledPlatforms 为空（[]）：不要调用 ${publisherName}，也不要调用 jacky_creator_sync_publish；先用 jacky_creator_setup 配置启用平台，用户确认后再继续。`;
   }
   const names = enabledPlatforms
     .map((platform) => `${PUBLISH_PLATFORM_DEFINITIONS[platform].name}（${platform}）`)
     .join("、");
-  return `- 当前 enabledPlatforms：${names}。${publisherName} 与 oil_sync_publish 只处理这些平台，不得上传或同步其他平台。`;
+  return `- 当前 enabledPlatforms：${names}。${publisherName} 与 jacky_creator_sync_publish 只处理这些平台，不得上传或同步其他平台。`;
 }
 
 /**
@@ -82,18 +82,18 @@ export function creatorGuideText(status: CreatorSetupStatus): string {
     "## 内容管理",
     `- 片库目录是 ${settings.libraryRoot}，一集一个子文件夹，命名为 YYYY-MM-DD_可读标题。`,
     "- 正文以磁盘文件为准：topic.md 选题、script.md 口播脚本、公众号文章/ 图文稿、*.mp4 成片、*.srt/*.ass 字幕、*_3x4.png 等封面。读和改这些文件用系统自带的文件工具。",
-    "- 新建一集用 oil_create_content；文件夹名乱了用 oil_organize_library，先预览、用户确认后再 apply=true。它只改名，不删文件。",
+    "- 新建一集用 jacky_creator_create_content；文件夹名乱了用 jacky_creator_organize_library，先预览、用户确认后再 apply=true。它只改名，不删文件。",
     "- 工作台自己的状态（绑定、阶段、发布标记）在 overlay.json，不是正文，不要手改。",
     "",
     "## 脚本与人设",
     "- 每集的口播脚本在 script.md，直接用文件工具读写。",
     scriptRules === undefined
-      ? "- 当前没有配置脚本规则（人设）。用户第一次让你写或改脚本时，先主动问清语气、结构、禁忌和目标观众，再用 oil_script_rules 存下来，之后每次写脚本都遵循。"
-      : "- 已配置脚本规则（人设），写或改 script.md 前先用 oil_script_rules 读取并严格遵循；用户提出新的长期偏好时，把它合并进规则再保存。",
+      ? "- 当前没有配置脚本规则（人设）。用户第一次让你写或改脚本时，先主动问清语气、结构、禁忌和目标观众，再用 jacky_creator_script_rules 存下来，之后每次写脚本都遵循。"
+      : "- 已配置脚本规则（人设），写或改 script.md 前先用 jacky_creator_script_rules 读取并严格遵循；用户提出新的长期偏好时，把它合并进规则再保存。",
     "",
     "## 字幕",
-    "- 成片落盘后：oil_generate_subtitles 转录、自动校对、排版，完成后打开预览；用户在预览里确认专有名词后，再用 oil_burn_subtitles 烧录。预览前不要烧录。",
-    "- oil_generate_subtitles 是长任务，调用后立即返回。完成看 subtitle-transcript.json / subtitle-manifest.json，不要等 *_subtitled.mp4，也不要把启动说成完成。",
+    "- 成片落盘后：jacky_creator_generate_subtitles 转录、自动校对、排版，完成后打开预览；用户在预览里确认专有名词后，再用 jacky_creator_burn_subtitles 烧录。预览前不要烧录。",
+    "- jacky_creator_generate_subtitles 是长任务，调用后立即返回。完成看 subtitle-transcript.json / subtitle-manifest.json，不要等 *_subtitled.mp4，也不要把启动说成完成。",
     ...subtitleLines(capabilities),
     "",
     "## 演示",
@@ -102,13 +102,13 @@ export function creatorGuideText(status: CreatorSetupStatus): string {
     "- 产物写入这一集的 演示/ 目录，命名为 内容ID-16x9.html 或 内容ID-3x4.html，方便工作台稳定识别和预览。",
     "",
     "## 封面",
-    "- oil_generate_cover 前先按 Jacky Cover 规则从脚本或字幕提炼封面主标题，通过 title 传入；ZenMux 负责分析和整图生成人物融合版三画幅。不要把文件夹名直接当封面结论。生成后请用户核对标题、人物身份和错别字。",
+    "- jacky_creator_generate_cover 前先按 Jacky Cover 规则从脚本或字幕提炼封面主标题，通过 title 传入；ZenMux 负责分析和整图生成人物融合版三画幅。不要把文件夹名直接当封面结论。生成后请用户核对标题、人物身份和错别字。",
     ...coverLines(capabilities),
     "",
     "## 录制与剪辑",
     "- Screen Studio 是可选的录制与自动剪辑路线（仅 macOS），不是内容流程的必经步骤。使用它时，录制和导出成片由用户亲手完成；自动剪辑走外部 skill screen-studio-editor，它操作的是 .screenstudio 工程。",
     capabilities.screenStudio.state === "ready"
-      ? "- 当前已发现 Screen Studio。用 oil_update_content 把工程绑到对应一集，oil_open_studio 打开，oil_wait_export 等待成片落盘。"
+      ? "- 当前已发现 Screen Studio。用 jacky_creator_update_content 把工程绑到对应一集，jacky_creator_open_studio 打开，jacky_creator_wait_export 等待成片落盘。"
       : "- 当前没有可用的 Screen Studio：绑定工程和 screen-studio-editor 不可用，但内容制作不受阻。用户可用剪映或其他工具剪片，把成片文件放进这一集的文件夹，工作台会继续推进。",
     capabilities.editingSkill.state === "ready"
       ? "- 已发现 screen-studio-editor，用户要求清理时间线时直接使用。"
@@ -122,8 +122,8 @@ export function creatorGuideText(status: CreatorSetupStatus): string {
     capabilities.publishSync.state === "ready"
       ? enabledPlatforms.length === 0
         ? "- 已发现 Ego Browser，但当前没有启用平台，不执行自动发布和数据回收。"
-        : `- 当前已发现 Ego Browser。上传发布走外部 skill ${publisherName}，停在最终发表按钮前由用户点；发布后或用户要求时用 oil_sync_publish 回收播放、赞、评论并写回工作台。`
-      : "- 当前未发现 Ego Browser：自动发布和 oil_sync_publish 数据回收都不可用。告诉用户到 https://lite.ego.app 下载 ego lite，完成首次引导后 ego-browser 命令可用，再登录各平台创作者后台；片库、脚本、字幕、封面不受影响，不要假装能同步。",
+        : `- 当前已发现 Ego Browser。上传发布走外部 skill ${publisherName}，停在最终发表按钮前由用户点；发布后或用户要求时用 jacky_creator_sync_publish 回收播放、赞、评论并写回工作台。`
+      : "- 当前未发现 Ego Browser：自动发布和 jacky_creator_sync_publish 数据回收都不可用。告诉用户到 https://lite.ego.app 下载 ego lite，完成首次引导后 ego-browser 命令可用，再登录各平台创作者后台；片库、脚本、字幕、封面不受影响，不要假装能同步。",
     capabilities.publishSkill.state === "ready"
       ? enabledPlatforms.length === 0
         ? `- 已发现 ${publisherName}，但当前没有启用平台，不使用它。`

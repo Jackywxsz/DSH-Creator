@@ -14,6 +14,25 @@ function registeredTools(): Map<string, { parameters: { properties: Record<strin
 }
 
 describe("creator settings platform contract", () => {
+  it("registers only the unified Jacky Creator tool names", () => {
+    expect([...registeredTools().keys()]).toEqual([
+      "jacky_creator_guide",
+      "jacky_creator_script_rules",
+      "jacky_creator_setup",
+      "jacky_creator_create_content",
+      "jacky_creator_update_content",
+      "jacky_creator_profile",
+      "jacky_creator_organize_library",
+      "jacky_creator_sync_publish",
+      "jacky_creator_open_studio",
+      "jacky_creator_wait_export",
+      "jacky_creator_open_subtitle_preview",
+      "jacky_creator_burn_subtitles",
+      "jacky_creator_generate_subtitles",
+      "jacky_creator_generate_cover",
+    ]);
+  });
+
   it("exposes every shared platform as a settings option", () => {
     expect(CREATOR_SETTINGS_PLATFORMS.map((platform) => platform.key)).toEqual(PUBLISH_PLATFORMS);
     expect(CREATOR_SETTINGS_PLATFORMS.map((platform) => platform.label)).toEqual(
@@ -23,8 +42,8 @@ describe("creator settings platform contract", () => {
 
   it("exposes enabled platforms in the registered creator tools", () => {
     const tools = registeredTools();
-    const setup = tools.get("oil_creator_setup");
-    const profile = tools.get("oil_creator_profile");
+    const setup = tools.get("jacky_creator_setup");
+    const profile = tools.get("jacky_creator_profile");
     const setupPlatforms = setup?.parameters.properties.enabledPlatforms as { items?: { enum?: readonly string[] } };
     const profilePlatforms = profile?.parameters.properties.enabledPlatforms as { items?: { enum?: readonly string[] } };
 

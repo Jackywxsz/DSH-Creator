@@ -27,7 +27,7 @@ dsh plugin --profile web add jacky-creator
 如果 npm 通道暂时不可用，可以安装同版本的 GitHub Release 成品包：
 
 ~~~bash
-dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.6/jacky-creator-0.1.0-beta.6.tgz
+dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.7/jacky-creator-0.1.0-beta.7.tgz
 ~~~
 
 如果日志出现 `Issues with peer dependencies found`，先看命令最后是否显示安装完成。只有出现 `dsh: pnpm failed` 或其他明确失败提示时，才需要提交日志排查。
@@ -97,9 +97,11 @@ dsh plugin remove dsh-oil-creator
 
 然后执行本页的新安装命令并重启 DSH Desktop。Jacky Creator 会把旧工作台状态复制到新目录，不删除旧目录，也不覆盖已经存在的新数据。
 
+升级到统一 `jacky_creator_*` Agent 命令的版本后，请新建会话再继续创作。升级前已经打开的会话仍保存旧工具目录，继续使用可能出现 `UNKNOWN_TOOL`；不要为此删除历史会话或内容目录。
+
 ## 更新
 
-看到新版本后，打开 [GitHub Releases](https://github.com/Jackywxsz/DSH-Creator/releases)，按该版本说明中的安装命令更新。更新不会主动删除内容目录，重要内容仍建议提前备份。
+看到新版本后，打开 [GitHub Releases](https://github.com/Jackywxsz/DSH-Creator/releases)，按该版本说明中的安装命令更新。更新后彻底退出并重新打开 DSH Desktop，再新建会话。更新不会主动删除内容目录，重要内容仍建议提前备份。
 
 ## 数据保留
 

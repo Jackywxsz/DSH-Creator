@@ -41,8 +41,8 @@ const evidenceProperties = {
 
 export function registerCockpitTools(ctx: ToolsContext, service: CreatorCockpitService): void {
   ctx.tools.register(defineTool({
-    name: "cockpit_get_script_context",
-    description: "Read the real topic note plus the user-selected Jacky operations strategy, active review rules, and reusable templates for one Jacky content item. Use this before drafting its script; also read oil_script_rules, then write the result to the real script.md instead of returning an untracked copy.",
+    name: "jacky_creator_get_script_context",
+    description: "Read the real topic note plus the user-selected Jacky operations strategy, active review rules, and reusable templates for one Jacky content item. Use this before drafting its script; also read jacky_creator_script_rules, then write the result to the real script.md instead of returning an untracked copy.",
     parameters: { contentId: { type: "string", required: true, description: "Real Jacky content id." } },
     output: { schema: JSON_VALUE, render: (_args, value) => text("Script context", (value as { contentId: string }).contentId) },
     presentCall: (args) => present("Read script context", args),
@@ -50,7 +50,7 @@ export function registerCockpitTools(ctx: ToolsContext, service: CreatorCockpitS
   }));
 
   ctx.tools.register(defineTool({
-    name: "cockpit_get_evaluation_context",
+    name: "jacky_creator_get_evaluation_context",
     description: "Read the minimum real topic, script, six-dimension rubric, rubric version, and input fingerprint required to evaluate one Jacky content item.",
     parameters: { contentId: { type: "string", required: true, description: "Real Jacky content id." } },
     output: { schema: JSON_VALUE, render: (_args, value) => text("Evaluation context", (value as { contentId: string }).contentId) },
@@ -59,7 +59,7 @@ export function registerCockpitTools(ctx: ToolsContext, service: CreatorCockpitS
   }));
 
   ctx.tools.register(defineTool({
-    name: "cockpit_save_evaluation",
+    name: "jacky_creator_save_evaluation",
     description: "Save one evidence-based six-dimension evaluation after reading its current context. Scores must be integers from 0 to 5. The Host verifies the fingerprint and recomputes total; do not provide a total.",
     parameters: {
       contentId: { type: "string", required: true },
@@ -75,7 +75,7 @@ export function registerCockpitTools(ctx: ToolsContext, service: CreatorCockpitS
   }));
 
   ctx.tools.register(defineTool({
-    name: "cockpit_get_review_context",
+    name: "jacky_creator_get_review_context",
     description: "Read the minimum real content facts, publishing metrics, supplemental metrics, latest evaluation, and fingerprint needed to draft a post-publication review.",
     parameters: { contentId: { type: "string", required: true, description: "Real Jacky content id." } },
     output: { schema: JSON_VALUE, render: (_args, value) => text("Review context", (value as { contentId: string }).contentId) },
@@ -84,7 +84,7 @@ export function registerCockpitTools(ctx: ToolsContext, service: CreatorCockpitS
   }));
 
   ctx.tools.register(defineTool({
-    name: "cockpit_save_review_draft",
+    name: "jacky_creator_save_review_draft",
     description: "Save an AI-generated review as a draft only. The Host verifies the context fingerprint. This tool cannot confirm the review or write a formal rule/template; those actions require explicit UI confirmation.",
     parameters: {
       contentId: { type: "string", required: true },
