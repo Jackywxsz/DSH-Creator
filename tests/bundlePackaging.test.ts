@@ -99,11 +99,21 @@ describe("DeepSeek Harness bundle packaging", () => {
 
   it("documents installation through dsh plugin instead of profile edits", () => {
     const readme = readFileSync(resolve(root, "README.md"), "utf8");
+    const installation = readFileSync(
+      resolve(root, "docs/installation.md"),
+      "utf8",
+    );
     const implementation = readFileSync(
       resolve(root, "docs/implementation.md"),
       "utf8",
     );
 
+    for (const document of [readme, installation, implementation]) {
+      expect(document).toContain(
+        "dsh plugin --profile web add jacky-creator",
+      );
+    }
+    expect(readme).toContain("dsh plugin --profile web add dsh-plugin");
     expect(readme).toContain(
       "dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.6/jacky-creator-0.1.0-beta.6.tgz",
     );

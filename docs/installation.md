@@ -19,10 +19,16 @@ DSH Desktop 和 Jacky Creator 均为社区项目。
 ### 2. 运行安装命令
 
 ~~~bash
-dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.6/jacky-creator-0.1.0-beta.6.tgz
+dsh plugin --profile web add jacky-creator
 ~~~
 
 等待命令结束，不要在安装过程中重复执行。
+
+如果 npm 通道暂时不可用，可以安装同版本的 GitHub Release 成品包：
+
+~~~bash
+dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.6/jacky-creator-0.1.0-beta.6.tgz
+~~~
 
 如果日志出现 `Issues with peer dependencies found`，先看命令最后是否显示安装完成。只有出现 `dsh: pnpm failed` 或其他明确失败提示时，才需要提交日志排查。
 
@@ -67,7 +73,7 @@ Jacky Creator 会检查内容目录和可选能力，只显示凭据是否已配
 
 ### 安装日志提示构建脚本被阻止
 
-这通常说明安装的是 GitHub 源码地址。普通用户不要修改 DSH Profile，重新复制本页的 `.tgz` 安装命令即可。
+这通常说明安装的是 GitHub 源码地址。普通用户不要修改 DSH Profile，重新复制本页的 `jacky-creator` npm 安装命令；npm 通道不可用时再使用 GitHub Release 成品包。
 
 ### 安装完成但侧边栏没有变化
 
