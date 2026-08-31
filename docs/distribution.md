@@ -1,13 +1,13 @@
 # 发布与插件市场路径
 
-本文记录 Jacky Creator 从 GitHub Beta 到社区插件市场，再到未来稳定版的发布约束。市场收录和稳定版是两件事：社区市场允许使用经过验证的 GitHub Release 预构建包，npm 不是收录前提。
+本文记录 Jacky Creator 从 GitHub Beta、npm 成品包到社区插件市场，再到未来稳定版的发布约束。市场收录和稳定版是两件事；npm 和 GitHub Release 必须分发同一份经过验证的预构建包。
 
 ## 当前状态
 
 - 发布阶段：GitHub Beta。
 - 当前版本：`v0.1.0-beta.6`。
-- 安装来源：GitHub Release 的预构建 `.tgz`，源码、Git Tag 与安装包一一对应。
-- npm：未发布。
+- 安装来源：npm 包 `jacky-creator`；GitHub Release 的预构建 `.tgz` 作为固定版本备用入口。
+- npm：`jacky-creator@0.1.0-beta.6`，与同版本 GitHub Release 内容一致。
 - 插件市场：已收录到 `awesome-dsh-plugin`，由 `dsh-market` 同步市场卡片。
 - 首要宿主：DSH Desktop 2.0.2 / DeepSeek Harness 0.1.1-rc.2。
 
@@ -17,18 +17,26 @@
 GitHub main
   └── signed/annotated Tag
        └── GitHub Prerelease + 更新说明 + 预构建 .tgz
+            ├── npm 发布同一份 .tgz
+            ├── dsh-plugin.org 按 dsh-plugin Topic 与 npm 元数据收录
             └── awesome-dsh-plugin 收录 PR
                  └── dsh-market 自动同步市场卡片
 
 未来稳定版
-  └── npm 不可变版本（可选，不影响市场收录）
+  └── npm 不可变稳定版本
 ```
 
 GitHub 是源码、Issue、文档和版本真源。社区目录只保存仓库地址、准确简介、分类和经过验证的安装包地址，不跟随开发分支现场构建。
 
 ## GitHub Beta
 
-Beta 的直接安装入口固定到版本包：
+Beta 的推荐安装入口使用 npm 成品包：
+
+```bash
+dsh plugin --profile web add jacky-creator
+```
+
+GitHub Release 保留固定版本备用入口：
 
 ```bash
 dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.6/jacky-creator-0.1.0-beta.6.tgz
@@ -41,10 +49,15 @@ dsh plugin add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0
 3. `pnpm check` 通过。
 4. `pnpm release:check` 通过。
 5. GitHub Release 安装包包含 Host、Client、Typert、Bundle Patch、README、文档和 Hero，并且无需用户授权源码构建。
-6. 在干净 Profile 完成安装、重启、首次配置和卸载验证；无法完成的运行时验证必须在 Release 中说明。
-7. 仓库与打包产物中不得包含密钥、用户内容、缓存或本机私人路径。
+6. npm 发布使用同一份 GitHub Release `.tgz`，发布后回读 registry 并核对版本、仓库地址与完整性摘要。
+7. 在干净 Profile 完成安装、重启、首次配置和卸载验证；无法完成的运行时验证必须在 Release 中说明。
+8. 仓库与打包产物中不得包含密钥、用户内容、缓存或本机私人路径。
 
 Git 源码安装只供开发者使用。DeepSeek Harness rc.2 的 `dsh plugin` 会把参数转交 pnpm；pnpm 10 对 Git 源码包的 `prepare` 默认要求消费者显式允许构建，因此不作为普通用户入口。
+
+## dsh-plugin.org 收录
+
+[dsh-plugin.org](https://dsh-plugin.org/) 会扫描带有 `dsh-plugin` Topic 的公开仓库。README 必须提供可复制的 npm 安装命令，npm 包的 `repository` 必须精确指向本仓库；这样 DSH Plugin Hub 才会选择预构建 npm 包，而不是回退到需要现场构建的 Git 源码。
 
 ## 社区插件市场
 
@@ -89,11 +102,11 @@ description:
 - 核心能力与可选 Skill 的清晰分界。
 - 安装、首次配置、更新、卸载与数据保留说明。
 
-## 未来稳定版与 npm
+## 未来稳定版
 
 从 `v0.1.0-beta.3` 起，GitHub Release 包、内部 Cordis 插件 ID 和 Profile 依赖名统一为 `jacky-creator`。旧版用户先卸载旧包，再安装新包；首次启动会把旧状态非破坏性复制到 `~/.jacky-creator/`。
 
-未来若发布 npm，可再迁移到公开 Scoped Package，例如 `@jackywxsz/jacky-creator`。npm 包、Git Tag 和 GitHub Release 必须一一对应。
+npm 包名固定为 `jacky-creator`，避免改变 DSH Profile 依赖名与 Bundle ID。npm 包、Git Tag 和 GitHub Release 必须一一对应。
 
 稳定版还需要：
 
