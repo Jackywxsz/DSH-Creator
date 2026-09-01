@@ -1,0 +1,48 @@
+/* The host sidebar's `.footerActions` (hashed class, name-stable suffix) is a
+   horizontal flex row whose existing occupant (Plugin Market) is effectively
+   full-width, so any extra occupant gets pushed past the sidebar's right edge
+   into overflow:hidden — rendered but invisible. Allow the row to wrap so our
+   launcher takes its own full line beneath it. */
+[class*="_footerActions"] {
+  flex-wrap: wrap;
+}
+
+/* Full-row launcher on its own wrapped line when the sidebar is wide; the
+   collapsed rail centers a shrink-wrapped icon chip (label hidden there). */
+.jackyOperationsLauncher {
+  flex: 1 1 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  height: 32px;
+  min-width: 32px;
+  margin: 2px 8px 6px;
+  padding: 0 10px;
+  border: 1px solid var(--dsw-alias-border-l2, rgba(0, 0, 0, 0.18));
+  border-radius: 8px;
+  background: var(--dsw-alias-button-floating-fill, #ffffff);
+  color: var(--dsw-alias-fg-base, #111111);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.jackyOperationsLauncher:hover {
+  background: var(--dsw-alias-button-floating-hover, #f0f0f0);
+}
+
+.jackyOperationsLauncher[aria-pressed="true"] {
+  border-color: var(--jacky-sprout-green, #83cf1b);
+}
+
+.jackyOperationsLauncher .jackySproutIcon {
+  flex: none;
+}
+
+.jackyOperationsLauncherLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

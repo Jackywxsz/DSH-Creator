@@ -1,4 +1,4 @@
-import type { ClientContext, WorkspaceId } from "@deepseek-ai/dsh-client-runtime/client";
+import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
 import type {} from "@deepseek-ai/dsh-client-locale/client";
 import type {} from "@deepseek-ai/dsh-client-ui-layout/client";
 import type {} from "@deepseek-ai/dsh-api-remotes/client";
@@ -70,10 +70,12 @@ import type { CreatorCockpitFace } from "./operations/face.ts";
 import { CreatorSettingsCard } from "./CreatorSettingsCard.tsx";
 import type { CreatorViewFace } from "./face.ts";
 import { en, NS, type CreatorKey, zh } from "./locales.ts";
-import { OilSidebarRoot } from "./sidebar/OilSidebarRoot.tsx";
+import { FullscreenSurface } from "./sidebar/FullscreenSurface.tsx";
+import { OperationsLauncher } from "./sidebar/OperationsLauncher.tsx";
+import { OperationsSidebarPanel } from "./sidebar/OperationsSidebarPanel.tsx";
 import { OperationsWorkspace } from "./operations/OperationsWorkspace.tsx";
 import { CockpitSessionBridge } from "./operations/sessionBridge.tsx";
-import type { OilSidebarInjected, OilSidebarSlotProps } from "./sidebar/slots.ts";
+import type { SidebarFooterActionOwnerProps } from "./sidebar/slots.ts";
 import {
   registerCreatorSettingsCard,
   type CompatibleSettingsSlots,
@@ -553,43 +555,30 @@ export function apply(ctx: ClientContext): void {
     );
   }, "jacky-creator: content triggers");
 
-  const injectSidebar = (): OilSidebarInjected => ({
-    startSession: (workspaceId?: WorkspaceId) => {
-      ctx.workspaces.startSession(workspaceId);
-    },
-    toggleSidebar: () => {
-      ctx.layout.toggleSidebar();
-    },
-  });
-
-  function BoundSidebar(props: OilSidebarSlotProps) {
+  // --------------------------------------------------------------------------
+  // Sidebar integration.
+  //
+  // Upstream replaces the whole sidebar (declaring `sidebar.workspaces` etc.)
+  // and disables the host's ui-sidebar via its bundle patch. On DSH Desktop
+  // builds the renderer loads the host sidebar regardless of that host-side
+  // patch, so re-declaring those slots aborts plugin load ("slot
+  // sidebar.workspaces is already declared"). Instead we contribute a compact
+  // launcher into the host-owned `sidebar.footer.action` list slot; it toggles
+  // the shared sidebar-tab state and the shell.overlay wiring below renders
+  // the cockpit as a fullscreen mode.
+  // --------------------------------------------------------------------------
+  function BoundOperationsLauncher({ wide }: SidebarFooterActionOwnerProps) {
     const contentT = ctx.locale.bind(NS);
-    return (
-      <OilSidebarRoot
-        {...props}
-        tabLabels={{
-          sessions: contentT("tab.sessions"),
-          content: contentT("tab"),
-          operations: contentT("tab.operations"),
-        }}
-        contentFace={contentFace}
-        contentT={contentT}
-      />
-    );
+    return <OperationsLauncher wide={wide} label={contentT("tab.operations")} />;
   }
 
-  ctx.slots.inject("sidebar", () =>
+  ctx.slots.inject("sidebar.footer.action", () =>
     ctx.slots.register({
-      name: "sidebar",
+      name: "sidebar.footer.action",
+      id: "jacky-creator-operations-launcher",
       locale: NS,
-      priority: -1,
-      children: {
-        "sidebar.workspaces": { kind: "single", scope: "root" },
-        "sidebar.settings": { kind: "single", scope: "root" },
-        "sidebar.footer.action": { kind: "list", scope: "root" },
-      },
-      inject: injectSidebar,
-    }, BoundSidebar),
+      order: 100,
+    }, BoundOperationsLauncher),
   );
 
   ctx.effect(async () => {
@@ -602,6 +591,31 @@ export function apply(ctx: ClientContext): void {
       return () => {};
     }
     bumpProfile();
+
+    // Cockpit + inspector render as fullscreen modes: their own CSS offsets by
+    // `--oil-sidebar-width` (the plugin's removed private sidebar), so the
+    // FullscreenSurface wrapper zeroes the offset, covers the frame opaquely,
+    // and provides an explicit exit (close button / Escape).
+    const closeOperations = (): void => { setSidebarTab("content"); };
+    function FullscreenOperations(props: Parameters<typeof OperationsWorkspace>[0]) {
+      const contentT = ctx.locale.bind(NS);
+      return (
+        <FullscreenSurface
+          onClose={closeOperations}
+          nav={<OperationsSidebarPanel t={contentT} />}
+        >
+          <OperationsWorkspace {...props} />
+        </FullscreenSurface>
+      );
+    }
+    function FullscreenInspector(props: Parameters<typeof ContentInspector>[0]) {
+      // ContentInspector renders its own close affordance (closeDetails).
+      return (
+        <FullscreenSurface>
+          <ContentInspector {...props} />
+        </FullscreenSurface>
+      );
+    }
 
     const stopOverlay = ctx.slots.inject("shell.overlay", () => {
       let disposeOccupant: (() => void) | undefined;
@@ -639,7 +653,7 @@ export function apply(ctx: ClientContext): void {
                 setSidebarTab("content");
               },
             }),
-          }, OperationsWorkspace);
+          }, FullscreenOperations);
           return;
         }
         disposeOccupant = ctx.slots.register({
@@ -654,7 +668,7 @@ export function apply(ctx: ClientContext): void {
               setSelectedContentId(null);
             },
           }),
-        }, ContentInspector);
+        }, FullscreenInspector);
       };
       const stopSelection = subscribeSelectedContentId(sync);
       const stopChrome = subscribeSidebarChrome(sync);
