@@ -1,0 +1,55 @@
+.jackyFullscreenSurface {
+  position: absolute;
+  inset: 0;
+  /* Children (OperationsWorkspace, ContentInspector) offset themselves by the
+     plugin's old private sidebar width; zero it so they fill this surface. */
+  --oil-sidebar-width: 0px;
+  background: var(--dsw-alias-bg-base, #f7f4ec);
+  overflow: hidden;
+}
+
+/* With a nav column, recreate the original sidebar geometry: children offset
+   by the nav width instead of filling edge to edge. */
+.jackyFullscreenSurface.jackyHasNav {
+  --oil-sidebar-width: 224px;
+}
+
+.jackyFullscreenNav {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 224px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding-top: 10px;
+  overflow-y: auto;
+  border-right: 1px solid var(--dsw-alias-border-l1, rgba(0, 0, 0, 0.08));
+  background: var(--dsw-specific-sidebar-fill, #f3f0e8);
+  /* The panel stylesheet uses this sidebar-provided spacing token. */
+  --dsh-sidebar-inline-padding: 10px;
+}
+
+.jackyFullscreenClose {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 40;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--dsw-alias-border-l2, rgba(0, 0, 0, 0.15));
+  background: var(--dsw-alias-button-floating-fill, #ffffff);
+  color: var(--dsw-alias-fg-base, #111111);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.jackyFullscreenClose:hover {
+  background: var(--dsw-alias-button-floating-hover, #f0f0f0);
+}
