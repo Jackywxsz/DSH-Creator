@@ -1,5 +1,12 @@
-- id: ui-sidebar
-  disabled: true
+# Contribute the Jacky Creator bundle to the host loader.
+#
+# We deliberately do NOT disable the host `ui-sidebar`: the plugin coexists with
+# the host sidebar (contributing an operations launcher into
+# `sidebar.footer.action`) instead of replacing it. Disabling ui-sidebar left
+# compatibility mode and source-boot with no sidebar owner at all, so the footer
+# slot was never declared and the operations entry could not render. Keeping the
+# host sidebar guarantees exactly one owner across compatibility / advanced /
+# extended / source-boot.
 - insert:
     - id: jacky-creator
       name: jacky-creator

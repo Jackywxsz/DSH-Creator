@@ -11,9 +11,18 @@
  * it; without `nav`, the offset is zeroed and children fill edge to edge.
  * Renders as a deliberate mode: open via the footer launcher, leave via the
  * close button or Escape.
+ *
+ * Escape belongs to the innermost open layer. The cockpit's own forms use the
+ * host Modal (a `role="dialog"` / `aria-modal` layer that closes itself on
+ * Escape), so this surface must yield whenever such a layer is open — otherwise
+ * one Escape both dismisses the dialog and tears down the whole surface,
+ * discarding the unsaved form behind it. Rather than enumerate every dialog,
+ * the surface asks the DOM whether a modal layer is currently mounted and only
+ * closes when none is.
  * ------------------------------------------------------------------------- */
 
 import { useEffect, type ReactNode } from "react";
+import { escapeClosesSurface, modalLayerOpen } from "./escapeIntent.ts";
 import "./FullscreenSurface.css";
 
 export interface FullscreenSurfaceProps {
@@ -26,7 +35,7 @@ export function FullscreenSurface({ onClose, nav, children }: FullscreenSurfaceP
   useEffect(() => {
     if (onClose === undefined) return;
     const onKey = (event: KeyboardEvent): void => {
-      if (event.key === "Escape") onClose();
+      if (escapeClosesSurface(event, modalLayerOpen())) onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => { window.removeEventListener("keydown", onKey); };

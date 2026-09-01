@@ -8,7 +8,7 @@ Jacky Creator 的包名、Bundle ID 和设置命名空间统一为 `jacky-creato
 
 从旧包升级时，先卸载旧插件包，再安装 `jacky-creator`。首次启动只在新目录不存在时复制旧版工作台和运营状态；旧目录不删除，已有新目录不覆盖。
 
-插件对官方侧栏的替换只写在项目自己的 `cordis.patch.yml`，通过 `package.json` 的 `dsh.bundle.patch` 随包安装。不要把这段配置写进用户的 `~/.dsh/profiles/web/cordis.patch.yml`；用户层不会跟随插件卸载，残留后会把官方侧栏继续关掉。
+插件与官方侧栏共存：`cordis.patch.yml` 只把 `jacky-creator` Bundle 贡献进宿主 loader，不再禁用宿主 `ui-sidebar`。运营入口通过宿主自有的 `sidebar.footer.action` 槽注入，全屏工作台走 `shell.overlay`。这样在 compatibility / advanced / extended / source-boot 四种模式下都只有一个侧栏 owner，运营入口稳定可见——早期"禁用宿主侧栏再自建"的做法只在 Desktop 会重新启用宿主侧栏的模式下侥幸可用，在 compatibility 和 source-boot 下会让侧栏彻底没有 owner。该 patch 通过 `package.json` 的 `dsh.bundle.patch` 随包安装；不要把它写进用户的 `~/.dsh/profiles/web/cordis.patch.yml`，用户层不跟随插件卸载。
 
 Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最终 `assets/readme/hero.png`，不包含 `assets/readme/source/` 下的源素材。
 
