@@ -21,7 +21,7 @@ function parsePackMetadata(output: string) {
 }
 
 describe("DeepSeek Harness bundle packaging", () => {
-  it("owns the sidebar replacement in the bundle layer", () => {
+  it("coexists with the host sidebar in the bundle layer", () => {
     const manifest = JSON.parse(
       readFileSync(resolve(root, "package.json"), "utf8"),
     ) as {
@@ -87,7 +87,8 @@ describe("DeepSeek Harness bundle packaging", () => {
       .toContain("0.1.1-rc.2");
     expect(manifest.peerDependencies?.["@deepseek-ai/dsh-client-ui-settings-plugins"])
       .toContain("0.1.1-rc.2");
-    expect(patch).toMatch(/^- id: ui-sidebar\n  disabled: true$/m);
+    expect(patch).not.toMatch(/^\s*-?\s*id:\s*ui-sidebar\b/m);
+    expect(patch).not.toMatch(/disabled:\s*true/);
     expect(patch).toMatch(/^- insert:\n    - id: jacky-creator\n      name: jacky-creator$/m);
     expect(copyInplace).not.toContain(".dsh/profiles");
     expect(copyInplace).toContain("libDirectory");

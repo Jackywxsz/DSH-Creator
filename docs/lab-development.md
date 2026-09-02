@@ -15,7 +15,7 @@ pnpm lab:setup
 pnpm lab:config
 ```
 
-`pnpm lab:config` 应只出现一个 `jacky-creator` 条目，并且 `ui-sidebar` 保持禁用。它只组合并打印配置，不启动服务。
+`pnpm lab:config` 应只出现一个 `jacky-creator` 条目，并且不应禁用宿主 `ui-sidebar`。插件只向宿主侧边栏贡献一个 “Jacky Creator” 入口；该命令只组合并打印配置，不启动服务。
 
 准备脚本会创建一个已发布的受控夹具，用于验证 T+3、播放、点赞、评论和复盘页面。其链接使用 `example.invalid`，不会访问真实平台。
 

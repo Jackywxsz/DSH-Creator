@@ -1,0 +1,43 @@
+.jackyCreatorLauncher {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: 32px;
+  height: 34px;
+  margin: 2px 8px 6px;
+  padding: 0 10px;
+  border: 1px solid var(--jacky-ink, #111111);
+  border-radius: 9px;
+  background: #ffdf2b;
+  box-shadow: 3px 3px 0 var(--jacky-ink, #111111);
+  color: var(--jacky-ink, #111111);
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.jackyCreatorLauncher:hover {
+  background: #ffe75c;
+}
+
+.jackyCreatorLauncher:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--jacky-ink, #111111);
+}
+
+.jackyCreatorLauncher[aria-pressed="true"] {
+  border-color: var(--jacky-sprout-green, #83cf1b);
+}
+
+.jackyCreatorLauncher:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 2px;
+}
+
+.jackyCreatorLauncher span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

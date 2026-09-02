@@ -1,4 +1,4 @@
-import type { ClientContext, WorkspaceId } from "@deepseek-ai/dsh-client-runtime/client";
+import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
 import type {} from "@deepseek-ai/dsh-client-locale/client";
 import type {} from "@deepseek-ai/dsh-client-ui-layout/client";
 import type {} from "@deepseek-ai/dsh-api-remotes/client";
@@ -29,22 +29,18 @@ import type {
   LibrarySettings,
   ListContentsResult,
   PublishMark,
+  PublishBinding,
   PublishPlatform,
   SubtitlePreviewResult,
   SyncPublishResult,
   ArticleMediaResult,
   VideoPlaybackResult,
 } from "../types.ts";
-import { ContentInspector } from "./ContentInspector.tsx";
 import { openNativePath } from "./nativePaths.ts";
 import {
   bumpLibrary,
   bumpProfile,
-  getSelectedContentId,
   getSidebarTab,
-  setSelectedContentId,
-  setSidebarTab,
-  subscribeSelectedContentId,
   subscribeSidebarChrome,
 } from "./contentSelection.ts";
 import type { CredentialsClient } from "./credentialsApi.ts";
@@ -70,10 +66,14 @@ import type { CreatorCockpitFace } from "./operations/face.ts";
 import { CreatorSettingsCard } from "./CreatorSettingsCard.tsx";
 import type { CreatorViewFace } from "./face.ts";
 import { en, NS, type CreatorKey, zh } from "./locales.ts";
-import { OilSidebarRoot } from "./sidebar/OilSidebarRoot.tsx";
-import { OperationsWorkspace } from "./operations/OperationsWorkspace.tsx";
+import { CreatorLauncher } from "./sidebar/CreatorLauncher.tsx";
+import { CreatorWorkspace } from "./sidebar/CreatorWorkspace.tsx";
 import { CockpitSessionBridge } from "./operations/sessionBridge.tsx";
-import type { OilSidebarInjected, OilSidebarSlotProps } from "./sidebar/slots.ts";
+import type { SidebarFooterActionOwnerProps } from "./sidebar/slots.ts";
+import {
+  registerCreatorLauncher,
+  type CompatibleSidebarSlots,
+} from "./sidebarIntegration.ts";
 import {
   registerCreatorSettingsCard,
   type CompatibleSettingsSlots,
@@ -122,6 +122,10 @@ interface OilCreatorRemote {
     status: PublishMark;
     url?: string;
     publishedAt?: number;
+    remoteId?: string;
+    views?: number;
+    likes?: number;
+    comments?: number;
   }) => Promise<RemoteAnswer<ContentDetail>>;
   syncPublish: (request: { id?: string; platform?: PublishPlatform; force?: boolean }) => Promise<RemoteAnswer<SyncPublishResult>>;
   openSubtitlePreview: (request: { id: string }) => Promise<RemoteAnswer<SubtitlePreviewResult>>;
@@ -455,11 +459,18 @@ export function apply(ctx: ClientContext): void {
       bumpLibrary();
       return next;
     },
-    setPublish: async (id, platform, status, url, publishedAt) => {
+    setPublish: async (id, platform, status, url, publishedAt, binding?: PublishBinding) => {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
       const next = unwrap(
-        await remote.setPublish({ id, platform, status, ...(url === undefined ? {} : { url }), ...(publishedAt === undefined ? {} : { publishedAt }) }),
+        await remote.setPublish({
+          id,
+          platform,
+          status,
+          ...(url === undefined ? {} : { url }),
+          ...(publishedAt === undefined ? {} : { publishedAt }),
+          ...(binding ?? {}),
+        }),
         "publish failed",
       );
       bumpLibrary();
@@ -537,6 +548,8 @@ export function apply(ctx: ClientContext): void {
     name: "conversation.input.dock",
     id: "creator-cockpit-session-bridge",
     order: 1000,
+    locale: NS,
+    inject: () => ({ getContent: contentFace.getContent }),
   }, CockpitSessionBridge)), "jacky-creator: session input bridge");
 
   ctx.effect(() => {
@@ -553,43 +566,23 @@ export function apply(ctx: ClientContext): void {
     );
   }, "jacky-creator: content triggers");
 
-  const injectSidebar = (): OilSidebarInjected => ({
-    startSession: (workspaceId?: WorkspaceId) => {
-      ctx.workspaces.startSession(workspaceId);
-    },
-    toggleSidebar: () => {
-      ctx.layout.toggleSidebar();
-    },
-  });
-
-  function BoundSidebar(props: OilSidebarSlotProps) {
+  function BoundCreatorLauncher({ wide }: SidebarFooterActionOwnerProps) {
     const contentT = ctx.locale.bind(NS);
     return (
-      <OilSidebarRoot
-        {...props}
-        tabLabels={{
-          sessions: contentT("tab.sessions"),
-          content: contentT("tab"),
-          operations: contentT("tab.operations"),
-        }}
-        contentFace={contentFace}
-        contentT={contentT}
+      <CreatorLauncher
+        wide={wide}
+        label={contentT("workspace.title")}
+        expandSidebar={() => { ctx.layout.toggleSidebar(); }}
       />
     );
   }
 
-  ctx.slots.inject("sidebar", () =>
-    ctx.slots.register({
-      name: "sidebar",
-      locale: NS,
-      priority: -1,
-      children: {
-        "sidebar.workspaces": { kind: "single", scope: "root" },
-        "sidebar.settings": { kind: "single", scope: "root" },
-        "sidebar.footer.action": { kind: "list", scope: "root" },
-      },
-      inject: injectSidebar,
-    }, BoundSidebar),
+  ctx.slots.inject("sidebar.footer.action", () =>
+    registerCreatorLauncher(
+      ctx.slots as unknown as CompatibleSidebarSlots,
+      BoundCreatorLauncher,
+      NS,
+    ),
   );
 
   ctx.effect(async () => {
@@ -605,62 +598,34 @@ export function apply(ctx: ClientContext): void {
 
     const stopOverlay = ctx.slots.inject("shell.overlay", () => {
       let disposeOccupant: (() => void) | undefined;
-      let occupantKey = "";
+      let workspaceOpen = false;
       const release = (): void => {
         disposeOccupant?.();
         disposeOccupant = undefined;
-        occupantKey = "";
+        workspaceOpen = false;
       };
       const sync = (): void => {
-        const selectedId = getSelectedContentId();
-        const nextKey = getSidebarTab() === "operations"
-          ? "operations"
-          : selectedId === null
-            ? ""
-            : `content:${selectedId}`;
-        if (nextKey === occupantKey) return;
-        release();
-        if (nextKey === "") {
+        const shouldOpen = getSidebarTab() !== "sessions";
+        if (shouldOpen === workspaceOpen) return;
+        if (!shouldOpen) {
+          release();
           return;
         }
-        occupantKey = nextKey;
-        if (nextKey === "operations") {
-          disposeOccupant = ctx.slots.register({
-            name: "shell.overlay",
-            id: "creator-cockpit-operations",
-            order: 20,
-            locale: NS,
-            inject: () => ({
-              ...face(),
-              ...operationsFace,
-              t: ctx.locale.bind(NS),
-              openContent: (id: string) => {
-                setSelectedContentId(id);
-                setSidebarTab("content");
-              },
-            }),
-          }, OperationsWorkspace);
-          return;
-        }
+        workspaceOpen = true;
         disposeOccupant = ctx.slots.register({
           name: "shell.overlay",
-          id: "oil-creator-inspector",
+          id: "jacky-creator-workspace",
           order: 20,
           locale: NS,
           inject: () => ({
-            ...face(),
+            content: contentFace,
             cockpit: operationsFace,
-            closeDetails: () => {
-              setSelectedContentId(null);
-            },
           }),
-        }, ContentInspector);
+        }, CreatorWorkspace);
       };
-      const stopSelection = subscribeSelectedContentId(sync);
       const stopChrome = subscribeSidebarChrome(sync);
       sync();
       return () => {
-        stopSelection();
         stopChrome();
         release();
       };

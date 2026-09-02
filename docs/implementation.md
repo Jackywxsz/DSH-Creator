@@ -8,7 +8,7 @@ Jacky Creator 的包名、Bundle ID 和设置命名空间统一为 `jacky-creato
 
 从旧包升级时，先卸载旧插件包，再安装 `jacky-creator`。首次启动只在新目录不存在时复制旧版工作台和运营状态；旧目录不删除，已有新目录不覆盖。
 
-插件对官方侧栏的替换只写在项目自己的 `cordis.patch.yml`，通过 `package.json` 的 `dsh.bundle.patch` 随包安装。不要把这段配置写进用户的 `~/.dsh/profiles/web/cordis.patch.yml`；用户层不会跟随插件卸载，残留后会把官方侧栏继续关掉。
+插件保留宿主 `ui-sidebar` 为唯一 sidebar owner，只向宿主拥有的 `sidebar.footer.action` 贡献一个 “Jacky Creator” 入口。入口通过 `shell.overlay` 打开局部工作区：透明根层不拦截底层 AppFrame，内容详情与原生会话在桌面端并排，运营页复用同一工作区。项目自己的 `cordis.patch.yml` 只负责插入 `jacky-creator` Bundle，并通过 `package.json` 的 `dsh.bundle.patch` 随包安装；不要把这段配置写进用户的 `~/.dsh/profiles/web/cordis.patch.yml`，避免插件卸载后残留用户级配置。
 
 Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最终 `assets/readme/hero.png`，不包含 `assets/readme/source/` 下的源素材。
 
@@ -34,7 +34,7 @@ Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最�
 
 | 环节 | 现状 |
 | --- | --- |
-| 列表与检查器 | 自定义侧栏「内容」页；检查器叠在对话左边，聊天不关；概览用状态标签标明阶段，只展开当前步骤的操作 |
+| 列表与检查器 | 从宿主 footer 的唯一入口进入“会话 / 内容 / 运营”工作区；内容列表与检查器复用原组件，桌面端检查器在对话左侧为原生会话让位，聊天不关 |
 | 建内容、选题笔记 | 面板新建；`jacky_creator_create_content` 建文件夹；选题写 `topic.md` |
 | 绑定 / 打开工程 | 面板换绑、打开；`jacky_creator_open_studio` |
 | 等导出 | `jacky_creator_wait_export` 立刻返回并开始盯目录；成片稳定后清掉 waiting 标记 |
@@ -89,7 +89,7 @@ DeepSeek Harness `0.1.1-rc.2` 会先从 Host 的 `settings.describe` 取得插�
 
 `jacky_creator_guide` 是自举入口：用户不知道插件能做什么、或模型不确定下一步时调用，返回带当前能力状态的完整指引，包括 Ego Browser 缺失时自动发布和数据回收不可用。`jacky_creator_script_rules` 读写脚本规则（人设），存在 overlay 里；写或改 `script.md` 前模型先读它。`jacky_creator_setup` 无参数时只读检查目录、操作系统、Screen Studio、字幕、封面、凭据和 Ego Browser。带配置字段但 `apply=false` 时只返回提案；只有用户确认后才用 `apply=true` 写入。可选依赖缺失只降级对应能力，不影响片库核心。
 
-检查器中间栏可以拉到约 800px，走 `shell.overlay`，不占用官方右侧「详情」栏。官方详情栏保持关闭。发布区拆成同步、视频平台、公众号、标签几张卡。概览封面并排 3:4 和 4:3。视频页播放 `_subtitled` 成片，没有则播原片。脚本写在内容文件夹的 `script.md`，已经转好的 Markdown 在 `公众号文章/`。列表按文件夹名里的日期倒序，同一天按文件夹创建时间倒序；重导出或重新生成产物不会改变顺序。对话里 `@` 可以点一条片子或「当前详情」，`/current content` 引用当前打开的那条；发给模型的只有文件夹路径，正文和封面用系统列文件 / 读文件。
+检查器中间栏可以拉到约 800px，走 `shell.overlay` 的局部 sidecar，不占用官方右侧「详情」栏。小于 1180px 时不强行挤压会话，改为可关闭抽屉；关闭、切域、热重载都会恢复宿主 conversation 的原始 padding 与 transition。原生输入框上方的当前内容条只把 `/current content` 追加到现有草稿，不覆盖、不清空、不自动发送。官方详情栏保持关闭。发布区拆成同步、视频平台、公众号、标签几张卡。概览封面并排 3:4 和 4:3。视频页播放 `_subtitled` 成片，没有则播原片。脚本写在内容文件夹的 `script.md`，已经转好的 Markdown 在 `公众号文章/`。列表按文件夹名里的日期倒序，同一天按文件夹创建时间倒序；重导出或重新生成产物不会改变顺序。
 
 ## 状态存在哪里
 

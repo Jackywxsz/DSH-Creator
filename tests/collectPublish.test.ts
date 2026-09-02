@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { cacheIsFresh } from "../src/collectCache.ts";
 import {
   applyMatchesToOverlay,
+  buildSyncPlatformResults,
   collectedHitsTarget,
   dedupeCollectedPosts,
   filterCollected,
@@ -13,6 +14,7 @@ import {
   mergeCollected,
   normalizeTitle,
   parseCollectOutput,
+  rankCollectedCandidates,
   titleScore,
   unionCollected,
   cacheCoversTargets,
@@ -77,6 +79,52 @@ describe("matchCollected", () => {
     expect(matches).toHaveLength(1);
     expect(matches[0]?.id).toBe("a");
     expect(matches[0]?.post.views).toBe(1200);
+  });
+});
+
+describe("rankCollectedCandidates", () => {
+  it("returns a small ranked set for manual binding without auto-matching low confidence posts", () => {
+    const candidates = rankCollectedCandidates("本地工程名", [
+      {
+        platform: "douyin",
+        items: [
+          { platform: "douyin", title: "完全不同但较新的作品", remoteId: "new", url: "https://www.douyin.com/video/new", views: 72, publishedAt: 3_000 },
+          { platform: "douyin", title: "本地工程实战", remoteId: "related", url: "https://www.douyin.com/video/related", likes: 9, publishedAt: 2_000 },
+          { platform: "douyin", title: "另一条", remoteId: "old", publishedAt: 1_000 },
+        ],
+      },
+    ], 2);
+
+    expect(candidates).toHaveLength(2);
+    expect(candidates[0]).toMatchObject({
+      platform: "douyin",
+      title: "本地工程实战",
+      url: "https://www.douyin.com/video/related",
+      remoteId: "related",
+      likes: 9,
+    });
+    expect(candidates[1]?.remoteId).toBe("new");
+  });
+});
+
+describe("buildSyncPlatformResults", () => {
+  it("keeps per-platform errors and explains a fetched page with zero matches", () => {
+    expect(buildSyncPlatformResults([
+      {
+        platform: "douyin",
+        items: Array.from({ length: 72 }, (_, index) => ({
+          platform: "douyin" as const,
+          title: `作品 ${index}`,
+          remoteId: String(index),
+        })),
+      },
+      { platform: "bilibili", items: [], error: "B站作品接口返回 HTML" },
+      { platform: "wechat", items: [], loginRequired: true },
+    ], [])).toEqual([
+      { platform: "douyin", count: 72, matched: 0, noMatchReason: "titleMismatch" },
+      { platform: "bilibili", count: 0, matched: 0, error: "B站作品接口返回 HTML" },
+      { platform: "wechat", count: 0, matched: 0, loginRequired: true },
+    ]);
   });
 });
 
@@ -187,7 +235,7 @@ describe("parseCollectOutput", () => {
           },
           {
             platform: "wechat",
-            items: [{ title: "一期测试", url: "https://channels.weixin.qq.com/x", views: 88 }],
+            items: [{ title: "一期测试", url: "https://channels.weixin.qq.com/x", views: 88, publishedAt: 1_700_000_000_000 }],
           },
         ],
       }),
@@ -196,6 +244,7 @@ describe("parseCollectOutput", () => {
     expect(parsed.collected).toHaveLength(2);
     expect(parsed.collected[0]?.loginRequired).toBe(true);
     expect(parsed.collected[1]?.items[0]?.views).toBe(88);
+    expect(parsed.collected[1]?.items[0]?.publishedAt).toBe(1_700_000_000_000);
   });
 
   it("preserves spaceClosed so a failed close stays registered", () => {

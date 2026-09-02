@@ -401,9 +401,26 @@ async function collectBilibili() {
   const items = [];
   let expected = Number.POSITIVE_INFINITY;
   for (let pn = 1; pn <= MAX_PAGES; pn += 1) {
-    const payload = await pageJson(`fetch("/x/web/archives?status=pubed&pn=${pn}&ps=30&coop=1&interactive=1", {
+    const response = await pageJson(`fetch("/x/web/archives?status=pubed&pn=${pn}&ps=30&coop=1&interactive=1", {
       credentials: "include"
-    }).then((r) => r.json())`);
+    }).then(async (r) => ({
+      http: r.status,
+      contentType: r.headers.get("content-type") || "",
+      text: await r.text()
+    }))`);
+    const text = String(response?.text || "");
+    if (response?.contentType?.includes("text/html") || /^\s*</.test(text)) {
+      throw new Error(`Bilibili creator API returned HTML; login or endpoint may have changed (HTTP ${response?.http || "unknown"})`);
+    }
+    let payload;
+    try {
+      payload = JSON.parse(text);
+    } catch {
+      throw new Error(`Bilibili creator API returned invalid JSON; login or endpoint may have changed (HTTP ${response?.http || "unknown"})`);
+    }
+    if (Number(response?.http) >= 400) {
+      throw new Error(`Bilibili creator API returned HTTP ${response.http}; login or endpoint may have changed`);
+    }
     const batch = parseBiliPayload(payload);
     items.push(...batch);
     if (foundTargets(items)) break;

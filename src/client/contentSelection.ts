@@ -6,6 +6,7 @@ import {
   saveCreatorUiState,
   type SidebarTab,
 } from "./persistence.ts";
+import { INSPECTOR_DEFAULT, INSPECTOR_MAX, INSPECTOR_MIN } from "./inspectorGeometry.ts";
 
 type Listener = () => void;
 
@@ -17,15 +18,13 @@ const profileListeners = new Set<Listener>();
 const initialUi = loadCreatorUiState(browserCreatorStorage());
 let selectedId = initialUi.selectedId;
 let sidebarTab: SidebarTab = initialUi.sidebarTab;
+let inspectorVisible = false;
 let operationsSection: OperationsSection = "today";
 let libraryEpoch = 0;
 let profileEpoch = 0;
 let ideaCaptureEpoch = 0;
 const ideaCaptureListeners = new Set<Listener>();
 let sidebarWidthPx = 280;
-export const INSPECTOR_MIN = 320;
-export const INSPECTOR_MAX = 800;
-export const INSPECTOR_DEFAULT = 640;
 let inspectorWidthPx = clampInspectorWidth(initialUi.inspectorWidth ?? INSPECTOR_DEFAULT);
 
 function clampInspectorWidth(px: number): number {
@@ -102,6 +101,7 @@ export function setInspectorWidth(px: number): void {
   inspectorWidthPx = next;
   const state = loadCreatorUiState(browserCreatorStorage());
   saveCreatorUiState(browserCreatorStorage(), { ...state, inspectorWidth: next });
+  emitChrome();
 }
 
 export function getInspectorWidth(): number {
@@ -241,6 +241,10 @@ export function getSidebarTab(): SidebarTab {
 export function setSidebarTab(tab: SidebarTab): void {
   if (sidebarTab === tab) return;
   sidebarTab = tab;
+  if (tab !== "content" && inspectorVisible) {
+    inspectorVisible = false;
+    clearConversationInset();
+  }
   const state = loadCreatorUiState(browserCreatorStorage());
   saveCreatorUiState(browserCreatorStorage(), { ...state, sidebarTab });
   emitChrome();
@@ -288,7 +292,32 @@ export function useIdeaCaptureEpoch(): number {
 }
 
 export function inspectorIsOpen(): boolean {
-  return selectedId !== null;
+  return selectedId !== null && inspectorVisible;
+}
+
+export function contentInspectorIsVisible(): boolean {
+  return inspectorVisible;
+}
+
+export function setContentInspectorVisible(visible: boolean): void {
+  const next = visible && selectedId !== null;
+  if (inspectorVisible === next) return;
+  inspectorVisible = next;
+  if (!next) clearConversationInset();
+  emitChrome();
+}
+
+export function useContentInspectorVisible(): boolean {
+  const [visible, setVisible] = useState(contentInspectorIsVisible);
+  useEffect(() => subscribeSidebarChrome(() => {
+    setVisible(contentInspectorIsVisible());
+  }), []);
+  return visible;
+}
+
+export function openContentDetails(id: string): void {
+  setSelectedContentId(id);
+  setContentInspectorVisible(true);
 }
 
 export function getSelectedContentId(): string | null {
@@ -303,7 +332,11 @@ export function setSelectedContentId(id: string | null): void {
   selectedId = id;
   const state = loadCreatorUiState(browserCreatorStorage());
   saveCreatorUiState(browserCreatorStorage(), { ...state, selectedId });
-  if (id === null) clearConversationInset();
+  if (id === null) {
+    inspectorVisible = false;
+    clearConversationInset();
+    emitChrome();
+  }
   emit();
 }
 

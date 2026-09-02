@@ -31,6 +31,19 @@ export interface PublishMatch {
   score: number;
 }
 
+export interface PublishCandidate extends CollectedPost {
+  score: number;
+}
+
+export interface SyncPlatformResult {
+  platform: PublishPlatform;
+  count: number;
+  matched: number;
+  loginRequired?: boolean;
+  error?: string;
+  noMatchReason?: "empty" | "titleMismatch";
+}
+
 export function normalizeTitle(value: string): string {
   return value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
 }
@@ -87,6 +100,36 @@ export function matchCollected(
     }
   }
   return matches;
+}
+
+export function rankCollectedCandidates(
+  localTitle: string,
+  platforms: readonly CollectedPlatform[],
+  limitPerPlatform = 5,
+): PublishCandidate[] {
+  return platforms.flatMap((page) => page.items
+    .map((post, index) => ({ post, index, score: titleScore(localTitle, post.title) }))
+    .sort((left, right) => right.score - left.score
+      || (right.post.publishedAt ?? 0) - (left.post.publishedAt ?? 0)
+      || left.index - right.index)
+    .slice(0, limitPerPlatform)
+    .map(({ post, score }) => ({ ...post, platform: page.platform, score })));
+}
+
+export function buildSyncPlatformResults(
+  platforms: readonly CollectedPlatform[],
+  matches: readonly PublishMatch[],
+): SyncPlatformResult[] {
+  return platforms.map((page) => {
+    const matched = matches.filter((match) => match.platform === page.platform).length;
+    const row: SyncPlatformResult = { platform: page.platform, count: page.items.length, matched };
+    if (page.loginRequired === true) row.loginRequired = true;
+    if (page.error !== undefined && page.error !== "") row.error = page.error;
+    if (matched === 0 && row.loginRequired !== true && row.error === undefined) {
+      row.noMatchReason = page.items.length === 0 ? "empty" : "titleMismatch";
+    }
+    return row;
+  });
 }
 
 export function knownFromPublish(
@@ -297,6 +340,7 @@ export function parseCollectOutput(raw: string): CollectResult {
               if (typeof post.views === "number") next.views = post.views;
               if (typeof post.likes === "number") next.likes = post.likes;
               if (typeof post.comments === "number") next.comments = post.comments;
+              if (typeof post.publishedAt === "number") next.publishedAt = post.publishedAt;
               return [next];
             })
             : [];
