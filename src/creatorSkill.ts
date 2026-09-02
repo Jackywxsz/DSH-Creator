@@ -45,7 +45,7 @@ export const CREATOR_WORKBENCH_SKILL = {
 ## 整理与发布安全
 
 - 调用 \`jacky_creator_organize_library\` 时先预览，向用户列出改名前后；确认后才传 \`apply=true\`。它不删除文件。
-- 发布默认准备草稿。上传、账号登录和最终发表属于外部发布能力；最终发表必须由用户明确确认。
+- 发布默认准备草稿。上传、账号登录和最终发表属于外部发布能力；最终发表必须由用户明确确认。发布器拿到平台最终链接后，立即调用 \`jacky_creator_update_content\` 传入 \`publishStatus=published\`、\`publishUrl\` 和 \`syncAfterPublish=true\`，先把链接写入当前内容存档，再回收该平台数据；不要依赖标题猜测绑定。
 - 自动发布优先使用已发现的 \`jacky-video-publisher\`，未安装时兼容公开的 \`video-publisher\`；不要把兼容包假称为 Jacky Skill。它和已发布数据回收（\`jacky_creator_sync_publish\`）只处理 \`enabledPlatforms\` 中的平台，都依赖 Ego Browser 和已登录的创作者后台；\`enabledPlatforms\` 为空时不执行发布或同步，先配置并确认启用平台。能力检查显示缺失时明确告诉用户这两项不可用，其余功能照常。
 
 ## 推进工作

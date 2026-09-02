@@ -716,6 +716,7 @@ export class OilCreatorService extends TypertRemoteService {
       });
     let collected: CollectResult;
     let fromCache = false;
+    let unavailablePlatforms = new Set<PublishPlatform>();
     const cachedSlice = cached === undefined ? undefined : filterCollected(cached.result, platforms);
     const cacheCoversPlatforms = cachedSlice !== undefined
       && platforms.every((platform) => cachedSlice.collected.some((page) => page.platform === platform));
@@ -728,6 +729,9 @@ export class OilCreatorService extends TypertRemoteService {
     ) {
       collected = cachedSlice ?? cached.result;
       fromCache = true;
+      unavailablePlatforms = new Set(collected.collected
+        .filter((page) => page.loginRequired === true || (page.error !== undefined && page.error !== ""))
+        .map((page) => page.platform));
     } else {
       try {
         collected = await runCollectPublish(collectScriptPath(), signal, {
@@ -735,6 +739,9 @@ export class OilCreatorService extends TypertRemoteService {
           ...(targets === undefined ? {} : { targets }),
           registryPath: collectRegistryPathForDataDir(this.dataDir),
         });
+        unavailablePlatforms = new Set(collected.collected
+          .filter((page) => page.loginRequired === true || (page.error !== undefined && page.error !== ""))
+          .map((page) => page.platform));
         const merged = scopedId === undefined
           ? mergeCollected(cached?.result, collected, platforms)
           : unionCollected(cached?.result, collected);
@@ -754,28 +761,40 @@ export class OilCreatorService extends TypertRemoteService {
         }
         collected = cachedSlice ?? cached.result;
         fromCache = true;
+        unavailablePlatforms = new Set(collected.collected
+          .filter((page) => page.loginRequired === true || (page.error !== undefined && page.error !== ""))
+          .map((page) => page.platform));
       }
     }
+    const matchableCollected: CollectResult = unavailablePlatforms.size === 0
+      ? collected
+      : {
+          collected: collected.collected.map((page) => unavailablePlatforms.has(page.platform)
+            ? { ...page, items: [] }
+            : page),
+        };
     const matches = matchCollected(
       scoped.map((item) => ({
         id: item.id,
         title: item.title,
         known: knownFromPublish(item.publish),
       })),
-      collected.collected,
+      matchableCollected.collected,
     );
-    await withOverlayLock(this.dataDir, async () => {
-      const latest = await loadOverlay(this.dataDir);
-      latest.items = applyMatchesToOverlay(latest.items, matches);
-      await saveOverlay(this.dataDir, latest);
-      this.invalidateCatalog();
-    });
+    if (matches.length > 0) {
+      await withOverlayLock(this.dataDir, async () => {
+        const latest = await loadOverlay(this.dataDir);
+        latest.items = applyMatchesToOverlay(latest.items, matches);
+        await saveOverlay(this.dataDir, latest);
+        this.invalidateCatalog();
+      });
+    }
     const result: SyncPublishResult = {
       matched: matches.length,
       platforms: buildSyncPlatformResults(collected.collected, matches),
     };
     if (scopedId !== undefined && matches.length === 0 && scoped[0] !== undefined) {
-      const candidates = rankCollectedCandidates(scoped[0].title, collected.collected);
+      const candidates = rankCollectedCandidates(scoped[0].title, matchableCollected.collected);
       if (candidates.length > 0) result.candidates = candidates;
     }
     if (fromCache) result.cached = true;

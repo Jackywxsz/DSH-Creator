@@ -397,6 +397,24 @@ async function collectDouyin() {
   return { items: [], loginRequired: false };
 }
 
+function parseCollectorJsonResponse(response, label) {
+  const text = String(response?.text || "");
+  const http = response?.http || "unknown";
+  if (response?.contentType?.includes("text/html") || /^\s*</.test(text)) {
+    throw new Error(`${label} returned HTML; login or endpoint may have changed (HTTP ${http})`);
+  }
+  let payload;
+  try {
+    payload = JSON.parse(text);
+  } catch {
+    throw new Error(`${label} returned invalid JSON; login or endpoint may have changed (HTTP ${http})`);
+  }
+  if (Number(response?.http) >= 400) {
+    throw new Error(`${label} returned HTTP ${response.http}; login or endpoint may have changed`);
+  }
+  return payload;
+}
+
 async function collectBilibili() {
   const items = [];
   let expected = Number.POSITIVE_INFINITY;
@@ -408,19 +426,7 @@ async function collectBilibili() {
       contentType: r.headers.get("content-type") || "",
       text: await r.text()
     }))`);
-    const text = String(response?.text || "");
-    if (response?.contentType?.includes("text/html") || /^\s*</.test(text)) {
-      throw new Error(`Bilibili creator API returned HTML; login or endpoint may have changed (HTTP ${response?.http || "unknown"})`);
-    }
-    let payload;
-    try {
-      payload = JSON.parse(text);
-    } catch {
-      throw new Error(`Bilibili creator API returned invalid JSON; login or endpoint may have changed (HTTP ${response?.http || "unknown"})`);
-    }
-    if (Number(response?.http) >= 400) {
-      throw new Error(`Bilibili creator API returned HTTP ${response.http}; login or endpoint may have changed`);
-    }
+    const payload = parseCollectorJsonResponse(response, "Bilibili creator API");
     const batch = parseBiliPayload(payload);
     items.push(...batch);
     if (foundTargets(items)) break;

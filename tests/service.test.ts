@@ -322,6 +322,45 @@ describe("OilCreatorService.syncPublish", () => {
       views: 70,
     });
   });
+
+  it("does not match or suggest stale cached posts for platforms that fail a forced scoped sync", async () => {
+    collect.run.mockResolvedValueOnce({
+      collected: [
+        { platform: "wechat", items: [], error: "collector failed" },
+        { platform: "bilibili", items: [], loginRequired: true },
+      ],
+    });
+    const service = await syncService({ enabledPlatforms: ["wechat", "bilibili"] });
+    const dataDir = (service as unknown as { dataDir: string }).dataDir;
+    const current = item("/tmp/demo", "/tmp/demo/demo.mp4");
+    (service as unknown as { scanned: () => Promise<{ items: ContentSummary[] }> }).scanned = async () => ({
+      items: [current],
+    });
+    await saveCollectCache(dataDir, {
+      collected: [
+        {
+          platform: "wechat",
+          items: [{ platform: "wechat", title: current.title, remoteId: "old-wechat" }],
+        },
+        {
+          platform: "bilibili",
+          items: [{ platform: "bilibili", title: current.title, remoteId: "old-bilibili" }],
+        },
+      ],
+    }, { scope: "partial" });
+
+    const result = await service.syncPublish({ id: current.id, force: true }, new AbortController().signal);
+    const overlay = await loadOverlay(dataDir);
+
+    expect(result).toEqual({
+      matched: 0,
+      platforms: [
+        { platform: "wechat", count: 1, matched: 0, error: "collector failed" },
+        { platform: "bilibili", count: 1, matched: 0, loginRequired: true },
+      ],
+    });
+    expect(overlay.items[current.id]?.publish).toBeUndefined();
+  });
 });
 
 describe("OilCreatorService platform login setup", () => {
