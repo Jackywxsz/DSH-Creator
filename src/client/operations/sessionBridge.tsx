@@ -89,8 +89,9 @@ export function sendCockpitInstruction(text: string): boolean {
 
 export function submitCockpitInstruction(bridge: ActiveBridge | undefined, text: string): boolean {
   if (bridge === undefined || bridge.input.phase !== "plain") return false;
-  if (bridge.input.draft.trim() !== "") return false;
-  bridge.actions.setDraft(text);
+  const draft = bridge.input.draft.trim();
+  if (draft !== "" && draft !== "/current content") return false;
+  bridge.actions.setDraft(draft === "/current content" ? appendContentReference(text) : text);
   bridge.actions.submit();
   return true;
 }
