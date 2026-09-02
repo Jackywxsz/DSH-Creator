@@ -397,13 +397,36 @@ async function collectDouyin() {
   return { items: [], loginRequired: false };
 }
 
+function parseCollectorJsonResponse(response, label) {
+  const text = String(response?.text || "");
+  const http = response?.http || "unknown";
+  if (response?.contentType?.includes("text/html") || /^\s*</.test(text)) {
+    throw new Error(`${label} returned HTML; login or endpoint may have changed (HTTP ${http})`);
+  }
+  let payload;
+  try {
+    payload = JSON.parse(text);
+  } catch {
+    throw new Error(`${label} returned invalid JSON; login or endpoint may have changed (HTTP ${http})`);
+  }
+  if (Number(response?.http) >= 400) {
+    throw new Error(`${label} returned HTTP ${response.http}; login or endpoint may have changed`);
+  }
+  return payload;
+}
+
 async function collectBilibili() {
   const items = [];
   let expected = Number.POSITIVE_INFINITY;
   for (let pn = 1; pn <= MAX_PAGES; pn += 1) {
-    const payload = await pageJson(`fetch("/x/web/archives?status=pubed&pn=${pn}&ps=30&coop=1&interactive=1", {
+    const response = await pageJson(`fetch("/x/web/archives?status=pubed&pn=${pn}&ps=30&coop=1&interactive=1", {
       credentials: "include"
-    }).then((r) => r.json())`);
+    }).then(async (r) => ({
+      http: r.status,
+      contentType: r.headers.get("content-type") || "",
+      text: await r.text()
+    }))`);
+    const payload = parseCollectorJsonResponse(response, "Bilibili creator API");
     const batch = parseBiliPayload(payload);
     items.push(...batch);
     if (foundTargets(items)) break;

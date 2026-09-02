@@ -163,6 +163,10 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
         description: "Per-platform publish mark stored in the plugin overlay.",
       },
       publishUrl: { type: "string", description: "Optional live URL when status is published." },
+      syncAfterPublish: {
+        type: "boolean",
+        description: "When true with a published URL, write the URL first and immediately collect platform metrics.",
+      },
     },
     output: {
       schema: JSON_VALUE,
@@ -193,6 +197,9 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
             : { id: args.id, platform: args.publishPlatform, status: args.publishStatus, url: args.publishUrl },
           signal,
         );
+        if (args.publishStatus === "published" && args.publishUrl !== undefined && args.syncAfterPublish === true) {
+          await service.syncPublish({ id: args.id, platform: args.publishPlatform, force: true }, signal);
+        }
       }
       return asJson(await service.getContent({ id: args.id }, signal));
     },

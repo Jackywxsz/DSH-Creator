@@ -9,12 +9,13 @@ import {
 } from "@deepseek-ai/dsh-client-ui-primitives";
 import type { InjectFace, PropsLocale, PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots";
 
-import { formatCount } from "../collectPublish.ts";
+import { buildCandidatePublishUpdate, formatCount } from "../collectPublish.ts";
 import { isPublishMark } from "../publishStatus.ts";
 import { rewriteArticleImages } from "../articleMarkdown.ts";
-import type { ArticleMediaResult, ContentDetail, ContentOptionalStep, PublishMark, PublishPlatform, SubtitleCue, VideoPlaybackResult, WorkflowStage } from "../types.ts";
+import type { ArticleMediaResult, ContentDetail, ContentOptionalStep, PublishMark, PublishPlatform, SubtitleCue, SyncPublishResult, VideoPlaybackResult, WorkflowStage } from "../types.ts";
 import { CoverThumb, coverThumbRevision } from "./CoverThumb.tsx";
 import type { CreatorViewFace } from "./face.ts";
+import { constrainInspectorGeometry } from "./inspectorGeometry.ts";
 import {
   applyConversationInset,
   clearConversationInset,
@@ -167,6 +168,57 @@ function JobNote({ tone, children }: { tone?: "running" | "done" | "error"; chil
       {tone === "done" && <StateDot state="done" size={12} />}
       {tone === "error" && <StateDot state="error" size={12} />}
       {children}
+    </div>
+  );
+}
+
+function PublishUrlEditor({
+  url,
+  disabled,
+  onSave,
+  t,
+}: {
+  url: string | undefined;
+  disabled: boolean;
+  onSave: (url: string) => Promise<void>;
+  t: (key: CreatorKey) => string;
+}) {
+  const [draft, setDraft] = useState(url ?? "");
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { setDraft(url ?? ""); setError(undefined); }, [url]);
+  const save = (): void => {
+    setSaving(true);
+    setError(undefined);
+    void onSave(draft).then(() => {
+      setSaving(false);
+    }, (cause: unknown) => {
+      setError(cause instanceof Error ? cause.message : t("empty.error"));
+      setSaving(false);
+    });
+  };
+  return (
+    <div className="publishUrlEditor">
+      <label>
+        <span>{t("inspector.publish.urlLabel")}</span>
+        <input
+          type="url"
+          value={draft}
+          disabled={disabled || saving}
+          placeholder={t("inspector.publish.urlPlaceholder")}
+          onChange={(event) => { setDraft(event.target.value); setError(undefined); }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && draft.trim() !== "") {
+              event.preventDefault();
+              save();
+            }
+          }}
+        />
+      </label>
+      <button type="button" disabled={disabled || saving || draft.trim() === "" || draft.trim() === (url ?? "")} onClick={save}>
+        {t(saving ? "inspector.publish.urlSaving" : "inspector.publish.urlSave")}
+      </button>
+      {error !== undefined && <small>{error}</small>}
     </div>
   );
 }
@@ -444,11 +496,11 @@ export type ContentInspectorProps =
   & {
     closeDetails: () => void;
     cockpit: CreatorCockpitFace;
+    sidebarWidth: number;
   };
 
 export function ContentInspector({
   t,
-  useSessions,
   ready,
   getContent,
   getCoverThumb,
@@ -473,9 +525,9 @@ export function ContentInspector({
   openFolder,
   closeDetails,
   cockpit,
+  sidebarWidth,
 }: ContentInspectorProps) {
-  const [selectedId, setSelectedId] = useSelectedContentId();
-  const currentSessionId = useSessions((sessions) => sessions.current);
+  const [selectedId] = useSelectedContentId();
   const libraryEpoch = useLibraryEpoch();
   const profileEpoch = useProfileEpoch();
   const [enabledPlatforms, setEnabledPlatforms] = useState<readonly PublishPlatform[] | undefined>(undefined);
@@ -485,8 +537,11 @@ export function ContentInspector({
   const [cues, setCues] = useState<SubtitleCue[]>([]);
   const [error, setError] = useState<string | undefined>(undefined);
   const [tab, setTab] = useState<InspectorTab>("overview");
-  const [panelWidth, setPanelWidth] = useState(getInspectorWidth);
+  const [preferredWidth, setPreferredWidth] = useState(getInspectorWidth);
   const [expanded, setExpanded] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(() => (
+    typeof window === "undefined" ? 1440 : window.innerWidth
+  ));
   const [dragging, setDragging] = useState(false);
   const [actionError, setActionError] = useState<string | undefined>(undefined);
   const [sessionHint, setSessionHint] = useState<string | undefined>(undefined);
@@ -494,6 +549,8 @@ export function ContentInspector({
   const [busy, setBusy] = useState<"subtitle" | "burn" | "cover" | "sync" | undefined>(undefined);
   const expectSubtitlePreview = useRef(false);
   const [syncHint, setSyncHint] = useState<string | undefined>(undefined);
+  const [syncResult, setSyncResult] = useState<SyncPublishResult | undefined>(undefined);
+  const [candidatePending, setCandidatePending] = useState<string | undefined>(undefined);
   const [scriptDraft, setScriptDraft] = useState("");
   const [scriptSaved, setScriptSaved] = useState(true);
   scriptSavedRef.current = scriptSaved;
@@ -511,6 +568,8 @@ export function ContentInspector({
     setSessionHint(undefined);
 
     setSyncHint(undefined);
+    setSyncResult(undefined);
+    setCandidatePending(undefined);
     setScriptDraft("");
     setScriptSaved(true);
     setVideoSrc(undefined);
@@ -550,6 +609,12 @@ export function ContentInspector({
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => { setExpanded(true); });
     return () => { window.cancelAnimationFrame(frame); };
+  }, []);
+
+  useEffect(() => {
+    const sync = (): void => { setViewportWidth(window.innerWidth); };
+    window.addEventListener("resize", sync);
+    return () => { window.removeEventListener("resize", sync); };
   }, []);
 
   useEffect(() => {
@@ -667,6 +732,8 @@ export function ContentInspector({
     if (detail?.subtitleJob.status === "error") expectSubtitlePreview.current = false;
   }, [selectedId, detail?.subtitleJob.status]);
 
+  const geometry = constrainInspectorGeometry(preferredWidth, viewportWidth, sidebarWidth);
+  const panelWidth = geometry.width;
   const shownWidth = expanded ? panelWidth : 0;
 
   const applyPublish = (platform: PublishPlatform, status: PublishMark): void => {
@@ -697,13 +764,66 @@ export function ContentInspector({
     });
   };
 
+  const savePublishedUrl = async (platform: PublishPlatform, url: string): Promise<void> => {
+    if (detail === undefined) return;
+    const row = detail.publish[platform];
+    setPublishPending(platform);
+    try {
+      setDetail(await setPublish(detail.id, platform, "published", url, row.publishedAt));
+      setSyncHint(t("inspector.publish.urlSaved"));
+    } finally {
+      setPublishPending(null);
+    }
+  };
+
+  const bindPublishCandidate = (candidate: NonNullable<SyncPublishResult["candidates"]>[number]): void => {
+    if (detail === undefined) return;
+    const key = `${candidate.platform}:${candidate.remoteId ?? candidate.url ?? candidate.title}`;
+    const row = detail.publish[candidate.platform];
+    const update = buildCandidatePublishUpdate(row, candidate);
+    setCandidatePending(key);
+    setActionError(undefined);
+    void setPublish(
+      detail.id,
+      candidate.platform,
+      update.status,
+      update.url,
+      update.publishedAt,
+      update.binding,
+    ).then((next) => {
+      setDetail(next);
+      setSyncHint(t("inspector.publish.candidateBound"));
+      setSyncResult((current) => {
+        if (current === undefined) return current;
+        const remainingCandidates = current.candidates?.filter((item) => item.platform !== candidate.platform);
+        const { candidates: _candidates, ...rest } = current;
+        return {
+          ...rest,
+          matched: current.matched + 1,
+          platforms: current.platforms.map((platform) => {
+          if (platform.platform !== candidate.platform) return platform;
+          const { noMatchReason: _noMatchReason, ...rest } = platform;
+          return { ...rest, matched: platform.matched + 1 };
+          }),
+          ...(remainingCandidates === undefined || remainingCandidates.length === 0
+            ? {}
+            : { candidates: remainingCandidates }),
+        };
+      });
+      setCandidatePending(undefined);
+    }, (cause: unknown) => {
+      setActionError(cause instanceof Error ? cause.message : t("empty.error"));
+      setCandidatePending(undefined);
+    });
+  };
+
   useEffect(() => {
-    if (selectedId === null) {
+    if (selectedId === null || !geometry.docked) {
       clearConversationInset();
       return;
     }
     applyConversationInset(shownWidth, !dragging);
-  }, [selectedId, currentSessionId, shownWidth, dragging]);
+  }, [selectedId, shownWidth, dragging, geometry.docked]);
 
   useEffect(() => () => { clearConversationInset(); }, []);
 
@@ -711,7 +831,7 @@ export function ContentInspector({
     const onMove = (event: PointerEvent): void => {
       if (drag.current === null) return;
       setInspectorWidth(drag.current.startWidth + (event.clientX - drag.current.startX));
-      setPanelWidth(getInspectorWidth());
+      setPreferredWidth(getInspectorWidth());
     };
     const onUp = (): void => {
       if (drag.current === null) return;
@@ -923,21 +1043,14 @@ export function ContentInspector({
   const onSyncPublish = (): void => {
     if (detail === undefined) return;
     setActionError(undefined);
+    setSyncResult(undefined);
     setBusy("sync");
     void syncPublish({ id: detail.id }).then((result) => {
-      const login = result.platforms
-        .filter((page) => page.loginRequired === true)
-        .map((page) => {
-          const label = PUBLISH_UI_PLATFORMS.find((item) => item.key === page.platform);
-          return label === undefined ? page.platform : t(label.label);
-        });
-      setSyncHint(t((result.cached === true ? "inspector.publish.cached" : "inspector.publish.synced") as CreatorKey)
+      setSyncResult(result);
+      setSyncHint(t((result.matched === 0
+        ? "inspector.publish.noAutomaticMatch"
+        : result.cached === true ? "inspector.publish.cached" : "inspector.publish.synced") as CreatorKey)
         .replace("{n}", String(result.matched)));
-      if (login.length > 0) {
-        setActionError(
-          t("inspector.publish.login" as CreatorKey).replace("{name}", login.join("、")),
-        );
-      }
       setBusy(undefined);
       return getContent(detail.id);
     }).then((next) => {
@@ -956,6 +1069,7 @@ export function ContentInspector({
       data-surface="inspector"
       className={[
         "docked",
+        !geometry.docked ? "drawer" : "",
         expanded ? "open" : "",
         dragging ? "dragging" : "",
         panelWidth >= 560 ? "wide" : "",
@@ -983,13 +1097,13 @@ export function ContentInspector({
             <button
               type="button"
               className="close"
-              aria-label={t("inspector.close" as CreatorKey)}
+              aria-label={t((geometry.docked ? "inspector.close" : "inspector.backToConversation") as CreatorKey)}
               onClick={() => {
-                setSelectedId(null);
                 closeDetails();
               }}
             >
               <IconCloseOutline16 size={14} />
+              <span className="closeLabel">{t("inspector.backToConversation" as CreatorKey)}</span>
             </button>
           </div>
         </div>
@@ -1133,15 +1247,23 @@ export function ContentInspector({
                                 <div className="publishMetrics">{metrics.join(" · ")}</div>
                               )}
                               {row.status === "published" && (
-                                <label className="publishDate">
-                                  <span>{t("inspector.publish.publishedAt")}</span>
-                                  <input
-                                    type="date"
-                                    value={dateInputValue(row.publishedAt)}
+                                <>
+                                  <label className="publishDate">
+                                    <span>{t("inspector.publish.publishedAt")}</span>
+                                    <input
+                                      type="date"
+                                      value={dateInputValue(row.publishedAt)}
+                                      disabled={publishPending === platform.key}
+                                      onChange={(event) => { applyPublishedAt(platform.key, event.target.value); }}
+                                    />
+                                  </label>
+                                  <PublishUrlEditor
+                                    url={row.url}
                                     disabled={publishPending === platform.key}
-                                    onChange={(event) => { applyPublishedAt(platform.key, event.target.value); }}
+                                    onSave={(url) => savePublishedUrl(platform.key, url)}
+                                    t={t}
                                   />
-                                </label>
+                                </>
                               )}
                               {row.status === "published" && row.url !== undefined && (
                                 <a className="publishUrl" href={row.url} target="_blank" rel="noreferrer">
@@ -1165,6 +1287,60 @@ export function ContentInspector({
                 >
                   {!platformSettingsPending && visiblePlatforms.length === 0 && (
                     <div className="empty">{t("inspector.publish.enablePlatforms" as CreatorKey)}</div>
+                  )}
+                  {syncResult !== undefined && (
+                    <div className="syncPlatformResults">
+                      {syncResult.platforms.map((platform) => {
+                        const definition = PUBLISH_UI_PLATFORMS.find((item) => item.key === platform.platform);
+                        const label = definition === undefined ? platform.platform : t(definition.label);
+                        const status = platform.error !== undefined
+                          ? t("inspector.publish.platformError").replace("{message}", platform.error)
+                          : platform.loginRequired === true
+                            ? t("inspector.publish.platformLoginRequired")
+                            : platform.noMatchReason === "titleMismatch"
+                              ? t("inspector.publish.platformTitleMismatch")
+                              : platform.noMatchReason === "empty"
+                                ? t("inspector.publish.platformEmpty")
+                                : t("inspector.publish.platformMatched");
+                        return (
+                          <div className={platform.error === undefined ? "syncPlatformResult" : "syncPlatformResult error"} key={platform.platform}>
+                            <strong>{label}</strong>
+                            <span>{t("inspector.publish.platformCounts")
+                              .replace("{count}", String(platform.count))
+                              .replace("{matched}", String(platform.matched))}</span>
+                            <small>{status}</small>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {(syncResult?.candidates?.length ?? 0) > 0 && (
+                    <div className="publishCandidates">
+                      <strong>{t("inspector.publish.candidatesTitle")}</strong>
+                      <p>{t("inspector.publish.candidatesHint")}</p>
+                      {syncResult?.candidates?.map((candidate) => {
+                        const definition = PUBLISH_UI_PLATFORMS.find((item) => item.key === candidate.platform);
+                        const label = definition === undefined ? candidate.platform : t(definition.label);
+                        const key = `${candidate.platform}:${candidate.remoteId ?? candidate.url ?? candidate.title}`;
+                        const metrics = metricParts(candidate, t);
+                        return (
+                          <div className="publishCandidate" key={key}>
+                            <div>
+                              <span>{label}</span>
+                              <strong>{candidate.title}</strong>
+                              {metrics.length > 0 && <small>{metrics.join(" · ")}</small>}
+                            </div>
+                            <button
+                              type="button"
+                              disabled={candidatePending !== undefined}
+                              onClick={() => { bindPublishCandidate(candidate); }}
+                            >
+                              {t(candidatePending === key ? "inspector.publish.candidateBinding" : "inspector.publish.candidateBind")}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
                   )}
                   <ActionBar>
                     <ActionButton

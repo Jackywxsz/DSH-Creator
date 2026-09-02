@@ -1,5 +1,3 @@
-- id: ui-sidebar
-  disabled: true
 - insert:
     - id: jacky-creator
       name: jacky-creator

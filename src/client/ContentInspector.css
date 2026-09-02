@@ -81,6 +81,10 @@
   background: #e5e7eb;
 }
 
+[data-plugin="jacky-creator"][data-surface="inspector"] .closeLabel {
+  display: none;
+}
+
 [data-plugin="jacky-creator"][data-surface="inspector"] .close:focus-visible {
   outline: 2px solid #1f5fff;
   outline-offset: 2px;
@@ -724,6 +728,102 @@
   font: var(--dsw-font-markdown-small);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishUrlEditor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishUrlEditor label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-markdown-small);
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishUrlEditor input,
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishUrlEditor button,
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishCandidate button {
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 7px;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-markdown-small);
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishUrlEditor button,
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishCandidate button {
+  align-self: end;
+  cursor: pointer;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishUrlEditor small {
+  grid-column: 1 / -1;
+  color: var(--dsw-alias-state-error-primary);
+  font: var(--dsw-font-markdown-small);
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .syncPlatformResults,
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishCandidates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .syncPlatformResult,
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishCandidate {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .syncPlatformResult > span {
+  text-align: right;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .syncPlatformResult > small {
+  grid-column: 1 / -1;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .syncPlatformResult.error > small {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishCandidates > p {
+  margin: -4px 0 0;
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-markdown-small);
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishCandidate {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishCandidate > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishCandidate > div > span,
+[data-plugin="jacky-creator"][data-surface="inspector"] .publishCandidate > div > small {
+  color: var(--dsw-alias-label-tertiary);
+  font: var(--dsw-font-markdown-small);
 }
 
 [data-plugin="jacky-creator"][data-surface="inspector"] .cues {
@@ -1414,6 +1514,37 @@
     padding: 10px;
     box-shadow: 4px 4px 0 #1f5fff;
   }
+}
+
+@media (max-width: 1179px) {
+  [data-plugin="jacky-creator"][data-surface="inspector"].docked {
+    right: 0;
+  }
+
+  [data-plugin="jacky-creator"][data-surface="inspector"] .titleActions .close:last-child {
+    width: auto;
+    padding: 0 10px;
+    gap: 6px;
+    border-radius: 8px;
+  }
+
+  [data-plugin="jacky-creator"][data-surface="inspector"] .closeLabel {
+    display: inline;
+    font-size: 12px;
+  }
+
+  [data-plugin="jacky-creator"][data-surface="inspector"] .resize {
+    display: none;
+  }
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"].drawer .closeLabel {
+  display: inline;
+  font-size: 12px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"].drawer .resize {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

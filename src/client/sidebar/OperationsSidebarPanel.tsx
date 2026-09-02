@@ -35,7 +35,11 @@ export function OperationsSidebarPanel({ t, onNavigate }: { t: (key: CreatorKey)
   const themeLabel = theme === "dark" ? "浅色模式" : "深色模式";
 
   return (
-    <nav className="operationsPanel" aria-label={t("operations.nav.label")}>
+    <nav
+      className="operationsPanel"
+      aria-label={t("operations.nav.label")}
+      data-cockpit-theme={theme}
+    >
       <div className="operationsNavCaption">{t("operations.nav.label")}</div>
       <div className="operationsNavList">
         {SECTIONS.map((section) => {
@@ -45,6 +49,7 @@ export function OperationsSidebarPanel({ t, onNavigate }: { t: (key: CreatorKey)
               key={section.id}
               type="button"
               className={section.id === active ? "operationsNavItem active" : "operationsNavItem"}
+              aria-label={t(section.label)}
               aria-current={section.id === active ? "page" : undefined}
               onClick={() => { setOperationsSection(section.id); onNavigate?.(); }}
             >

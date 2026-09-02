@@ -288,6 +288,79 @@ describe("OilCreatorService.syncPublish", () => {
       .rejects.toThrow("content not found: missing");
     expect(collect.calls).toEqual([]);
   });
+
+  it("returns a limited manual-binding candidate set when a scoped sync finds no safe match", async () => {
+    collect.run.mockResolvedValueOnce({
+      collected: [{
+        platform: "douyin",
+        items: Array.from({ length: 9 }, (_, index) => ({
+          platform: "douyin" as const,
+          title: index === 0 ? "本地工程实战" : `其他作品 ${index}`,
+          remoteId: String(index),
+          url: `https://www.douyin.com/video/${index}`,
+          views: 70 + index,
+          publishedAt: 1_000 + index,
+        })),
+      }],
+    });
+    const service = await syncService({ enabledPlatforms: ["douyin"] });
+    const current = item("/tmp/demo", "/tmp/demo/demo.mp4");
+    current.title = "本地工程名";
+    (service as unknown as { scanned: () => Promise<{ items: ContentSummary[] }> }).scanned = async () => ({
+      items: [current],
+    });
+
+    const result = await service.syncPublish({ id: current.id, force: true }, new AbortController().signal);
+
+    expect(result.matched).toBe(0);
+    expect(result.candidates).toHaveLength(5);
+    expect(result.candidates?.[0]).toMatchObject({
+      platform: "douyin",
+      title: "本地工程实战",
+      remoteId: "0",
+      url: "https://www.douyin.com/video/0",
+      views: 70,
+    });
+  });
+
+  it("does not match or suggest stale cached posts for platforms that fail a forced scoped sync", async () => {
+    collect.run.mockResolvedValueOnce({
+      collected: [
+        { platform: "wechat", items: [], error: "collector failed" },
+        { platform: "bilibili", items: [], loginRequired: true },
+      ],
+    });
+    const service = await syncService({ enabledPlatforms: ["wechat", "bilibili"] });
+    const dataDir = (service as unknown as { dataDir: string }).dataDir;
+    const current = item("/tmp/demo", "/tmp/demo/demo.mp4");
+    (service as unknown as { scanned: () => Promise<{ items: ContentSummary[] }> }).scanned = async () => ({
+      items: [current],
+    });
+    await saveCollectCache(dataDir, {
+      collected: [
+        {
+          platform: "wechat",
+          items: [{ platform: "wechat", title: current.title, remoteId: "old-wechat" }],
+        },
+        {
+          platform: "bilibili",
+          items: [{ platform: "bilibili", title: current.title, remoteId: "old-bilibili" }],
+        },
+      ],
+    }, { scope: "partial" });
+
+    const result = await service.syncPublish({ id: current.id, force: true }, new AbortController().signal);
+    const overlay = await loadOverlay(dataDir);
+
+    expect(result).toEqual({
+      matched: 0,
+      platforms: [
+        { platform: "wechat", count: 1, matched: 0, error: "collector failed" },
+        { platform: "bilibili", count: 1, matched: 0, loginRequired: true },
+      ],
+    });
+    expect(overlay.items[current.id]?.publish).toBeUndefined();
+  });
 });
 
 describe("OilCreatorService platform login setup", () => {
@@ -365,6 +438,90 @@ describe("OilCreatorService.setPublish", () => {
 
     expect(overlayItem.publish?.bilibili?.publishedAt).toBe(2_000);
   });
+
+  it("validates and persists an edited HTTPS work URL without changing the publication date", async () => {
+    const service = await syncService({ enabledPlatforms: ["bilibili"] });
+    const overlayItem: OverlayItem = {
+      publish: { bilibili: { status: "published", publishedAt: 1_000 } },
+    };
+    const probe = service as unknown as {
+      patchItem: (
+        id: string,
+        mutate: (item: OverlayItem) => void,
+        signal: AbortSignal,
+      ) => Promise<ContentDetail>;
+    };
+    probe.patchItem = async (_id, mutate) => {
+      mutate(overlayItem);
+      return undefined as never;
+    };
+
+    await service.setPublish({
+      id: "2026-08-13_demo",
+      platform: "bilibili",
+      status: "published",
+      url: "  https://www.bilibili.com/video/BV1demo  ",
+    }, new AbortController().signal);
+
+    expect(overlayItem.publish?.bilibili).toMatchObject({
+      status: "published",
+      publishedAt: 1_000,
+      url: "https://www.bilibili.com/video/BV1demo",
+    });
+  });
+
+  it("rejects a non-HTTP work URL before writing the overlay", async () => {
+    const service = await syncService({ enabledPlatforms: ["bilibili"] });
+    const patchItem = vi.fn();
+    (service as unknown as { patchItem: typeof patchItem }).patchItem = patchItem;
+
+    await expect(service.setPublish({
+      id: "2026-08-13_demo",
+      platform: "bilibili",
+      status: "published",
+      url: "javascript:alert(1)",
+    }, new AbortController().signal)).rejects.toThrow("publish URL must use http or https");
+    expect(patchItem).not.toHaveBeenCalled();
+  });
+
+  it("writes a selected candidate through setPublish while preserving the publication date", async () => {
+    const service = await syncService({ enabledPlatforms: ["douyin"] });
+    const overlayItem: OverlayItem = {
+      publish: { douyin: { status: "published", publishedAt: 1_000 } },
+    };
+    (service as unknown as {
+      patchItem: (
+        id: string,
+        mutate: (item: OverlayItem) => void,
+        signal: AbortSignal,
+      ) => Promise<ContentDetail>;
+    }).patchItem = async (_id, mutate) => {
+      mutate(overlayItem);
+      return undefined as never;
+    };
+
+    await service.setPublish({
+      id: "2026-08-13_demo",
+      platform: "douyin",
+      status: "published",
+      url: "https://www.douyin.com/video/remote",
+      remoteId: "remote",
+      views: 72,
+      likes: 8,
+      comments: 3,
+    }, new AbortController().signal);
+
+    expect(overlayItem.publish?.douyin).toMatchObject({
+      status: "published",
+      publishedAt: 1_000,
+      url: "https://www.douyin.com/video/remote",
+      remoteId: "remote",
+      views: 72,
+      likes: 8,
+      comments: 3,
+    });
+  });
+
 });
 
 describe("OilCreatorService subtitle job reconcile", () => {

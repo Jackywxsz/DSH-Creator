@@ -23,5 +23,7 @@ describe("jacky-creator-workbench skill", () => {
     expect(CREATOR_WORKBENCH_SKILL.content).toContain("候选内容目录不存在时");
     expect(CREATOR_WORKBENCH_SKILL.content).toContain("用户确认后");
     expect(CREATOR_WORKBENCH_SKILL.content).toContain("最终发表必须由用户明确确认");
+    expect(CREATOR_WORKBENCH_SKILL.content).toContain("syncAfterPublish=true");
+    expect(CREATOR_WORKBENCH_SKILL.content).toContain("先把链接写入当前内容存档，再回收该平台数据");
   });
 });

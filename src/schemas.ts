@@ -48,6 +48,14 @@ const publishMarkSchema = z.union([
 ]);
 
 const publishPlatformSchema = z.enum(PUBLISH_PLATFORMS);
+const httpPublishUrlSchema = z.string().refine((value) => {
+  try {
+    const protocol = new URL(value.trim()).protocol;
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}, "publish URL must use http or https");
 
 const platformPublishSchema = z.object({
   status: publishMarkSchema,
@@ -220,8 +228,12 @@ export const setPublishRequestSchema = z.object({
   id: z.string().min(1),
   platform: publishPlatformSchema,
   status: publishMarkSchema,
-  url: z.string().optional(),
+  url: httpPublishUrlSchema.optional(),
   publishedAt: z.number().int().nonnegative().optional(),
+  remoteId: z.string().min(1).optional(),
+  views: z.number().nonnegative().optional(),
+  likes: z.number().nonnegative().optional(),
+  comments: z.number().nonnegative().optional(),
 });
 
 export const subtitlePreviewResultSchema = z.object({
@@ -241,9 +253,22 @@ export const syncPublishResultSchema = z.object({
   platforms: z.array(z.object({
     platform: publishPlatformSchema,
     count: z.number().int().nonnegative(),
+    matched: z.number().int().nonnegative(),
     loginRequired: z.boolean().optional(),
     error: z.string().optional(),
+    noMatchReason: z.union([z.literal("empty"), z.literal("titleMismatch")]).optional(),
   })),
+  candidates: z.array(z.object({
+    platform: publishPlatformSchema,
+    title: z.string().min(1),
+    url: z.string().optional(),
+    remoteId: z.string().optional(),
+    views: z.number().optional(),
+    likes: z.number().optional(),
+    comments: z.number().optional(),
+    publishedAt: z.number().optional(),
+    score: z.number().min(0).max(1),
+  })).optional(),
 });
 
 export const revisionResultSchema = z.object({

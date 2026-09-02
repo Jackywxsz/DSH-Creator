@@ -54,4 +54,9 @@ describe("creator settings platform contract", () => {
     expect(profile?.parameters.properties).not.toHaveProperty("name");
     expect(profile?.parameters.properties).not.toHaveProperty("homepage");
   });
+
+  it("exposes explicit publish-result sync opt-in", () => {
+    const update = registeredTools().get("jacky_creator_update_content");
+    expect(update?.parameters.properties.syncAfterPublish).toEqual(expect.objectContaining({ type: "boolean" }));
+  });
 });

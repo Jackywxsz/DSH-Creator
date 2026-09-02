@@ -36,12 +36,14 @@ import { applyOrganize, previewOrganize, remapOverlayItems } from "./organize.ts
 import { cacheIsFresh, loadCollectCache, nextCollectCacheScope, saveCollectCache } from "./collectCache.ts";
 import {
   applyMatchesToOverlay,
+  buildSyncPlatformResults,
   cacheCoversTargets,
   filterCollected,
   filterMatchItems,
   knownFromPublish,
   matchCollected,
   mergeCollected,
+  rankCollectedCandidates,
   unionCollected,
   type CollectResult,
   type CollectTarget,
@@ -57,7 +59,7 @@ import {
   saveOverlay,
   withOverlayLock,
 } from "./overlay.ts";
-import { patchOverlayPublish } from "./publishStatus.ts";
+import { normalizeHttpPublishUrl, patchOverlayPublish } from "./publishStatus.ts";
 import { missingSecretMessage } from "./secrets.ts";
 import { describeCreatorSecrets, resolveCreatorSecret, secretEnv } from "./secretsHost.ts";
 import {
@@ -653,14 +655,30 @@ export class OilCreatorService extends TypertRemoteService {
     if (!enabledPlatforms.includes(request.platform)) {
       throw new Error(`publish platform is disabled: ${request.platform}`);
     }
+    const url = request.url === undefined ? undefined : normalizeHttpPublishUrl(request.url);
+    if (request.url !== undefined && url === undefined) {
+      throw new Error("publish URL must use http or https");
+    }
+    const binding = request.remoteId === undefined
+      && request.views === undefined
+      && request.likes === undefined
+      && request.comments === undefined
+      ? undefined
+      : {
+          ...(request.remoteId === undefined ? {} : { remoteId: request.remoteId }),
+          ...(request.views === undefined ? {} : { views: request.views }),
+          ...(request.likes === undefined ? {} : { likes: request.likes }),
+          ...(request.comments === undefined ? {} : { comments: request.comments }),
+        };
     return this.patchItem(request.id, (item) => {
       item.publish = patchOverlayPublish(
         item.publish,
         request.platform,
         request.status,
-        request.url,
+        url,
         Date.now(),
         request.publishedAt,
+        binding,
       );
     }, signal);
   }
@@ -698,6 +716,7 @@ export class OilCreatorService extends TypertRemoteService {
       });
     let collected: CollectResult;
     let fromCache = false;
+    let unavailablePlatforms = new Set<PublishPlatform>();
     const cachedSlice = cached === undefined ? undefined : filterCollected(cached.result, platforms);
     const cacheCoversPlatforms = cachedSlice !== undefined
       && platforms.every((platform) => cachedSlice.collected.some((page) => page.platform === platform));
@@ -710,6 +729,9 @@ export class OilCreatorService extends TypertRemoteService {
     ) {
       collected = cachedSlice ?? cached.result;
       fromCache = true;
+      unavailablePlatforms = new Set(collected.collected
+        .filter((page) => page.loginRequired === true || (page.error !== undefined && page.error !== ""))
+        .map((page) => page.platform));
     } else {
       try {
         collected = await runCollectPublish(collectScriptPath(), signal, {
@@ -717,6 +739,9 @@ export class OilCreatorService extends TypertRemoteService {
           ...(targets === undefined ? {} : { targets }),
           registryPath: collectRegistryPathForDataDir(this.dataDir),
         });
+        unavailablePlatforms = new Set(collected.collected
+          .filter((page) => page.loginRequired === true || (page.error !== undefined && page.error !== ""))
+          .map((page) => page.platform));
         const merged = scopedId === undefined
           ? mergeCollected(cached?.result, collected, platforms)
           : unionCollected(cached?.result, collected);
@@ -736,34 +761,42 @@ export class OilCreatorService extends TypertRemoteService {
         }
         collected = cachedSlice ?? cached.result;
         fromCache = true;
+        unavailablePlatforms = new Set(collected.collected
+          .filter((page) => page.loginRequired === true || (page.error !== undefined && page.error !== ""))
+          .map((page) => page.platform));
       }
     }
+    const matchableCollected: CollectResult = unavailablePlatforms.size === 0
+      ? collected
+      : {
+          collected: collected.collected.map((page) => unavailablePlatforms.has(page.platform)
+            ? { ...page, items: [] }
+            : page),
+        };
     const matches = matchCollected(
       scoped.map((item) => ({
         id: item.id,
         title: item.title,
         known: knownFromPublish(item.publish),
       })),
-      collected.collected,
+      matchableCollected.collected,
     );
-    await withOverlayLock(this.dataDir, async () => {
-      const latest = await loadOverlay(this.dataDir);
-      latest.items = applyMatchesToOverlay(latest.items, matches);
-      await saveOverlay(this.dataDir, latest);
-      this.invalidateCatalog();
-    });
+    if (matches.length > 0) {
+      await withOverlayLock(this.dataDir, async () => {
+        const latest = await loadOverlay(this.dataDir);
+        latest.items = applyMatchesToOverlay(latest.items, matches);
+        await saveOverlay(this.dataDir, latest);
+        this.invalidateCatalog();
+      });
+    }
     const result: SyncPublishResult = {
       matched: matches.length,
-      platforms: collected.collected.map((page) => {
-        const row: SyncPublishResult["platforms"][number] = {
-          platform: page.platform,
-          count: page.items.length,
-        };
-        if (page.loginRequired === true) row.loginRequired = true;
-        if (page.error !== undefined && page.error !== "") row.error = page.error;
-        return row;
-      }),
+      platforms: buildSyncPlatformResults(collected.collected, matches),
     };
+    if (scopedId !== undefined && matches.length === 0 && scoped[0] !== undefined) {
+      const candidates = rankCollectedCandidates(scoped[0].title, matchableCollected.collected);
+      if (candidates.length > 0) result.candidates = candidates;
+    }
     if (fromCache) result.cached = true;
     return result;
   }

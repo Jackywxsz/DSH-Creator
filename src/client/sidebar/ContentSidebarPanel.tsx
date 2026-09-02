@@ -14,7 +14,13 @@ import {
 import type { ContentSummary, WorkflowStage } from "../../types.ts";
 import { CoverThumb, coverThumbRevision } from "../CoverThumb.tsx";
 import type { CreatorViewFace } from "../face.ts";
-import { useLibraryEpoch, useSelectedContentId } from "../contentSelection.ts";
+import {
+  openContentDetails,
+  setContentInspectorVisible,
+  useContentInspectorVisible,
+  useLibraryEpoch,
+  useSelectedContentId,
+} from "../contentSelection.ts";
 import type { CreatorKey } from "../locales.ts";
 import { formatRelativeTime } from "../relativeTime.ts";
 import { StatusPill, type StatusTone } from "../ui/StatusPill.tsx";
@@ -52,6 +58,7 @@ export function ContentSidebarPanel({
   const searchInput = useRef<HTMLInputElement>(null);
   const libraryEpoch = useLibraryEpoch();
   const [selectedId, setSelectedId] = useSelectedContentId();
+  const inspectorVisible = useContentInspectorVisible();
   const selectedIdRef = useRef(selectedId);
   selectedIdRef.current = selectedId;
   const [items, setItems] = useState<ContentSummary[]>([]);
@@ -133,7 +140,7 @@ export function ContentSidebarPanel({
       setCreateOpen(false);
       setCreateName("");
       await loadList(query);
-      setSelectedId(created.id);
+      openContentDetails(created.id);
     } catch (cause) {
       setCreateError(cause instanceof Error ? cause.message : t("create.failed"));
     } finally {
@@ -268,7 +275,11 @@ export function ContentSidebarPanel({
             type="button"
             className={item.id === selectedId ? "contentRow selected" : "contentRow"}
             onClick={() => {
-              setSelectedId(item.id === selectedId ? null : item.id);
+              if (item.id === selectedId && inspectorVisible) {
+                setContentInspectorVisible(false);
+                return;
+              }
+              openContentDetails(item.id);
             }}
           >
             <span className="rowCover">

@@ -4,11 +4,16 @@ import {
   bumpLibrary,
   bumpProfile,
   getLibraryEpoch,
+  getInspectorWidth,
   getOperationsSection,
   getProfileEpoch,
   getSelectedContentId,
   getSidebarTab,
+  contentInspectorIsVisible,
   inspectorIsOpen,
+  openContentDetails,
+  setContentInspectorVisible,
+  setInspectorWidth,
   setSelectedContentId,
   setOperationsSection,
   setSidebarTab,
@@ -23,7 +28,15 @@ describe("content selection", () => {
     setSidebarTab("sessions");
     setOperationsSection("today");
     setSelectedContentId(null);
+    setInspectorWidth(560);
     vi.unstubAllGlobals();
+  });
+
+  it("clamps the persisted inspector preference to the supported range", () => {
+    setInspectorWidth(999);
+    expect(getInspectorWidth()).toBe(720);
+    setInspectorWidth(100);
+    expect(getInspectorWidth()).toBe(420);
   });
 
   it("notifies subscribers and persists", () => {
@@ -38,9 +51,9 @@ describe("content selection", () => {
     stop();
   });
 
-  it("keeps the inspector when switching to sessions", () => {
+  it("keeps selection but hides the inspector when switching to sessions", () => {
     setSidebarTab("content");
-    setSelectedContentId("2026-01-23_demo");
+    openContentDetails("2026-01-23_demo");
     expect(inspectorIsOpen()).toBe(true);
     const seen: Array<string | null> = [];
     const stop = subscribeSelectedContentId(() => {
@@ -55,9 +68,20 @@ describe("content selection", () => {
     expect(chrome).toBe(1);
     stopChrome();
     expect(getSelectedContentId()).toBe("2026-01-23_demo");
-    expect(inspectorIsOpen()).toBe(true);
+    expect(contentInspectorIsVisible()).toBe(false);
+    expect(inspectorIsOpen()).toBe(false);
     expect(seen).toEqual([]);
     stop();
+  });
+
+  it("reopens a retained selection without changing it", () => {
+    setSidebarTab("content");
+    openContentDetails("2026-01-23_demo");
+    setContentInspectorVisible(false);
+    expect(getSelectedContentId()).toBe("2026-01-23_demo");
+    expect(contentInspectorIsVisible()).toBe(false);
+    setContentInspectorVisible(true);
+    expect(inspectorIsOpen()).toBe(true);
   });
 
   it("tracks the active operations section through chrome subscribers", () => {

@@ -49,6 +49,17 @@ export function isPublishPlatform(value: unknown): value is PublishPlatform {
   return PUBLISH_PLATFORMS.includes(value as PublishPlatform);
 }
 
+export function normalizeHttpPublishUrl(value: string): string | undefined {
+  const text = value.trim();
+  if (text === "") return undefined;
+  try {
+    const protocol = new URL(text).protocol;
+    return protocol === "http:" || protocol === "https:" ? text : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function mapPublisherStatus(raw: string): PublishMark {
   const value = raw.trim().toLowerCase();
   if (value === "published" || value === "live" || value === "posted") return "published";
@@ -183,20 +194,43 @@ export function patchOverlayPublish(
   url?: string,
   now = Date.now(),
   publishedAt?: number,
+  binding?: Pick<OverlayPublish, "remoteId" | "views" | "likes" | "comments">,
 ): NonNullable<OverlayItem["publish"]> {
   const next: NonNullable<OverlayItem["publish"]> = { ...current };
   const previous = current?.[platform];
+  const remoteIdentityChanged = binding?.remoteId !== undefined
+    && binding.remoteId !== ""
+    && binding.remoteId !== previous?.remoteId;
   const entry: OverlayPublish = {
     status,
-    ...(previous === undefined ? {} : copyOverlayMetrics(previous)),
+    ...(previous === undefined
+      ? {}
+      : remoteIdentityChanged
+        ? copyOverlayTimestamps(previous)
+        : copyOverlayMetrics(previous)),
   };
   if (status === "published") entry.publishedAt = publishedAt ?? previous?.publishedAt ?? now;
-  if (status === "published" && url !== undefined && url.trim() !== "") {
+  else if (publishedAt !== undefined) entry.publishedAt = publishedAt;
+  if ((status === "published" || binding !== undefined) && url !== undefined && url.trim() !== "") {
     entry.url = url.trim();
-  } else if (previous?.url !== undefined && status === "published") {
+  } else if (binding === undefined && previous?.url !== undefined && status === "published") {
     entry.url = previous.url;
   }
+  if (binding !== undefined) {
+    if (binding.remoteId !== undefined && binding.remoteId !== "") entry.remoteId = binding.remoteId;
+    if (binding.views !== undefined) entry.views = binding.views;
+    if (binding.likes !== undefined) entry.likes = binding.likes;
+    if (binding.comments !== undefined) entry.comments = binding.comments;
+    entry.syncedAt = now;
+  }
   next[platform] = entry;
+  return next;
+}
+
+function copyOverlayTimestamps(over: OverlayPublish): Pick<OverlayPublish, "publishedAt" | "syncedAt"> {
+  const next: Pick<OverlayPublish, "publishedAt" | "syncedAt"> = {};
+  if (over.publishedAt !== undefined) next.publishedAt = over.publishedAt;
+  if (over.syncedAt !== undefined) next.syncedAt = over.syncedAt;
   return next;
 }
 

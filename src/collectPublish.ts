@@ -1,5 +1,13 @@
 import { PUBLISH_PLATFORM_DEFINITIONS, PUBLISH_PLATFORMS } from "./platforms.ts";
-import type { ContentPublish, OverlayItem, OverlayPublish, PublishPlatform } from "./types.ts";
+import { normalizeHttpPublishUrl } from "./publishStatus.ts";
+import type {
+  ContentPublish,
+  OverlayItem,
+  OverlayPublish,
+  PlatformPublish,
+  PublishBinding,
+  PublishPlatform,
+} from "./types.ts";
 
 export interface CollectedPost {
   platform: PublishPlatform;
@@ -29,6 +37,19 @@ export interface PublishMatch {
   platform: PublishPlatform;
   post: CollectedPost;
   score: number;
+}
+
+export interface PublishCandidate extends CollectedPost {
+  score: number;
+}
+
+export interface SyncPlatformResult {
+  platform: PublishPlatform;
+  count: number;
+  matched: number;
+  loginRequired?: boolean;
+  error?: string;
+  noMatchReason?: "empty" | "titleMismatch";
 }
 
 export function normalizeTitle(value: string): string {
@@ -87,6 +108,36 @@ export function matchCollected(
     }
   }
   return matches;
+}
+
+export function rankCollectedCandidates(
+  localTitle: string,
+  platforms: readonly CollectedPlatform[],
+  limitPerPlatform = 5,
+): PublishCandidate[] {
+  return platforms.flatMap((page) => page.items
+    .map((post, index) => ({ post, index, score: titleScore(localTitle, post.title) }))
+    .sort((left, right) => right.score - left.score
+      || (right.post.publishedAt ?? 0) - (left.post.publishedAt ?? 0)
+      || left.index - right.index)
+    .slice(0, limitPerPlatform)
+    .map(({ post, score }) => ({ ...post, platform: page.platform, score })));
+}
+
+export function buildSyncPlatformResults(
+  platforms: readonly CollectedPlatform[],
+  matches: readonly PublishMatch[],
+): SyncPlatformResult[] {
+  return platforms.map((page) => {
+    const matched = matches.filter((match) => match.platform === page.platform).length;
+    const row: SyncPlatformResult = { platform: page.platform, count: page.items.length, matched };
+    if (page.loginRequired === true) row.loginRequired = true;
+    if (page.error !== undefined && page.error !== "") row.error = page.error;
+    if (matched === 0 && row.loginRequired !== true && row.error === undefined) {
+      row.noMatchReason = page.items.length === 0 ? "empty" : "titleMismatch";
+    }
+    return row;
+  });
 }
 
 export function knownFromPublish(
@@ -207,9 +258,33 @@ export function formatCount(value: number): string {
 export const WECHAT_LIST_URL = "https://channels.weixin.qq.com/platform/post/list";
 
 export function usablePublishUrl(candidate?: string, previous?: string): string | undefined {
-  if (candidate !== undefined && candidate !== "" && candidate !== WECHAT_LIST_URL) return candidate;
-  if (previous !== undefined && previous !== "" && previous !== WECHAT_LIST_URL) return previous;
-  return undefined;
+  const normalizedCandidate = candidate === undefined ? undefined : normalizeHttpPublishUrl(candidate);
+  if (normalizedCandidate !== undefined && normalizedCandidate !== WECHAT_LIST_URL) return normalizedCandidate;
+  const normalizedPrevious = previous === undefined ? undefined : normalizeHttpPublishUrl(previous);
+  return normalizedPrevious === WECHAT_LIST_URL ? undefined : normalizedPrevious;
+}
+
+export function buildCandidatePublishUpdate(
+  row: Pick<PlatformPublish, "status" | "publishedAt">,
+  candidate: PublishCandidate,
+): {
+  status: PlatformPublish["status"];
+  url?: string;
+  publishedAt?: number;
+  binding: PublishBinding;
+} {
+  const url = usablePublishUrl(candidate.url);
+  return {
+    status: row.status,
+    ...(url === undefined ? {} : { url }),
+    ...(row.publishedAt === undefined ? {} : { publishedAt: row.publishedAt }),
+    binding: {
+      ...(candidate.remoteId === undefined ? {} : { remoteId: candidate.remoteId }),
+      ...(candidate.views === undefined ? {} : { views: candidate.views }),
+      ...(candidate.likes === undefined ? {} : { likes: candidate.likes }),
+      ...(candidate.comments === undefined ? {} : { comments: candidate.comments }),
+    },
+  };
 }
 
 export function cacheCoversTargets(
@@ -297,6 +372,7 @@ export function parseCollectOutput(raw: string): CollectResult {
               if (typeof post.views === "number") next.views = post.views;
               if (typeof post.likes === "number") next.likes = post.likes;
               if (typeof post.comments === "number") next.comments = post.comments;
+              if (typeof post.publishedAt === "number") next.publishedAt = post.publishedAt;
               return [next];
             })
             : [];
