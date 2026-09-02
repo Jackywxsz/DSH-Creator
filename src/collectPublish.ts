@@ -1,5 +1,13 @@
 import { PUBLISH_PLATFORM_DEFINITIONS, PUBLISH_PLATFORMS } from "./platforms.ts";
-import type { ContentPublish, OverlayItem, OverlayPublish, PublishPlatform } from "./types.ts";
+import { normalizeHttpPublishUrl } from "./publishStatus.ts";
+import type {
+  ContentPublish,
+  OverlayItem,
+  OverlayPublish,
+  PlatformPublish,
+  PublishBinding,
+  PublishPlatform,
+} from "./types.ts";
 
 export interface CollectedPost {
   platform: PublishPlatform;
@@ -250,9 +258,33 @@ export function formatCount(value: number): string {
 export const WECHAT_LIST_URL = "https://channels.weixin.qq.com/platform/post/list";
 
 export function usablePublishUrl(candidate?: string, previous?: string): string | undefined {
-  if (candidate !== undefined && candidate !== "" && candidate !== WECHAT_LIST_URL) return candidate;
-  if (previous !== undefined && previous !== "" && previous !== WECHAT_LIST_URL) return previous;
-  return undefined;
+  const normalizedCandidate = candidate === undefined ? undefined : normalizeHttpPublishUrl(candidate);
+  if (normalizedCandidate !== undefined && normalizedCandidate !== WECHAT_LIST_URL) return normalizedCandidate;
+  const normalizedPrevious = previous === undefined ? undefined : normalizeHttpPublishUrl(previous);
+  return normalizedPrevious === WECHAT_LIST_URL ? undefined : normalizedPrevious;
+}
+
+export function buildCandidatePublishUpdate(
+  row: Pick<PlatformPublish, "status" | "publishedAt">,
+  candidate: PublishCandidate,
+): {
+  status: PlatformPublish["status"];
+  url?: string;
+  publishedAt?: number;
+  binding: PublishBinding;
+} {
+  const url = usablePublishUrl(candidate.url);
+  return {
+    status: row.status,
+    ...(url === undefined ? {} : { url }),
+    ...(row.publishedAt === undefined ? {} : { publishedAt: row.publishedAt }),
+    binding: {
+      ...(candidate.remoteId === undefined ? {} : { remoteId: candidate.remoteId }),
+      ...(candidate.views === undefined ? {} : { views: candidate.views }),
+      ...(candidate.likes === undefined ? {} : { likes: candidate.likes }),
+      ...(candidate.comments === undefined ? {} : { comments: candidate.comments }),
+    },
+  };
 }
 
 export function cacheCoversTargets(

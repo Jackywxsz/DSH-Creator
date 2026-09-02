@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { cacheIsFresh } from "../src/collectCache.ts";
+import { patchOverlayPublish } from "../src/publishStatus.ts";
 import {
   applyMatchesToOverlay,
   buildSyncPlatformResults,
@@ -218,6 +219,102 @@ describe("cacheCoversTargets", () => {
 describe("usablePublishUrl", () => {
   it("does not replace a real URL with the WeChat list page", () => {
     expect(usablePublishUrl(WECHAT_LIST_URL, "https://example.com/post")).toBe("https://example.com/post");
+  });
+
+  it("rejects non-HTTP collector URLs", () => {
+    expect(usablePublishUrl("javascript:alert(1)")).toBeUndefined();
+  });
+
+  it("prevents a non-HTTP collector URL from entering the overlay", () => {
+    const next = applyMatchesToOverlay({}, [{
+      id: "demo",
+      platform: "wechat",
+      score: 1,
+      post: {
+        platform: "wechat",
+        title: "demo",
+        url: "javascript:alert(1)",
+      },
+    }], 2_000);
+
+    expect(next.demo?.publish?.wechat).toEqual({
+      status: "published",
+      publishedAt: 2_000,
+      syncedAt: 2_000,
+    });
+  });
+});
+
+describe("manual candidate binding", () => {
+  it("keeps status and date while replacing a different remote work without stale identity fields", async () => {
+    const module = await import("../src/collectPublish.ts");
+    const buildCandidatePublishUpdate = (module as unknown as {
+      buildCandidatePublishUpdate?: (
+        row: {
+          status: "draft";
+          publishedAt: number;
+          remoteId: string;
+          url: string;
+          views: number;
+        },
+        candidate: {
+          platform: "douyin";
+          title: string;
+          remoteId: string;
+          publishedAt: number;
+          score: number;
+        },
+      ) => {
+        status: "draft";
+        url?: string;
+        publishedAt?: number;
+        binding: { remoteId?: string; views?: number; likes?: number; comments?: number };
+      };
+    }).buildCandidatePublishUpdate;
+
+    expect(buildCandidatePublishUpdate).toBeTypeOf("function");
+    if (buildCandidatePublishUpdate === undefined) return;
+
+    const update = buildCandidatePublishUpdate(
+      {
+        status: "draft",
+        publishedAt: 1_000,
+        remoteId: "old",
+        url: "https://www.douyin.com/video/old",
+        views: 99,
+      },
+      {
+        platform: "douyin",
+        title: "new work",
+        remoteId: "new",
+        publishedAt: 9_000,
+        score: 0.7,
+      },
+    );
+    const next = patchOverlayPublish(
+      {
+        douyin: {
+          status: "draft",
+          publishedAt: 1_000,
+          remoteId: "old",
+          url: "https://www.douyin.com/video/old",
+          views: 99,
+        },
+      },
+      "douyin",
+      update.status,
+      update.url,
+      2_000,
+      update.publishedAt,
+      update.binding,
+    );
+
+    expect(next.douyin).toEqual({
+      status: "draft",
+      publishedAt: 1_000,
+      remoteId: "new",
+      syncedAt: 2_000,
+    });
   });
 });
 

@@ -9,10 +9,10 @@ import {
 } from "@deepseek-ai/dsh-client-ui-primitives";
 import type { InjectFace, PropsLocale, PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots";
 
-import { formatCount, usablePublishUrl } from "../collectPublish.ts";
+import { buildCandidatePublishUpdate, formatCount } from "../collectPublish.ts";
 import { isPublishMark } from "../publishStatus.ts";
 import { rewriteArticleImages } from "../articleMarkdown.ts";
-import type { ArticleMediaResult, ContentDetail, ContentOptionalStep, PublishBinding, PublishMark, PublishPlatform, SubtitleCue, SyncPublishResult, VideoPlaybackResult, WorkflowStage } from "../types.ts";
+import type { ArticleMediaResult, ContentDetail, ContentOptionalStep, PublishMark, PublishPlatform, SubtitleCue, SyncPublishResult, VideoPlaybackResult, WorkflowStage } from "../types.ts";
 import { CoverThumb, coverThumbRevision } from "./CoverThumb.tsx";
 import type { CreatorViewFace } from "./face.ts";
 import { constrainInspectorGeometry } from "./inspectorGeometry.ts";
@@ -780,21 +780,16 @@ export function ContentInspector({
     if (detail === undefined) return;
     const key = `${candidate.platform}:${candidate.remoteId ?? candidate.url ?? candidate.title}`;
     const row = detail.publish[candidate.platform];
-    const binding: PublishBinding = {
-      ...(candidate.remoteId === undefined ? {} : { remoteId: candidate.remoteId }),
-      ...(candidate.views === undefined ? {} : { views: candidate.views }),
-      ...(candidate.likes === undefined ? {} : { likes: candidate.likes }),
-      ...(candidate.comments === undefined ? {} : { comments: candidate.comments }),
-    };
+    const update = buildCandidatePublishUpdate(row, candidate);
     setCandidatePending(key);
     setActionError(undefined);
     void setPublish(
       detail.id,
       candidate.platform,
-      "published",
-      usablePublishUrl(candidate.url, row.url),
-      candidate.publishedAt ?? row.publishedAt,
-      binding,
+      update.status,
+      update.url,
+      update.publishedAt,
+      update.binding,
     ).then((next) => {
       setDetail(next);
       setSyncHint(t("inspector.publish.candidateBound"));
