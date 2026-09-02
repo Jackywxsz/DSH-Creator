@@ -27,7 +27,7 @@ dsh plugin --profile web add jacky-creator
 如果 npm 通道暂时不可用，可以安装同版本的 GitHub Release 成品包：
 
 ~~~bash
-dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.7/jacky-creator-0.1.0-beta.7.tgz
+dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.8/jacky-creator-0.1.0-beta.8.tgz
 ~~~
 
 如果日志出现 `Issues with peer dependencies found`，先看命令最后是否显示安装完成。只有出现 `dsh: pnpm failed` 或其他明确失败提示时，才需要提交日志排查。

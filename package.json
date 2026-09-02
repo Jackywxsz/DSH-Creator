@@ -1,6 +1,6 @@
 {
   "name": "jacky-creator",
-  "version": "0.1.0-beta.7",
+  "version": "0.1.0-beta.8",
   "description": "Jacky Creator: a local-first content and operations cockpit for DeepSeek Harness",
   "license": "MIT",
   "repository": {
