@@ -1,5 +1,7 @@
 node_modules
 lib
+.pnpm-store/
+.worktrees/
 .lab
 artifacts
 output/playwright/
