@@ -193,3 +193,24 @@
   color: var(--cockpit-muted);
   font-weight: 750;
 }
+
+@media (max-width: 620px) {
+  .jackyFullscreenNav .operationsPanel {
+    padding-inline: 0;
+  }
+
+  .jackyFullscreenNav .operationsNavCaption,
+  .jackyFullscreenNav .operationsNavItem span,
+  .jackyFullscreenNav .operationsThemeToggle strong,
+  .jackyFullscreenNav .operationsThemeToggle i,
+  .jackyFullscreenNav .operationsVersion {
+    display: none;
+  }
+
+  [data-plugin="jacky-creator"][data-surface="sidebar"].jackyFullscreenNav .operationsNavItem,
+  [data-plugin="jacky-creator"][data-surface="sidebar"].jackyFullscreenNav .operationsThemeToggle {
+    display: flex;
+    justify-content: center;
+    padding-inline: 0;
+  }
+}

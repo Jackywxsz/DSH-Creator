@@ -6,6 +6,7 @@ import {
   mapPublisherStatus,
   mergePublish,
   nextPublishMark,
+  normalizeHttpPublishUrl,
   patchOverlayPublish,
   pickAutoPublishName,
   publishFromAutoPublish,
@@ -87,6 +88,16 @@ describe("patchOverlayPublish", () => {
       3_000,
     );
     expect(next.bilibili?.publishedAt).toBe(1_000);
+  });
+
+});
+
+describe("normalizeHttpPublishUrl", () => {
+  it("accepts only absolute HTTP(S) URLs", () => {
+    expect(normalizeHttpPublishUrl("  https://example.com/post/1  ")).toBe("https://example.com/post/1");
+    expect(normalizeHttpPublishUrl("http://example.com/post/1")).toBe("http://example.com/post/1");
+    expect(normalizeHttpPublishUrl("javascript:alert(1)")).toBeUndefined();
+    expect(normalizeHttpPublishUrl("example.com/post/1")).toBeUndefined();
   });
 });
 

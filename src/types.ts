@@ -297,7 +297,16 @@ export interface SetPublishRequest {
   status: PublishMark;
   url?: string;
   publishedAt?: number;
+  remoteId?: string;
+  views?: number;
+  likes?: number;
+  comments?: number;
 }
+
+export type PublishBinding = Pick<
+  SetPublishRequest,
+  "remoteId" | "views" | "likes" | "comments"
+>;
 
 export interface SubtitlePreviewResult {
   url: string;
@@ -316,8 +325,21 @@ export interface SyncPublishResult {
   platforms: Array<{
     platform: PublishPlatform;
     count: number;
+    matched: number;
     loginRequired?: boolean;
     error?: string;
+    noMatchReason?: "empty" | "titleMismatch";
+  }>;
+  candidates?: Array<{
+    platform: PublishPlatform;
+    title: string;
+    url?: string;
+    remoteId?: string;
+    views?: number;
+    likes?: number;
+    comments?: number;
+    publishedAt?: number;
+    score: number;
   }>;
 }
 

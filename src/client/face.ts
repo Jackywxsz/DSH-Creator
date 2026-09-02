@@ -11,6 +11,7 @@ import type {
   LibrarySettings,
   ListContentsResult,
   PublishMark,
+  PublishBinding,
   PublishPlatform,
   SubtitlePreviewResult,
   SubtitleTextResult,
@@ -46,7 +47,14 @@ export interface CreatorViewFace {
   bindStudio: (id: string, path: string) => Promise<ContentDetail>;
   openStudio: (id: string) => Promise<ContentDetail>;
   waitForExport: (id: string) => Promise<ContentDetail>;
-  setPublish: (id: string, platform: PublishPlatform, status: PublishMark, url?: string, publishedAt?: number) => Promise<ContentDetail>;
+  setPublish: (
+    id: string,
+    platform: PublishPlatform,
+    status: PublishMark,
+    url?: string,
+    publishedAt?: number,
+    binding?: PublishBinding,
+  ) => Promise<ContentDetail>;
   syncPublish: (request?: { platform?: PublishPlatform; id?: string }) => Promise<SyncPublishResult>;
   openSubtitlePreview: (id: string) => Promise<SubtitlePreviewResult>;
   startSubtitleBurn: (id: string) => Promise<ContentDetail>;
