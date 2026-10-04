@@ -80,7 +80,7 @@ describe("Jacky Creator product terminology", () => {
 
     expect(onboarding).not.toMatch(/这是 .*测试版|不跟随开发分支|真实用户测试|测试用户/);
     expect(readme).not.toContain("dsh plugin remove dsh-oil-creator");
-    expect(installation.match(/dsh plugin remove dsh-oil-creator/g)).toHaveLength(1);
+    expect(installation.match(/dsh plugin --profile web remove dsh-oil-creator/g)).toHaveLength(1);
     expect(onboarding).not.toContain("dsh-oil-creator-0.1.0-beta.2.tgz");
     expect(onboarding).toContain("jacky-creator-0.1.0-beta.9.tgz");
     expect(publicDocs).not.toContain("~/.dsh-oil-creator");
