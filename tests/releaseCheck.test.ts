@@ -181,6 +181,7 @@ describe("release:check", () => {
     }
   });
 
+  // Three real Git fixtures and CLI processes can exceed Vitest's 5s default.
   it("rejects missing origin and missing files", () => {
     const noOrigin = createRepository();
     const wrongOrigin = createRepository();
@@ -203,7 +204,7 @@ describe("release:check", () => {
       rmSync(wrongOrigin, { recursive: true, force: true });
       rmSync(missing, { recursive: true, force: true });
     }
-  });
+  }, 15_000);
 
   it("rejects official DSH runtime packages bundled as regular dependencies", () => {
     const repository = createRepository();
