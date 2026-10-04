@@ -1,5 +1,5 @@
 import { useMemo, useState, type DragEvent } from "react";
-import { Button, IconEditOutline16, IconPlusOutline16, IconTrashOutline16, Modal } from "@deepseek-ai/dsh-client-ui-primitives";
+import { Button, IconEditOutlineMedium, IconPlusOutlineMedium, IconTrashOutlineMedium, Modal } from "@deepseek-ai/dsh-client-ui-primitives";
 
 import type { CockpitState, ScheduleItem } from "../../cockpit/schemas.ts";
 import type { ContentSummary, WorkflowStage } from "../../types.ts";
@@ -161,7 +161,7 @@ export function SchedulePage({ state, items, face, t, commit, openContent }: {
         <button type="button" onClick={() => { movePeriod(-1); }}>←</button>
         <button type="button" onClick={() => { setAnchor(dayStart(now)); }}>今天</button>
         <button type="button" onClick={() => { movePeriod(1); }}>→</button>
-        <button type="button" className="operationsPrimaryAction" onClick={() => { openForm(now); }}><IconPlusOutline16 size={16} />{t("operations.schedule.create")}</button>
+        <button type="button" className="operationsPrimaryAction" onClick={() => { openForm(now); }}><IconPlusOutlineMedium size={16} />{t("operations.schedule.create")}</button>
       </div>
     </div>
 
@@ -208,7 +208,7 @@ export function SchedulePage({ state, items, face, t, commit, openContent }: {
                 event.dataTransfer.setData("text/plain", value);
               }} style={{ "--schedule-color": color } as React.CSSProperties}>
                 <button type="button" className="scheduleCardMain" onClick={() => { if (entry.contentId !== undefined) openContent(entry.contentId); }}><span>{t(`operations.schedule.milestone.${entry.milestone}` as CreatorKey)}</span><strong>{entry.title}</strong></button>
-                <div><button type="button" aria-label={t("operations.schedule.done")} onClick={() => { void commit(face.updateScheduleItem({ id: entry.id, patch: { completed: entry.completedAt === undefined } })); }}>{entry.completedAt === undefined ? "✓" : "↶"}</button><button type="button" aria-label={t("operations.edit")} onClick={() => { openForm(date, entry); }}><IconEditOutline16 size={13} /></button><button type="button" aria-label={t("operations.delete")} onClick={() => { if (window.confirm(t("operations.schedule.deleteConfirm"))) void commit(face.deleteScheduleItem(entry.id)); }}><IconTrashOutline16 size={13} /></button></div>
+                <div><button type="button" aria-label={t("operations.schedule.done")} onClick={() => { void commit(face.updateScheduleItem({ id: entry.id, patch: { completed: entry.completedAt === undefined } })); }}>{entry.completedAt === undefined ? "✓" : "↶"}</button><button type="button" aria-label={t("operations.edit")} onClick={() => { openForm(date, entry); }}><IconEditOutlineMedium size={13} /></button><button type="button" aria-label={t("operations.delete")} onClick={() => { if (window.confirm(t("operations.schedule.deleteConfirm"))) void commit(face.deleteScheduleItem(entry.id)); }}><IconTrashOutlineMedium size={13} /></button></div>
               </article>;
             })}</div>
           </section>;

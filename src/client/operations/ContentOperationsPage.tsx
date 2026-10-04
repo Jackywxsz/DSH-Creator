@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, IconEditOutline16, IconPlusOutline16, IconTrashOutline16, Input, Modal } from "@deepseek-ai/dsh-client-ui-primitives";
+import { Button, IconEditOutlineMedium, IconPlusOutlineMedium, IconTrashOutlineMedium, Input, Modal } from "@deepseek-ai/dsh-client-ui-primitives";
 
 import type { CockpitState, ContentOperationsMeta } from "../../cockpit/schemas.ts";
 import type { ContentDetail, ContentSummary } from "../../types.ts";
@@ -127,8 +127,8 @@ function MetadataEditor({
       </button>
       <div className="operationsMetaQuickActions">
         {item.workflow === "publish" && <button type="button" className="publish" onClick={() => { openContent(item.id); }}>{t("operations.publish.confirm")}</button>}
-        <button type="button" disabled={nextScheduled !== undefined} onClick={() => { void commit(face.createScheduleItem({ kind: "content", milestone: item.workflow === "idle" ? "topic" : item.workflow === "record" ? "recording" : item.workflow === "publish" ? "publishing" : item.workflow === "live" ? "review" : "editing", title: meta?.nextAction || item.title, contentId: item.id, plannedAt: new Date().setHours(12, 0, 0, 0), note: meta?.nextAction ?? "" })); }}><IconPlusOutline16 size={14} />{nextScheduled === undefined ? "安排今天" : `已排 ${localDate(nextScheduled.plannedAt)}`}</button>
-        <button type="button" aria-expanded={expanded} onClick={() => { setExpanded((value) => !value); }}><IconEditOutline16 size={14} />{expanded ? "收起策略" : "编辑策略"}</button>
+        <button type="button" disabled={nextScheduled !== undefined} onClick={() => { void commit(face.createScheduleItem({ kind: "content", milestone: item.workflow === "idle" ? "topic" : item.workflow === "record" ? "recording" : item.workflow === "publish" ? "publishing" : item.workflow === "live" ? "review" : "editing", title: meta?.nextAction || item.title, contentId: item.id, plannedAt: new Date().setHours(12, 0, 0, 0), note: meta?.nextAction ?? "" })); }}><IconPlusOutlineMedium size={14} />{nextScheduled === undefined ? "安排今天" : `已排 ${localDate(nextScheduled.plannedAt)}`}</button>
+        <button type="button" aria-expanded={expanded} onClick={() => { setExpanded((value) => !value); }}><IconEditOutlineMedium size={14} />{expanded ? "收起策略" : "编辑策略"}</button>
       </div>
       {expanded && <><div className="operationsMetaFields">
         <label><span>{t("operations.meta.contentType")}</span><select value={contentType} onChange={(event) => { setContentType(event.target.value); }}><option value="">{t("operations.notRecorded")}</option>{state.settings.contentTypes.map((value) => <option key={value}>{value}</option>)}</select></label>
@@ -150,7 +150,7 @@ function MetadataEditor({
       </section>
       <div className="operationsEditorActions">
         <button type="button" onClick={() => { openContent(item.id); }}>{t("operations.openContent")}</button>
-        {meta !== undefined && <button type="button" className="danger" onClick={() => { if (window.confirm(t("operations.meta.deleteConfirm"))) void commit(face.deleteContentMeta(item.id)).catch(() => {}); }}><IconTrashOutline16 size={14} />{t("operations.meta.clear")}</button>}
+        {meta !== undefined && <button type="button" className="danger" onClick={() => { if (window.confirm(t("operations.meta.deleteConfirm"))) void commit(face.deleteContentMeta(item.id)).catch(() => {}); }}><IconTrashOutlineMedium size={14} />{t("operations.meta.clear")}</button>}
         <button type="button" className="save" disabled={saving} onClick={() => { void save(); }}>{saving ? t("settings.saving") : t("settings.save")}</button>
       </div>
       </>}

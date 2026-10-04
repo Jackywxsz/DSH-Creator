@@ -29,7 +29,7 @@ import {
 export const CREATOR_COCKPIT_NAMESPACE = "creatorCockpit";
 
 function codec(typeSymbol: string, schema: z.ZodType<unknown>) {
-  return { mode: "strict" as const, typeSymbol, schema };
+  return { mode: "strict" as const, typeSymbol, create: () => schema };
 }
 
 function jsonParam(

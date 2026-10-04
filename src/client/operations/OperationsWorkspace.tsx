@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { IconRefreshOutline16, IconRightUpOutline14 } from "@deepseek-ai/dsh-client-ui-primitives";
+import { IconRefreshOutlineMedium, IconRightUpOutlineMedium } from "@deepseek-ai/dsh-client-ui-primitives";
 
 import type { CockpitState } from "../../cockpit/schemas.ts";
 import type { ContentSummary, PipelineStage, PublishMark } from "../../types.ts";
@@ -253,7 +253,7 @@ export function OperationsWorkspace({
             disabled={loading || cockpitLoading}
             onClick={() => { setRefreshNonce((value) => value + 1); }}
           >
-            <IconRefreshOutline16 size={16} />
+            <IconRefreshOutlineMedium size={16} />
             <span>{t("toolbar.refresh")}</span>
           </button>
         )}
@@ -317,7 +317,7 @@ export function OperationsWorkspace({
                     </span>
                     <span className="operationsOpenLabel">
                       {t("operations.openContent")}
-                      <IconRightUpOutline14 size={14} />
+                      <IconRightUpOutlineMedium size={14} />
                     </span>
                   </button>
                 );

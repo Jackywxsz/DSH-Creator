@@ -17,8 +17,8 @@ export function registerCreatorSettingsCard(
   },
 ): () => void {
   return slots.register({
-    name: "settings.plugin.item",
-    key: options.namespace,
+    name: "settings.plugins.tab",
+    label: "Jacky Creator",
     id: options.legacyId,
     order: options.legacyOrder,
     locale: options.locale,

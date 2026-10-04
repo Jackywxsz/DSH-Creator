@@ -71,8 +71,8 @@ Harness 从 GitHub 安装时生成的构建包显式包含 README 引用的最�
 
 保持 **一个** Harness 插件。官方要求：只有能力需要独立替换时才拆包，不要预防性拆分。见 DeepSeek Harness `docs/user/develop/practice/index.zh.md`。
 
-设置位 `settings.plugin.item` 的含义是「一个插件一张卡」，不是一个功能一张卡。
-DeepSeek Harness `0.1.1-rc.2` 会先从 Host 的 `settings.describe` 取得插件命名空间，再按同名 `key` 派发设置卡。当前设置值统一由插件 Remote 和 `~/.jacky-creator/overlay.json` 管理，Host 命名空间只负责让设置卡被发现，避免双数据源。
+设置位 `settings.plugins.tab` 的含义是「一个插件一张卡」，不是一个功能一张卡。
+DeepSeek Harness `0.2.0-rc.2` 通过 `settings.plugins.tab` 的 list 插槽派发设置页。插件注册带标签的独立 tab，并用 `settings.configure({ auto: false })` 关闭重复生成的表单。设置值仍由插件 Remote 和 overlay 管理。
 
 执行分工：
 
@@ -129,7 +129,7 @@ ego-browser nodejs < scripts/collect-publish.mjs
 | 长任务、规范返回值、不要把散文当 API | `docs/cookbook/adding-a-tool.md` |
 | 一个包还是拆成 Definition / Provider | `docs/user/develop/practice/index.zh.md`（不要预防性拆分） |
 | API Key 只写不回读 | 官方凭据服务；界面对照已安装的 `@oil-oil/dsh-vision` 设置卡 |
-| 设置卡槽位 | `packages/client/ui-settings-plugins` 里对 `settings.plugin.item` 的说明 |
+| 设置卡槽位 | `packages/client/ui-settings-plugins` 里对 `settings.plugins.tab` 的说明 |
 
 官方 Bash 那种三包拆分，只适用于「同一能力会换执行环境」。内容工作台不是这种能力。
 

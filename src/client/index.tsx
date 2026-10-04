@@ -1,8 +1,12 @@
-import type { ClientContext } from "@deepseek-ai/dsh-client-runtime/client";
+import type { Context as ClientContext } from "@deepseek-ai/cordis";
+import type {} from "@deepseek-ai/dsh-api-workspace-controller/client";
+import type {} from "@deepseek-ai/dsh-api-session-controller/client";
+import type {} from "@deepseek-ai/dsh-client-ui-workspace/client";
+import type {} from "@deepseek-ai/dsh-client-ui-session/client";
+import type {} from "@deepseek-ai/dsh-client-ui-renderer/client";
 import type {} from "@deepseek-ai/dsh-client-locale/client";
 import type {} from "@deepseek-ai/dsh-client-ui-layout/client";
 import type {} from "@deepseek-ai/dsh-api-remotes/client";
-import type { IApiClient } from "@deepseek-ai/dsh-client-connection/client";
 import type {} from "@deepseek-ai/dsh-client-ui-settings-plugins/client";
 
 import { TYPERT_REMOTE } from "../remote.ts";
@@ -37,13 +41,13 @@ import type {
   VideoPlaybackResult,
 } from "../types.ts";
 import { openNativePath } from "./nativePaths.ts";
+import { credentialsClient } from "./credentialsApi.ts";
 import {
   bumpLibrary,
   bumpProfile,
   getSidebarTab,
   subscribeSidebarChrome,
 } from "./contentSelection.ts";
-import type { CredentialsClient } from "./credentialsApi.ts";
 import type {
   CockpitState,
   CreateFollowerSnapshotRequest,
@@ -162,16 +166,6 @@ interface CreatorCockpitRemote {
   promoteIdea: (request: PromoteIdeaRequest) => Promise<RemoteAnswer<PromotionResult>>;
 }
 
-function credentialsOf(ctx: ClientContext): CredentialsClient | undefined {
-  const connection = ctx.get("connection") as { api?: { credentials?: CredentialsClient } } | undefined;
-  return connection?.api?.credentials;
-}
-
-function hostOf(ctx: ClientContext): IApiClient["host"] | undefined {
-  const connection = ctx.get("connection") as { api?: Pick<IApiClient, "host"> } | undefined;
-  return connection?.api?.host;
-}
-
 function unwrap<T>(answer: RemoteAnswer<T>, fallback: string): T {
   if (!answer.ok || answer.value === undefined) {
     throw new Error(answer.error?.message ?? fallback);
@@ -179,7 +173,9 @@ function unwrap<T>(answer: RemoteAnswer<T>, fallback: string): T {
   return answer.value;
 }
 
-export const inject = ["slots", "locale", "remote", "workspaces", "layout", "connection"];
+export const inject = [
+  "slots", "locale", "remote", "remote.credentials", "remote.session", "uiWorkspace", "layout",
+];
 
 export function apply(ctx: ClientContext): void {
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), "jacky-creator: dictionaries");
@@ -358,9 +354,9 @@ export function apply(ctx: ClientContext): void {
       const answer = await remote.getSubtitleText({ id });
       return answer.ok && answer.value !== undefined ? answer.value : { text: "", cues: [] };
     },
-    pickDirectory: () => ctx.workspaces.pickDirectory(),
-    openPath: (path) => ctx.workspaces.openPath(path),
-    openFolder: (path) => openNativePath(hostOf(ctx), (next) => ctx.workspaces.openPath(next), path),
+    pickDirectory: () => ctx.uiWorkspace.pickDirectory(),
+    openPath: (path) => openNativePath(ctx.remote.session, path),
+    openFolder: (path) => openNativePath(ctx.remote.session, path),
     getSettings: async () => {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
@@ -630,7 +626,7 @@ export function apply(ctx: ClientContext): void {
         release();
       };
     });
-    const stopSettings = ctx.slots.inject("settings.plugin.item", () =>
+    const stopSettings = ctx.slots.inject("settings.plugins.tab", () =>
       registerCreatorSettingsCard(
         ctx.slots as unknown as CompatibleSettingsSlots,
         CreatorSettingsCard,
@@ -641,7 +637,7 @@ export function apply(ctx: ClientContext): void {
           locale: NS,
           inject: () => ({
             ...face(),
-            credentials: credentialsOf(ctx),
+            credentials: credentialsClient(ctx.remote.credentials),
           }),
         },
       ));

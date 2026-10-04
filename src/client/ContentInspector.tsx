@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
-  IconBrowseOutline16,
-  IconCloseOutline16,
-  IconFolderOpenOutline16,
+  IconBrowseOutlineMedium,
+  IconCloseOutlineMedium,
+  IconFolderOpenOutlineMedium,
   MarkdownText,
   Menu,
   StateDot,
 } from "@deepseek-ai/dsh-client-ui-primitives";
-import type { InjectFace, PropsLocale, PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots";
+import type { InjectFace, PropsLocale } from "@deepseek-ai/dsh-client-ui-slots";
 
 import { buildCandidatePublishUpdate, formatCount } from "../collectPublish.ts";
 import { isPublishMark } from "../publishStatus.ts";
@@ -490,7 +490,6 @@ function ScriptOperationsBridge({
 }
 
 export type ContentInspectorProps =
-  & PropsRuntime<"shell.overlay">
   & InjectFace<CreatorViewFace>
   & PropsLocale<"dsh.jacky.creator">
   & {
@@ -527,6 +526,10 @@ export function ContentInspector({
   cockpit,
   sidebarWidth,
 }: ContentInspectorProps) {
+  const markdownLabels = useMemo(() => ({
+    code: { copyLabel: t("markdown.copy"), copiedLabel: t("markdown.copied") },
+    footnotes: t("markdown.footnotes"),
+  }), [t]);
   const [selectedId] = useSelectedContentId();
   const libraryEpoch = useLibraryEpoch();
   const profileEpoch = useProfileEpoch();
@@ -1091,7 +1094,7 @@ export function ContentInspector({
                 aria-label={t("inspector.openFolder" as CreatorKey)}
                 onClick={() => { void openFolder(detail.folderPath); }}
               >
-                <IconFolderOpenOutline16 size={14} />
+                <IconFolderOpenOutlineMedium size={14} />
               </button>
             )}
             <button
@@ -1102,7 +1105,7 @@ export function ContentInspector({
                 closeDetails();
               }}
             >
-              <IconCloseOutline16 size={14} />
+              <IconCloseOutlineMedium size={14} />
               <span className="closeLabel">{t("inspector.backToConversation" as CreatorKey)}</span>
             </button>
           </div>
@@ -1145,7 +1148,7 @@ export function ContentInspector({
                       id={detail.id}
                       load={getCoverThumb}
                       revision={coverThumbRevision(detail.covers)}
-                      fallback={<IconBrowseOutline16 className="coverFallback" size={22} />}
+                      fallback={<IconBrowseOutlineMedium className="coverFallback" size={22} />}
                     />
                     <span>{t("inspector.overview.openCover" as CreatorKey)}</span>
                   </button>
@@ -1626,6 +1629,7 @@ export function ContentInspector({
               : (
                 <div className="article">
                   <MarkdownText
+                    labels={markdownLabels}
                     text={articleOrigin === undefined
                       ? detail.article
                       : rewriteArticleImages(detail.article, articleOrigin)}
@@ -1779,7 +1783,7 @@ export function ContentInspector({
                 aria-label={t("inspector.cover.previewClose" as CreatorKey)}
                 onClick={() => { setCoverPreview(undefined); }}
               >
-                <IconCloseOutline16 size={16} />
+                <IconCloseOutlineMedium size={16} />
               </button>
             </header>
             <div className="coverPreviewCanvas">

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  IconBrowseOutline16,
-  IconDataOutline16,
-  IconNewChatOutline16,
-  IconPanelLeftOutline16,
+  IconBrowseOutlineMedium,
+  IconDataOutlineMedium,
+  IconNewChatOutlineMedium,
+  IconPanelLeftOutlineMedium,
   Tooltip,
 } from "@deepseek-ai/dsh-client-ui-primitives";
 
@@ -171,7 +171,7 @@ export function OilSidebarRoot({
                 <OilBrand compact />
               </span>
             )}
-            <IconPanelLeftOutline16 className="panelIcon" size={wide ? 16 : 18} />
+            <IconPanelLeftOutlineMedium className="panelIcon" size={wide ? 16 : 18} />
           </button>
         </Tooltip>
       </div>
@@ -184,7 +184,7 @@ export function OilSidebarRoot({
             aria-label={t("session.new.label")}
             onClick={() => { startSession(); }}
           >
-            <IconNewChatOutline16 size={18} />
+            <IconNewChatOutlineMedium size={18} />
           </button>
         </Tooltip>
       )}
@@ -199,7 +199,7 @@ export function OilSidebarRoot({
               className={cx("tabButton", sidebarTab === "sessions" && "active")}
               onClick={() => { chooseTab("sessions"); }}
             >
-              <IconNewChatOutline16 size={14} />
+              <IconNewChatOutlineMedium size={14} />
               {tabLabels.sessions}
             </button>
             <button
@@ -209,7 +209,7 @@ export function OilSidebarRoot({
               className={cx("tabButton", sidebarTab === "content" && "active")}
               onClick={() => { chooseTab("content"); }}
             >
-              <IconBrowseOutline16 size={14} />
+              <IconBrowseOutlineMedium size={14} />
               {tabLabels.content}
             </button>
             <button
@@ -219,7 +219,7 @@ export function OilSidebarRoot({
               className={cx("tabButton", sidebarTab === "operations" && "active")}
               onClick={() => { chooseTab("operations"); }}
             >
-              <IconDataOutline16 size={14} />
+              <IconDataOutlineMedium size={14} />
               {tabLabels.operations}
             </button>
           </div>
@@ -252,7 +252,7 @@ export function OilSidebarRoot({
                   aria-label={t("session.new.label")}
                   onClick={() => { startSession(); }}
                 >
-                  <IconNewChatOutline16 size={16} />
+                  <IconNewChatOutlineMedium size={16} />
                 </button>
               </Tooltip>
             </div>
