@@ -2,25 +2,54 @@
 
 ## 开始前准备
 
-从 [DeepSeek 官网](https://www.deepseek.com/zh/download/) 安装官方 Harness，并确认运行时为 `0.2.0-rc.2`。准备一个本地内容文件夹；Windows x64 尚未完成验收，Screen Studio、Ego Lite 等扩展仅支持 macOS。
+**主维护通道：官方 DeepSeek Harness 桌面端、官方 CLI 启动的 Web UI。** 当前组合为 Harness `0.2.0-rc.2` + Jacky Creator `0.1.0-beta.9`，不是“任意最新版本均兼容”。
+
+桌面用户从 [DeepSeek 官网](https://www.deepseek.com/zh/download/) 安装官方 Harness，并确认运行时版本。Web UI 用户准备 Node.js `>=22.19.0`，按下方步骤安装官方 CLI。准备一个本地内容文件夹；Windows x64 尚未完成验收，Screen Studio、Ego Lite 等扩展仅支持 macOS。
+
+社区桌面封装或分支保留兼容支持，但不是主要适配、回归和发布验收通道。先核对它内置的 Harness 运行时与插件 API，不要用社区客户端自身的版本号判断兼容，也不要套用官方桌面端的 Profile 命令。
 
 Jacky Creator 是社区插件。`0.1.0-beta.9` 面向官方 Harness `0.2.0-rc.2`，已在 macOS 官方 Electron 与 CLI/Web 隔离环境验收。固定版本成品包见 [Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.9)。
 
 ## 安装
 
-官方桌面端优先使用内置插件管理器添加成品包；如已安装桌面版附带的 `dsh` 命令，也可执行：
+### A. 官方桌面端
+
+1. 打开官方 Harness，确认运行时为 `0.2.0-rc.2`。
+2. 打开侧栏“插件”，通过内置插件管理器添加下面的成品包 URL；也可从 [Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.9) 下载 `.tgz` 后添加。
+3. 等待安装成功，彻底退出并重启桌面端。
+
+```text
+https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
+```
+
+如已安装桌面版附带的 `dsh` 命令，也可执行：
 
 ```bash
 dsh plugin --profile desktop add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
 ```
 
-CLI / Web 用户在 `0.2.0-rc.2` 的 CLI 中执行：
+### B. 官方 Web UI
+
+首次安装官方 CLI、核对版本、安装插件并启动：
+
+```bash
+npm install -g @deepseek-ai/dsh@0.2.0-rc.2
+dsh --version
+dsh plugin --profile web add jacky-creator@0.1.0-beta.9
+dsh web
+```
+
+已有匹配 CLI 可跳过第一行；版本输出必须为 `0.2.0-rc.2`。在浏览器打开启动日志提供的本地地址。Web UI 正在运行时，安装后先停止原进程，再执行 `dsh web`。
+
+固定 Release 地址可替换 npm 包安装命令：
 
 ```bash
 dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
 ```
 
-也可通过 npm 使用 `dsh plugin --profile web add jacky-creator@0.1.0-beta.9`。npm CLI 不能管理桌面端的 `desktop` Profile；不要把桌面端插件装进 `web` 后期待桌面端自动加载。
+npm CLI 不能管理桌面端的 `desktop` Profile；安装到 `web` 不会使桌面端自动加载。两个入口并用时，要分别安装到各自 Profile，并确认所用 `dsh` 来自对应宿主。
+
+### 安装成功的判断
 
 等待安装结束，再彻底退出并重启宿主。检查侧栏 Jacky Creator 入口、内容 / 运营 / 灵感页面和设置卡均能打开，目录选择和保存有效，才算完成安装验证。
 

@@ -37,27 +37,56 @@ Jacky Creator 把 DeepSeek Harness 的对话能力和本地创作目录连起来
 
 ## 安装
 
-### 1. 准备官方 Harness
+### 1. 确认软件与版本
 
-从 [DeepSeek 官网](https://www.deepseek.com/zh/download/) 安装官方 DeepSeek Harness。此版本针对 **Harness `0.2.0-rc.2`**，Jacky Creator 是独立社区插件。
+**主维护通道是官方 DeepSeek Harness 桌面端和官方 Web UI。** Jacky Creator 是独立社区插件，不是 DeepSeek 官方插件。
+
+| 使用入口 | 当前适配版本 | 安装目标 |
+| --- | --- | --- |
+| 官方 Electron 桌面端 | Harness `0.2.0-rc.2` + Creator `0.1.0-beta.9` | 桌面端自己的 `desktop` Profile |
+| 官方 Web UI（由官方 CLI 启动） | `@deepseek-ai/dsh@0.2.0-rc.2` + Creator `0.1.0-beta.9` | CLI 的 `web` Profile |
+| 社区桌面封装 / 分支 | 以其内置 Harness 运行时与插件 API 为准 | 使用该客户端自己的插件管理入口 |
+
+桌面用户从 [DeepSeek 官网](https://www.deepseek.com/zh/download/) 获取官方 Harness，先确认版本匹配。Web UI 用户按下面的 CLI 步骤安装。当前已验证 macOS；不能据此推定所有系统或后续 Harness 版本兼容。
+
+社区版保留兼容支持，但不作为主要适配、回归和发布验收通道，也不承诺逐个跟进其私有改动。社区客户端的应用版本号不等于内置 Harness 版本；只有运行时和 API 匹配时才可能使用同一插件包。
 
 ### 2. 安装 Jacky Creator
 
 `0.1.0-beta.9` 适配官方 Harness `0.2.0-rc.2`，安装包见 [GitHub Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.9)。市场若仍提供 `beta.8`，请使用下面的固定版本安装命令，不要对旧版授予版本豁免。
 
-**官方桌面端**：在内置插件管理器中添加对应版本的成品包；如已安装桌面版附带的 `dsh` 命令，目标为 `desktop` Profile：
+**A. 官方桌面端（推荐）**
+
+打开侧栏“插件”，通过内置插件管理器添加下面的成品包 URL，或从 [Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.9) 下载 `.tgz` 后添加：
+
+```text
+https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
+```
+
+如已安装桌面版附带的 `dsh` 命令，也可在终端安装到 `desktop` Profile：
 
 ```bash
 dsh plugin --profile desktop add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
 ```
 
-**官方 CLI / Web**：使用 `0.2.0-rc.2` 的 CLI，目标为 `web` Profile：
+**B. 官方 Web UI**
+
+准备 Node.js `>=22.19.0`。首次使用官方 CLI 时执行以下步骤；已有匹配版本可跳过第一行。`dsh --version` 应显示 `0.2.0-rc.2`：
+
+```bash
+npm install -g @deepseek-ai/dsh@0.2.0-rc.2
+dsh --version
+dsh plugin --profile web add jacky-creator@0.1.0-beta.9
+dsh web
+```
+
+在浏览器打开 `dsh web` 启动时输出的本地地址，即进入官方 Web UI。也可以用固定 Release 地址替换上面的插件安装命令：
 
 ```bash
 dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
 ```
 
-也可以通过 npm 包运行 `dsh plugin --profile web add jacky-creator@0.1.0-beta.9`。系统安装的 npm CLI 不能管理官方桌面端保留的 `desktop` Profile。
+桌面与 Web 是两个独立安装目标：安装到 `web` 不会自动出现在桌面端。npm 安装的 CLI 不能管理 `desktop`；如果两种 CLI 并存，请确认当前执行的是对应宿主的命令。
 
 安装完成后彻底退出并重启当前宿主，点击侧栏 **Jacky Creator** 入口，检查“内容 / 运营 / 灵感”和“设置 → 内置插件 → Jacky Creator”均能打开。
 
@@ -132,7 +161,9 @@ dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/d
 
 ## 插件市场
 
-历史版本已收录到 [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)。市场卡片可能仍指向旧包；以卡片实际版本与本页兼容表为准，目录同步不代表新版已发布。官方内置插件管理器与社区插件市场是不同入口。
+已收录到 [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)。beta.9 的目录更新见 [PR #6927](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6927)；是否已生效以 PR 合并状态和市场卡片实际安装包为准。若卡片仍指向 beta.8，请使用上面的 beta.9 固定地址或 npm 命令。
+
+社区插件市场是分发入口，社区桌面客户端是另一种宿主；使用社区市场不改变“官方桌面端 / 官方 Web UI 为主维护通道”的原则。
 
 ## 文档与开发
 

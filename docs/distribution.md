@@ -9,7 +9,8 @@
 - 安装来源：npm 包 `jacky-creator`；GitHub Release 的预构建 `.tgz` 作为固定版本备用入口。
 - npm / GitHub Release：统一使用 beta.9 成品包，公开状态分别以 registry 与 Release 为准。市场更新须经上游合并；若卡片仍是 beta.8，请使用本文固定版本命令。
 - 插件市场：已收录到 `awesome-dsh-plugin`，由 `dsh-market` 同步市场卡片。
-- 首要宿主：官方 DeepSeek Harness `0.2.0-rc.2`。桌面端使用 `desktop` Profile，npm CLI 使用 `web` Profile。
+- 主维护通道：官方 DeepSeek Harness `0.2.0-rc.2` 的 Electron 桌面端和官方 Web UI。桌面端使用 `desktop` Profile，官方 CLI 启动的 Web UI 使用 `web` Profile。
+- 社区客户端：保留兼容支持，以内置 Harness 运行时与 API 匹配为前提；不作为主要适配、回归和发布验收通道，不承诺跟进各封装的私有改动。社区插件市场是分发通道，不等于社区客户端。
 
 ## 发布链路
 
