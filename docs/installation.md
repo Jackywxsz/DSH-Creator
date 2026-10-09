@@ -4,7 +4,7 @@
 
 从 [DeepSeek 官网](https://www.deepseek.com/zh/download/) 安装官方 Harness，并确认运行时为 `0.2.0-rc.2`。准备一个本地内容文件夹；Windows x64 尚未完成验收，Screen Studio、Ego Lite 等扩展仅支持 macOS。
 
-Jacky Creator 是社区插件。`0.1.0-beta.9` 是适配候选，执行以下命令前请先确认 [Release](https://github.com/Jackywxsz/DSH-Creator/releases) 已提供该成品包。
+Jacky Creator 是社区插件。`0.1.0-beta.9` 面向官方 Harness `0.2.0-rc.2`，已在 macOS 官方 Electron 与 CLI/Web 隔离环境验收。固定版本成品包见 [Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.9)。
 
 ## 安装
 
@@ -20,7 +20,7 @@ CLI / Web 用户在 `0.2.0-rc.2` 的 CLI 中执行：
 dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
 ```
 
-npm 发布同版本后可使用 `dsh plugin --profile web add jacky-creator@0.1.0-beta.9`。npm CLI 不能管理桌面端的 `desktop` Profile；不要把桌面端插件装进 `web` 后期待桌面端自动加载。
+也可通过 npm 使用 `dsh plugin --profile web add jacky-creator@0.1.0-beta.9`。npm CLI 不能管理桌面端的 `desktop` Profile；不要把桌面端插件装进 `web` 后期待桌面端自动加载。
 
 等待安装结束，再彻底退出并重启宿主。检查侧栏 Jacky Creator 入口、内容 / 运营 / 灵感页面和设置卡均能打开，目录选择和保存有效，才算完成安装验证。
 

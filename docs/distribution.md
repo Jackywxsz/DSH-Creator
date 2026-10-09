@@ -4,10 +4,10 @@
 
 ## 当前状态
 
-- 发布阶段：本地适配候选，尚未发布。
+- 发布阶段：官方 Harness `0.2.0-rc.2` 适配 Beta；已完成 macOS Electron 与 CLI/Web 隔离验收。
 - 当前版本：`v0.1.0-beta.9`。
 - 安装来源：npm 包 `jacky-creator`；GitHub Release 的预构建 `.tgz` 作为固定版本备用入口。
-- npm / GitHub Release / 市场：beta.9 尚未同步；当前线上 beta.8 不支持目标宿主。
+- npm / GitHub Release：统一使用 beta.9 成品包，公开状态分别以 registry 与 Release 为准。市场更新须经上游合并；若卡片仍是 beta.8，请使用本文固定版本命令。
 - 插件市场：已收录到 `awesome-dsh-plugin`，由 `dsh-market` 同步市场卡片。
 - 首要宿主：官方 DeepSeek Harness `0.2.0-rc.2`。桌面端使用 `desktop` Profile，npm CLI 使用 `web` Profile。
 

@@ -43,7 +43,7 @@ Jacky Creator 把 DeepSeek Harness 的对话能力和本地创作目录连起来
 
 ### 2. 安装 Jacky Creator
 
-`0.1.0-beta.9` 是本次适配候选。请先在 [GitHub Releases](https://github.com/Jackywxsz/DSH-Creator/releases) 确认该版本已发布；市场若仍提供 `beta.8`，不要对它授予版本豁免。
+`0.1.0-beta.9` 适配官方 Harness `0.2.0-rc.2`，安装包见 [GitHub Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.9)。市场若仍提供 `beta.8`，请使用下面的固定版本安装命令，不要对旧版授予版本豁免。
 
 **官方桌面端**：在内置插件管理器中添加对应版本的成品包；如已安装桌面版附带的 `dsh` 命令，目标为 `desktop` Profile：
 
@@ -57,7 +57,7 @@ dsh plugin --profile desktop add https://github.com/Jackywxsz/DSH-Creator/releas
 dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
 ```
 
-npm 发布同版本后，也可以运行 `dsh plugin --profile web add jacky-creator@0.1.0-beta.9`。系统安装的 npm CLI 不能管理官方桌面端保留的 `desktop` Profile。
+也可以通过 npm 包运行 `dsh plugin --profile web add jacky-creator@0.1.0-beta.9`。系统安装的 npm CLI 不能管理官方桌面端保留的 `desktop` Profile。
 
 安装完成后彻底退出并重启当前宿主，点击侧栏 **Jacky Creator** 入口，检查“内容 / 运营 / 灵感”和“设置 → 内置插件 → Jacky Creator”均能打开。
 
@@ -123,10 +123,10 @@ npm 发布同版本后，也可以运行 `dsh plugin --profile web add jacky-cre
 
 | 插件版本 | Harness 运行时 | 状态 |
 | --- | --- | --- |
-| `0.1.0-beta.9` | `0.2.0-rc.2` | 适配候选；验收范围见更新记录 |
+| `0.1.0-beta.9` | `0.2.0-rc.2` | macOS 官方 Electron / CLI 验收通过；范围见验收记录 |
 | `0.1.0-beta.8` | `0.1.1-rc.2` | 历史版本，不能安装到 `0.2.0-rc.2` |
 
-本轮已在官方 CLI/Web 隔离环境验收；Electron 桌面封装、其他 Harness 版本和 Windows x64 尚未完成验证，详见[验收记录](docs/harness-0.2.0-rc.2-validation.md)。Screen Studio、Ego Lite 等可选扩展仅支持 macOS。
+本轮已在 macOS 官方 Electron 桌面端与 CLI/Web 隔离环境验收；原生目录弹窗、系统文件打开结果、其他 Harness 版本和 Windows x64 尚未完成完整验证，详见[验收记录](docs/harness-0.2.0-rc.2-validation.md)。Screen Studio、Ego Lite 等可选扩展仅支持 macOS。
 
 遇到 `incompatible with dsh` 或 `dsh: nothing was installed`，表示插件未安装成功。`allow-version` 只豁免检查，不修复 API；请安装匹配版本，不要为旧插件降级宿主。
 
