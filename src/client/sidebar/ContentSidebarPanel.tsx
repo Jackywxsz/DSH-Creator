@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Button,
-  IconBrowseOutline16,
-  IconCloseFill14,
-  IconProjectAddOutline16,
-  IconRefreshOutline16,
-  IconSearchOutline16,
+  IconBrowseOutlineMedium,
+  IconCloseFillMedium,
+  IconProjectAddOutlineMedium,
+  IconRefreshOutlineMedium,
+  IconSearchOutlineMedium,
   Input,
   Modal,
   Tooltip,
@@ -168,7 +168,7 @@ export function ContentSidebarPanel({
                 aria-expanded={searchOpen}
                 onClick={() => { setSearchOpen(true); }}
               >
-                <IconSearchOutline16 size={searchOpen ? 11 : 14} />
+                <IconSearchOutlineMedium size={searchOpen ? 11 : 14} />
               </button>
             </Tooltip>
             <input
@@ -193,7 +193,7 @@ export function ContentSidebarPanel({
                   closeSearch();
                 }}
               >
-                <IconCloseFill14 />
+                <IconCloseFillMedium />
               </button>
             )}
           </div>
@@ -208,7 +208,7 @@ export function ContentSidebarPanel({
                 void refreshCatalog().then(() => loadList(query));
               }}
             >
-              <IconRefreshOutline16 size={16} />
+              <IconRefreshOutlineMedium size={16} />
             </button>
           </Tooltip>
           <Tooltip label={t("toolbar.create")} delayMs={500}>
@@ -218,7 +218,7 @@ export function ContentSidebarPanel({
               aria-label={t("toolbar.create.aria")}
               onClick={() => { setCreateOpen(true); }}
             >
-              <IconProjectAddOutline16 size={16} />
+              <IconProjectAddOutlineMedium size={16} />
             </button>
           </Tooltip>
         </div>
@@ -287,7 +287,7 @@ export function ContentSidebarPanel({
                 id={item.id}
                 load={getCoverThumb}
                 revision={coverThumbRevision(item.covers)}
-                fallback={<IconBrowseOutline16 className="coverFallback" size={20} />}
+                fallback={<IconBrowseOutlineMedium className="coverFallback" size={20} />}
               />
             </span>
             <span className="rowBody">

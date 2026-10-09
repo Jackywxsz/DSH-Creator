@@ -50,15 +50,15 @@ describe("handwritten TYPERT", () => {
       expect(item.namespace).toBe(REMOTE_NAMESPACE);
       expect(item.result.mode).toBe("strict");
       if (item.result.mode !== "strict") continue;
-      expect("_zod" in item.result.schema).toBe(true);
-      expect(typeof item.result.schema.parse).toBe("function");
+      expect("_zod" in item.result.create()).toBe(true);
+      expect(typeof item.result.create().parse).toBe("function");
     }
   });
 
   it("requires an explicit confirmation on the mutating Skill installer endpoint", () => {
     const install = OIL_CREATOR_INVOCATIONS.find((item) => item.method === "installCapability");
     const schema = install?.parameters[0]?.codec.mode === "strict"
-      ? install.parameters[0].codec.schema
+      ? install.parameters[0].codec.create()
       : undefined;
     expect(() => schema?.parse({ target: "editing" })).toThrow();
     expect(schema?.parse({ target: "editing", confirmed: true })).toEqual({

@@ -1,8 +1,8 @@
 import {
-  IconChecklistOutline14,
-  IconDataOutline16,
-  IconGoalOutline16,
-  IconListPenOutline16,
+  IconChecklistOutlineMedium,
+  IconDataOutlineMedium,
+  IconGoalOutlineMedium,
+  IconListPenOutlineMedium,
 } from "@deepseek-ai/dsh-client-ui-primitives";
 
 import {
@@ -18,15 +18,15 @@ import "./OperationsSidebarPanel.css";
 const SECTIONS: Array<{
   id: OperationsSection;
   label: CreatorKey;
-  icon: typeof IconDataOutline16 | typeof JackySproutIcon;
+  icon: typeof IconDataOutlineMedium | typeof JackySproutIcon;
 }> = [
   { id: "ideas", label: "operations.nav.ideas", icon: JackySproutIcon },
-  { id: "today", label: "operations.nav.today", icon: IconChecklistOutline14 },
-  { id: "schedule", label: "operations.nav.schedule", icon: IconListPenOutline16 },
-  { id: "content", label: "operations.nav.content", icon: IconDataOutline16 },
-  { id: "goals", label: "operations.nav.goals", icon: IconGoalOutline16 },
-  { id: "reviews", label: "operations.nav.reviews", icon: IconListPenOutline16 },
-  { id: "settings", label: "operations.nav.settings", icon: IconDataOutline16 },
+  { id: "today", label: "operations.nav.today", icon: IconChecklistOutlineMedium },
+  { id: "schedule", label: "operations.nav.schedule", icon: IconListPenOutlineMedium },
+  { id: "content", label: "operations.nav.content", icon: IconDataOutlineMedium },
+  { id: "goals", label: "operations.nav.goals", icon: IconGoalOutlineMedium },
+  { id: "reviews", label: "operations.nav.reviews", icon: IconListPenOutlineMedium },
+  { id: "settings", label: "operations.nav.settings", icon: IconDataOutlineMedium },
 ];
 
 export function OperationsSidebarPanel({ t, onNavigate }: { t: (key: CreatorKey) => string; onNavigate?: () => void }) {

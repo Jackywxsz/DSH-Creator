@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { IconChevronDownOutline14 } from "@deepseek-ai/dsh-client-ui-primitives";
+import { IconChevronDownOutlineMedium } from "@deepseek-ai/dsh-client-ui-primitives";
 import type { InjectFace, PropsLocale, PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots";
 import type {} from "@deepseek-ai/dsh-client-ui-settings-plugins/client";
 
@@ -23,7 +23,7 @@ import { StatusPill, type StatusTone } from "./ui/StatusPill.tsx";
 import "./CreatorSettingsCard.css";
 
 export type CreatorSettingsCardProps =
-  & PropsRuntime<"settings.plugin.item">
+  & PropsRuntime<"settings.plugins.tab">
   & PropsLocale<"dsh.jacky.creator">
   & InjectFace<
     Pick<CreatorViewFace, "ready" | "getSettings" | "getCapabilities" | "installCapability" | "checkPlatformLogins" | "openPlatformLogin" | "setLibraryRoot" | "setProfile" | "setScriptRules" | "pickDirectory">
@@ -348,7 +348,7 @@ export function CreatorSettingsCard({
           <span className="description">{t("settings.description" as CreatorKey)}</span>
         </span>
         {dirty && <span className="pending">{t("settings.save" as CreatorKey)}</span>}
-        <IconChevronDownOutline14 className={open ? "chevron open" : "chevron"} />
+        <IconChevronDownOutlineMedium className={open ? "chevron open" : "chevron"} />
       </button>
       {open && (
         <div className="body">

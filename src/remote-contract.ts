@@ -42,7 +42,7 @@ export const REMOTE_NAMESPACE = "oilCreator";
 const emptyObjectSchema = z.object({});
 
 function codec(typeSymbol: string, schema: z.ZodType<unknown>) {
-  return { mode: "strict" as const, typeSymbol, schema };
+  return { mode: "strict" as const, typeSymbol, create: () => schema };
 }
 
 function jsonParam(

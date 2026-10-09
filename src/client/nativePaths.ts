@@ -1,32 +1,10 @@
-export interface NativePathHost {
-  openPath: (
-    request: { path: string },
-    signal: AbortSignal,
-  ) => Promise<{
-    result: {
-      ok: boolean;
-      error?: { message?: string };
-    };
-  }>;
-}
+import type { ClientRemote } from "@deepseek-ai/dsh-api-remotes/client";
 
-/**
- * Open a directory through the Host OS instead of the shared workspace funnel.
- * The latter may be intercepted by dsh-better-sidebar's file editor, which only
- * accepts files and reports directories as "is a directory".
- */
+/** Use the official Host opener for both files and directories. */
 export async function openNativePath(
-  host: NativePathHost | undefined,
-  fallback: (path: string) => Promise<void>,
+  session: Pick<ClientRemote["session"], "openWorkspacePath">,
   path: string,
 ): Promise<void> {
-  if (host === undefined) {
-    await fallback(path);
-    return;
-  }
-
-  const response = await host.openPath({ path }, new AbortController().signal);
-  if (!response.result.ok) {
-    throw new Error(response.result.error?.message ?? "path open failed");
-  }
+  const result = await session.openWorkspacePath({ path });
+  if (!result.ok) throw new Error(result.error.message);
 }

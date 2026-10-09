@@ -18,7 +18,7 @@ export function apply(ctx: Context, config: Config): void {
   const service = new OilCreatorService(ctx, config);
   const cockpit = new CreatorCockpitService(ctx, resolveCockpitDataDir(config), service);
   ctx.inject(["settings"], (settingsCtx) => {
-    registerCreatorSettingsNamespace(settingsCtx.settings);
+    settingsCtx.effect(() => registerCreatorSettingsNamespace(settingsCtx.settings));
   });
   ctx.inject(["tools"], (toolsCtx) => {
     registerCreatorTools(toolsCtx as never, service);

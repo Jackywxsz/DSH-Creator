@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
-  IconBrowseOutline16,
-  IconDataOutline16,
-  IconNewChatOutline16,
+  IconBrowseOutlineMedium,
+  IconDataOutlineMedium,
+  IconNewChatOutlineMedium,
 } from "@deepseek-ai/dsh-client-ui-primitives";
 import type { PropsLocale, PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots";
 
@@ -66,13 +66,13 @@ function hostSidebarWidth(root: HTMLElement): number {
   return Number.isFinite(firstColumn) && firstColumn >= 56 && firstColumn <= 420 ? firstColumn : fallback;
 }
 
-export function CreatorWorkspace({ t, useSessions, useWorkspaces, content, cockpit }: CreatorWorkspaceProps) {
+export function CreatorWorkspace({ t, usePanelInfo, content, cockpit }: CreatorWorkspaceProps) {
   const root = useRef<HTMLDivElement>(null);
   const tab = useSidebarTab();
   const [selectedId] = useSelectedContentId();
   const inspectorVisible = useContentInspectorVisible();
   const theme = useOperationsTheme();
-  const currentSessionId = useSessions((sessions) => sessions.current);
+  const activePanelId = usePanelInfo((panel) => panel.activePanelId);
   const [sidebarWidth, setSidebarWidth] = useState(280);
   const [navigationOpen, setNavigationOpen] = useState(true);
 
@@ -101,7 +101,7 @@ export function CreatorWorkspace({ t, useSessions, useWorkspaces, content, cockp
       window.removeEventListener("resize", measure);
       window.cancelAnimationFrame(animation);
     };
-  }, [currentSessionId]);
+  }, [activePanelId]);
 
   useEffect(() => {
     const close = (): void => {
@@ -149,13 +149,13 @@ export function CreatorWorkspace({ t, useSessions, useWorkspaces, content, cockp
         <div className="tabRow">
           <div className="tabList" role="tablist" aria-label={t("workspace.title")}>
             <button type="button" role="tab" aria-selected={false} className="tabButton" onClick={() => { chooseTab("sessions"); }}>
-              <IconNewChatOutline16 size={14} />{t("tab.sessions")}
+              <IconNewChatOutlineMedium size={14} />{t("tab.sessions")}
             </button>
             <button type="button" role="tab" aria-selected={tab === "content"} className={tab === "content" ? "tabButton active" : "tabButton"} onClick={() => { chooseTab("content"); }}>
-              <IconBrowseOutline16 size={14} />{t("tab.content")}
+              <IconBrowseOutlineMedium size={14} />{t("tab.content")}
             </button>
             <button type="button" role="tab" aria-selected={tab === "operations"} className={tab === "operations" ? "tabButton active" : "tabButton"} onClick={() => { chooseTab("operations"); }}>
-              <IconDataOutline16 size={14} />{t("tab.operations")}
+              <IconDataOutlineMedium size={14} />{t("tab.operations")}
             </button>
           </div>
         </div>
@@ -170,8 +170,6 @@ export function CreatorWorkspace({ t, useSessions, useWorkspaces, content, cockp
           {...content}
           cockpit={cockpit}
           t={t}
-          useSessions={useSessions}
-          useWorkspaces={useWorkspaces}
           sidebarWidth={sidebarWidth}
           closeDetails={closeContentDetails}
         />

@@ -1,65 +1,22 @@
 import { SlotCore } from "@deepseek-ai/dsh-client-ui-slots";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
+import { registerCreatorSettingsCard, type CompatibleSettingsSlots } from "../src/client/settingsSlot.ts";
 
-import { CREATOR_SETTINGS_NAMESPACE } from "../src/settingsContract.ts";
-import {
-  registerCreatorSettingsCard,
-  type CompatibleSettingsSlots,
-} from "../src/client/settingsSlot.ts";
-
-const OPTIONS = {
-  namespace: CREATOR_SETTINGS_NAMESPACE,
-  legacyId: "jacky-creator",
-  legacyOrder: 40,
-  locale: "dsh.jacky.creator",
-  inject: () => ({}),
-};
-
-function registerWithSlotCore(kind: "keyed" | "list"): SlotCore {
-  const slots = new SlotCore();
-  const component = () => null;
-  slots.register({
-    name: "root",
-    children: {
-      "settings.plugin.item": { kind, scope: "root" },
-    },
-  } as never, component as never);
-  registerCreatorSettingsCard(
-    slots as unknown as CompatibleSettingsSlots,
-    component,
-    OPTIONS,
-  );
-  return slots;
-}
-
-describe("settings.plugin.item compatibility", () => {
-  it("passes the rc.7 keyed slot validation", () => {
-    const slots = registerWithSlotCore("keyed");
-    expect(slots.entries("settings.plugin.item")[0]?.options.key)
-      .toBe(CREATOR_SETTINGS_NAMESPACE);
-  });
-
-  it("passes the rc.6 list slot validation", () => {
-    const slots = registerWithSlotCore("list");
-    expect(slots.entries("settings.plugin.item")[0]?.options.id)
-      .toBe("jacky-creator");
-  });
-
-  it("registers both compatibility coordinates through the public facade", () => {
-    const register = vi.fn(() => vi.fn());
-    registerCreatorSettingsCard(
-      { register },
-      "card",
-      OPTIONS,
-    );
-    expect(register).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: "settings.plugin.item",
-        key: CREATOR_SETTINGS_NAMESPACE,
-        id: "jacky-creator",
-        order: 40,
-      }),
-      "card",
-    );
+describe("settings.plugins.tab compatibility", () => {
+  it("registers a labelled tab in the official slot and disposes it", () => {
+    const slots = new SlotCore();
+    slots.register({
+      name: "root",
+      children: { "settings.plugins.tab": { kind: "list", scope: "root" } },
+    } as never, (() => null) as never);
+    const dispose = registerCreatorSettingsCard(slots as unknown as CompatibleSettingsSlots, () => null, {
+      namespace: "jacky-creator", legacyId: "jacky-creator", legacyOrder: 40,
+      locale: "dsh.jacky.creator", inject: () => ({}),
+    });
+    expect(slots.entries("settings.plugins.tab")[0]?.options).toMatchObject({
+      id: "jacky-creator", order: 40, label: "Jacky Creator",
+    });
+    dispose();
+    expect(slots.entries("settings.plugins.tab")).toHaveLength(0);
   });
 });

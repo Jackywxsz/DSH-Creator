@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button, IconEditOutline16, IconTrashOutline16, Modal } from "@deepseek-ai/dsh-client-ui-primitives";
+import { Button, IconEditOutlineMedium, IconTrashOutlineMedium, Modal } from "@deepseek-ai/dsh-client-ui-primitives";
 
 import type { CockpitState, Idea } from "../../cockpit/schemas.ts";
 import { useIdeaCaptureEpoch } from "../contentSelection.ts";
@@ -197,8 +197,8 @@ export function IdeasPage({
                 </button>
                 {expanded && <div className="ideaCardActions">
                   {idea.status === "promoted" && idea.promotedContentId !== undefined ? <button type="button" onClick={() => { openContent(idea.promotedContentId!); }}>{t("operations.openContent")}</button> : <button type="button" className="promote" onClick={() => { setPromoting(idea); setPromotionTitle(idea.title); setPromotionTopic(idea.note); }}>{t("operations.ideas.promote")}</button>}
-                  <button type="button" onClick={() => { openForm(idea); }}><IconEditOutline16 size={15} />{t("operations.edit")}</button>
-                  <button type="button" className="danger" onClick={() => { if (window.confirm(t("operations.ideas.deleteConfirm"))) void commit(face.deleteIdea(idea.id)); }}><IconTrashOutline16 size={15} />{t("operations.delete")}</button>
+                  <button type="button" onClick={() => { openForm(idea); }}><IconEditOutlineMedium size={15} />{t("operations.edit")}</button>
+                  <button type="button" className="danger" onClick={() => { if (window.confirm(t("operations.ideas.deleteConfirm"))) void commit(face.deleteIdea(idea.id)); }}><IconTrashOutlineMedium size={15} />{t("operations.delete")}</button>
                 </div>}
               </article>;
             })}</div>

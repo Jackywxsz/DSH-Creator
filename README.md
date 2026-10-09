@@ -37,45 +37,33 @@ Jacky Creator 把 DeepSeek Harness 的对话能力和本地创作目录连起来
 
 ## 安装
 
-### 1. 安装 DSH Desktop
+### 1. 准备官方 Harness
 
-下载并安装 [DSH Desktop 2.0.2](https://github.com/anywhere-labs/dsh-desktop/releases/tag/v2.0.2)。DSH Desktop 和 Jacky Creator 均为社区项目。
+从 [DeepSeek 官网](https://www.deepseek.com/zh/download/) 安装官方 DeepSeek Harness。此版本针对 **Harness `0.2.0-rc.2`**，Jacky Creator 是独立社区插件。
 
 ### 2. 安装 Jacky Creator
 
-推荐在 DSH Desktop 的内置终端安装 npm 成品包；插件市场同步完成后也可以一键安装。
+`0.1.0-beta.9` 适配官方 Harness `0.2.0-rc.2`，安装包见 [GitHub Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.9)。市场若仍提供 `beta.8`，请使用下面的固定版本安装命令，不要对旧版授予版本豁免。
 
-#### 方式一：通过 DSH Plugin Hub 安装
-
-先打开 DSH Desktop 的内置终端，安装可视化插件市场：
+**官方桌面端**：在内置插件管理器中添加对应版本的成品包；如已安装桌面版附带的 `dsh` 命令，目标为 `desktop` Profile：
 
 ```bash
-dsh plugin --profile web add dsh-plugin
+dsh plugin --profile desktop add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
 ```
 
-彻底退出并重新打开 DSH Desktop。市场目录同步并显示 `Jacky Creator` 后，进入“设置 → 插件市场”，打开插件卡片并点击安装。
-
-插件市场目录按周期同步。如果市场显示的版本低于 GitHub 最新版本，可以改用下面的命令行方式。
-
-#### 方式二：通过命令行安装最新版
-
-打开 DSH Desktop 的内置终端，复制下面一行并回车：
+**官方 CLI / Web**：使用 `0.2.0-rc.2` 的 CLI，目标为 `web` Profile：
 
 ```bash
-dsh plugin --profile web add jacky-creator
+dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
 ```
 
-如果 npm 通道暂时不可用，可以改装同版本的 GitHub Release 成品包：
+也可以通过 npm 包运行 `dsh plugin --profile web add jacky-creator@0.1.0-beta.9`。系统安装的 npm CLI 不能管理官方桌面端保留的 `desktop` Profile。
 
-```bash
-dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.8/jacky-creator-0.1.0-beta.8.tgz
-```
-
-无论使用哪种方式，安装完成后都要彻底退出并重新打开 DSH Desktop。侧边栏左上角出现 **Jacky Creator**，并能进入“内容 / 运营 / 灵感”，即表示安装成功。
+安装完成后彻底退出并重启当前宿主，点击侧栏 **Jacky Creator** 入口，检查“内容 / 运营 / 灵感”和“设置 → 内置插件 → Jacky Creator”均能打开。
 
 ### 3. 完成首次配置
 
-新建会话，选择 `standard` 或 `code` Agent，然后发送：
+新建会话，选择标准模式，然后发送：
 
 > 帮我配置 Jacky Creator：选择本地内容目录，先预览准备修改的设置，确认后再保存。
 
@@ -125,19 +113,26 @@ dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/d
 
 如果侧边栏没有出现 Jacky Creator：
 
-1. 确认安装命令是在 DSH Desktop 内置终端执行的。
-2. 彻底退出并重新打开 DSH Desktop。
-3. 仍然失败时，到 [GitHub Issues](https://github.com/Jackywxsz/DSH-Creator/issues) 提交系统版本、DSH Desktop 版本和脱敏后的安装日志。
+1. 确认插件安装到正在使用的 Profile（官方桌面端为 `desktop`，CLI 为 `web`）。
+2. 彻底退出并重新打开 DeepSeek Harness。
+3. 仍然失败时，到 [GitHub Issues](https://github.com/Jackywxsz/DSH-Creator/issues) 提交系统版本、DeepSeek Harness 版本和脱敏后的安装日志。
 
 不要手动修改 DSH Profile 的 `package.json` 或 `cordis.patch.yml`。
 
 ## 兼容性
 
-当前主要环境为 macOS、DSH Desktop 2.0.2 和 DeepSeek Harness 0.1.1-rc.2。Windows x64 暂不作为推荐环境，Screen Studio、Ego Lite 等扩展仅支持 macOS。
+| 插件版本 | Harness 运行时 | 状态 |
+| --- | --- | --- |
+| `0.1.0-beta.9` | `0.2.0-rc.2` | macOS 官方 Electron / CLI 验收通过；范围见验收记录 |
+| `0.1.0-beta.8` | `0.1.1-rc.2` | 历史版本，不能安装到 `0.2.0-rc.2` |
+
+本轮已在 macOS 官方 Electron 桌面端与 CLI/Web 隔离环境验收；原生目录弹窗、系统文件打开结果、其他 Harness 版本和 Windows x64 尚未完成完整验证，详见[验收记录](docs/harness-0.2.0-rc.2-validation.md)。Screen Studio、Ego Lite 等可选扩展仅支持 macOS。
+
+遇到 `incompatible with dsh` 或 `dsh: nothing was installed`，表示插件未安装成功。`allow-version` 只豁免检查，不修复 API；请安装匹配版本，不要为旧插件降级宿主。
 
 ## 插件市场
 
-Jacky Creator 已收录到 [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)，并由 [dsh-market](https://github.com/dsh-market/dsh-market) 同步市场卡片。安装 `dshmarket` 后，可以在 DSH Desktop 的“设置 → 插件市场”中搜索 `DSH-Creator` 并一键安装。市场版本尚未同步时，请使用上面的固定版本安装命令。
+历史版本已收录到 [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)。市场卡片可能仍指向旧包；以卡片实际版本与本页兼容表为准，目录同步不代表新版已发布。官方内置插件管理器与社区插件市场是不同入口。
 
 ## 文档与开发
 

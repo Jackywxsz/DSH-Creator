@@ -1,6 +1,9 @@
 export const NS = "dsh.jacky.creator";
 
 export const zh = {
+  "markdown.copy": "复制",
+  "markdown.copied": "已复制",
+  "markdown.footnotes": "脚注",
   tab: "内容",
   "tab.sessions": "会话",
   "tab.content": "内容",
@@ -572,6 +575,9 @@ export const zh = {
 };
 
 export const en = {
+  "markdown.copy": "Copy",
+  "markdown.copied": "Copied",
+  "markdown.footnotes": "Footnotes",
   tab: "Library",
   "tab.sessions": "Chats",
   "tab.content": "Content",

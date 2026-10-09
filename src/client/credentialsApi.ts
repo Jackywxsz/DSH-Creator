@@ -1,4 +1,20 @@
+import type { ClientRemote } from "@deepseek-ai/dsh-api-remotes/client";
 import type { SecretView } from "../types.ts";
+
+/** Adapt the official Remote result to the settings card's local interface. */
+export function credentialsClient(remote: ClientRemote["credentials"]): CredentialsClient {
+  return {
+    async describe({ refs }) {
+      const result = await remote.describe(refs);
+      return { result: result.ok
+        ? { ok: true, value: { credentials: result.value } }
+        : { ok: false } };
+    },
+    async set({ ref, value }) {
+      return { result: await remote.set(ref, value) };
+    },
+  };
+}
 
 export interface CredentialView {
   configured: boolean;
