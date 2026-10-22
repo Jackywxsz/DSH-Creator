@@ -11,6 +11,7 @@ import type {
   LibrarySettings,
   ListContentsResult,
   PublishMark,
+  PresentationDeck,
   PublishBinding,
   PublishPlatform,
   SubtitlePreviewResult,
@@ -42,6 +43,10 @@ export interface CreatorViewFace {
   setScriptRules: (text: string) => Promise<void>;
   refreshCatalog: () => Promise<ListContentsResult>;
   createContent: (title: string) => Promise<{ id: string; folderPath: string }>;
+  getPresentationDeck: (id: string) => Promise<PresentationDeck>;
+  savePresentationDeck: (id: string, deck: PresentationDeck) => Promise<ContentDetail>;
+  deleteContent: (id: string) => Promise<{ deleted: boolean; trashPath: string }>;
+  renameContent: (id: string, title: string) => Promise<{ id: string; folderPath: string }>;
   markReadyToRecord: (id: string) => Promise<ContentDetail>;
   setContentSkip: (id: string, step: ContentOptionalStep, skipped: boolean) => Promise<ContentDetail>;
   bindStudio: (id: string, path: string) => Promise<ContentDetail>;
@@ -59,7 +64,11 @@ export interface CreatorViewFace {
   openSubtitlePreview: (id: string) => Promise<SubtitlePreviewResult>;
   startSubtitleBurn: (id: string) => Promise<ContentDetail>;
   startSubtitleGenerate: (id: string) => Promise<ContentDetail>;
-  startCoverGenerate: (id: string) => Promise<ContentDetail>;
+  startCoverGenerate: (id: string, title?: string) => Promise<ContentDetail>;
   setScript: (id: string, text: string) => Promise<ContentDetail>;
+  setArticle: (id: string, text: string) => Promise<ContentDetail>;
+  setCoverTitle: (id: string, title: string) => Promise<ContentDetail>;
+  getSubtitleSrt: (id: string) => Promise<{ text: string; path: string }>;
+  saveSubtitleSrt: (id: string, text: string) => Promise<ContentDetail>;
   setTopicNote: (id: string, text: string) => Promise<ContentDetail>;
 }

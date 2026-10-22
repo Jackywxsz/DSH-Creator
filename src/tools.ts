@@ -143,6 +143,52 @@ export function registerCreatorTools(ctx: ToolsContext, service: OilCreatorServi
   }));
 
   ctx.tools.register(defineTool({
+    name: "jacky_creator_delete_content",
+    description:
+      "Move one episode folder to the library's .trash folder. This is a reversible soft delete; "
+      + "it never permanently deletes files. Use only after the user confirms the exact episode id.",
+    parameters: {
+      id: { type: "string", required: true, description: "Folder id (the episode folder name)." },
+    },
+    output: {
+      schema: JSON_VALUE,
+      render: (_args, value) => {
+        const result = value as { trashPath?: string };
+        return compactText("Moved to trash", result.trashPath ?? "");
+      },
+    },
+    presentCall: (args) => present("Delete content", args),
+    execute: (args, exec) => {
+      if (args.id.trim() === "") throw new Error("id is required");
+      return service.deleteContent({ id: args.id }, signalOf(exec));
+    },
+  }));
+
+  ctx.tools.register(defineTool({
+    name: "jacky_creator_rename_content",
+    description:
+      "Rename one episode folder while keeping its date prefix, and move its overlay state to the new id. "
+      + "Fails if the target folder already exists. Use only after the user confirms the new title.",
+    parameters: {
+      id: { type: "string", required: true, description: "Current folder id." },
+      title: { type: "string", required: true, description: "New readable title. Date prefix is preserved." },
+    },
+    output: {
+      schema: JSON_VALUE,
+      render: (_args, value) => {
+        const result = value as { id?: string };
+        return compactText("Renamed", result.id ?? "");
+      },
+    },
+    presentCall: (args) => present("Rename content", args),
+    execute: (args, exec) => {
+      if (args.id.trim() === "") throw new Error("id is required");
+      if (args.title.trim() === "") throw new Error("title is required");
+      return service.renameContent({ id: args.id, title: args.title }, signalOf(exec));
+    },
+  }));
+
+  ctx.tools.register(defineTool({
     name: "jacky_creator_update_content",
     description:
       "Write overlay-only marks for one episode: readyToRecord, bind a Screen Studio project, "

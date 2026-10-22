@@ -1552,3 +1552,270 @@
     transition: none;
   }
 }
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckEditor {
+  margin: 12px 20px;
+  border: 1px solid #d6d4cc;
+  background: #ffffff;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckLoading {
+  padding: 18px;
+  color: #666;
+  font-size: 13px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e0d8;
+  background: #faf9f5;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckHeader > div:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckHeader strong {
+  font-size: 13px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckHeader span {
+  color: #777;
+  font-size: 11px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckHeaderActions {
+  display: flex;
+  gap: 6px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckHeaderActions button,
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckItemActions button {
+  border: 1px solid #d6d4cc;
+  background: #fff;
+  color: #222;
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 4px 9px;
+  cursor: pointer;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckHeaderActions button.primary {
+  background: #1f5fff;
+  border-color: #1f5fff;
+  color: #fff;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckHeaderActions button:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckBody {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  min-height: 300px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckList {
+  border-right: 1px solid #e2e0d8;
+  max-height: 430px;
+  overflow: auto;
+  padding: 6px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckListItem {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border-radius: 4px;
+  margin-bottom: 3px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckListItem.active {
+  background: #eef3ff;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckPick {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 6px 4px;
+  cursor: pointer;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckPick span {
+  color: #999;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckPick b {
+  font-size: 12px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckItemActions {
+  display: flex;
+  gap: 1px;
+  opacity: 0;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckListItem:hover .deckItemActions,
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckListItem.active .deckItemActions {
+  opacity: 1;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckItemActions button {
+  padding: 2px 4px;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckItemActions button.danger {
+  color: #b42318;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckFields {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckFields label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckFields label span {
+  color: #666;
+  font-size: 11px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckFields input,
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckFields textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d6d4cc;
+  border-radius: 4px;
+  background: #fff;
+  color: #111;
+  padding: 7px 8px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckFields input:focus,
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckFields textarea:focus {
+  outline: none;
+  border-color: #1f5fff;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .deckError {
+  padding: 8px 12px;
+  color: #b42318;
+  background: #fff4f2;
+  font-size: 12px;
+  border-bottom: 1px solid #f3d6d0;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .editorBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 12px 20px 6px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .editorBar span {
+  color: #666;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .editorBar button {
+  border: 1px solid #1f5fff;
+  background: #1f5fff;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .editorBar button:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .articleEditor,
+[data-plugin="jacky-creator"][data-surface="inspector"] .srtEditor {
+  display: block;
+  width: calc(100% - 40px);
+  margin: 0 20px 12px;
+  box-sizing: border-box;
+  border: 1px solid #d6d4cc;
+  border-radius: 6px;
+  background: #fff;
+  color: #111;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.65;
+  resize: vertical;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .articleEditor {
+  min-height: 380px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .srtEditor {
+  min-height: 260px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .articleEditor:focus,
+[data-plugin="jacky-creator"][data-surface="inspector"] .srtEditor:focus {
+  outline: none;
+  border-color: #1f5fff;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .coverTitleInput {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #d6d4cc;
+  border-radius: 4px;
+  background: #fff;
+  color: #111;
+  padding: 7px 9px;
+  font: inherit;
+  font-size: 13px;
+}
+
+[data-plugin="jacky-creator"][data-surface="inspector"] .coverTitleInput:focus {
+  outline: none;
+  border-color: #1f5fff;
+}

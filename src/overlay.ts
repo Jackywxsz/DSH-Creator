@@ -45,6 +45,9 @@ export function decodeOverlay(value: unknown): OverlayStore {
       if (typeof record.title === "string" && record.title.length > 0) {
         next.title = record.title;
       }
+      if (typeof record.coverTitle === "string" && record.coverTitle.length > 0) {
+        next.coverTitle = record.coverTitle;
+      }
       if (record.readyToRecord === true) next.readyToRecord = true;
       if (typeof record.studioPath === "string" && record.studioPath.length > 0) {
         next.studioPath = record.studioPath;

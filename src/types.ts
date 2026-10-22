@@ -100,6 +100,7 @@ export interface ContentSummary {
   presentations: ContentPresentations;
   hasPublishPackage: boolean;
   hasArticle: boolean;
+  coverTitle?: string;
   studioPath?: string;
   waitingForExport: boolean;
   exportTimedOut?: boolean;
@@ -222,6 +223,18 @@ export interface ContentDetail extends ContentSummary {
   secrets: CreatorSecrets;
 }
 
+export interface PresentationPage {
+  id: string;
+  title: string;
+  body: string;
+  notes: string;
+}
+
+export interface PresentationDeck {
+  aspect: "16x9" | "3x4";
+  pages: PresentationPage[];
+}
+
 export interface CoverThumbResult {
   found: boolean;
   mime: string;
@@ -280,6 +293,7 @@ export interface WaitExportRequest {
 
 export interface OverlayItem {
   title?: string;
+  coverTitle?: string;
   readyToRecord?: boolean;
   studioPath?: string;
   waitingForExport?: boolean;

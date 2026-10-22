@@ -19,6 +19,23 @@ const contentPresentationsSchema = z.object({
   "3x4": z.string().optional(),
 });
 
+export const presentationPageSchema = z.object({
+  id: z.string().min(1),
+  title: z.string(),
+  body: z.string(),
+  notes: z.string(),
+});
+
+export const presentationDeckSchema = z.object({
+  aspect: z.union([z.literal("16x9"), z.literal("3x4")]),
+  pages: z.array(presentationPageSchema).min(1).max(30),
+});
+
+export const savePresentationDeckRequestSchema = z.object({
+  id: z.string().min(1),
+  deck: presentationDeckSchema,
+});
+
 const pipelineSchema = z.union([
   z.literal("raw"),
   z.literal("subtitled"),
@@ -366,6 +383,25 @@ export const createContentResultSchema = z.object({
   folderPath: z.string().min(1),
 });
 
+export const deleteContentRequestSchema = z.object({
+  id: z.string().min(1),
+});
+
+export const deleteContentResultSchema = z.object({
+  deleted: z.boolean(),
+  trashPath: z.string().min(1),
+});
+
+export const renameContentRequestSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+});
+
+export const renameContentResultSchema = z.object({
+  id: z.string().min(1),
+  folderPath: z.string().min(1),
+});
+
 export const setProfileRequestSchema = z.object({
   profile: creatorProfileSchema,
 });
@@ -380,6 +416,26 @@ export const setTopicNoteRequestSchema = z.object({
 });
 
 export const setScriptRequestSchema = z.object({
+  id: z.string().min(1),
+  text: z.string(),
+});
+
+export const setArticleRequestSchema = z.object({
+  id: z.string().min(1),
+  text: z.string(),
+});
+
+export const setCoverTitleRequestSchema = z.object({
+  id: z.string().min(1),
+  title: z.string(),
+});
+
+export const subtitleSrtResultSchema = z.object({
+  text: z.string(),
+  path: z.string(),
+});
+
+export const saveSubtitleSrtRequestSchema = z.object({
   id: z.string().min(1),
   text: z.string(),
 });

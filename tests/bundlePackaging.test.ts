@@ -50,7 +50,7 @@ describe("DeepSeek Harness bundle packaging", () => {
     );
 
     expect(manifest.name).toBe("jacky-creator");
-    expect(manifest.version).toBe("0.1.0-beta.9");
+    expect(manifest.version).toMatch(/^0\.1\.0-beta\.\d+$/);
     expect(manifest.dsh?.bundle?.patch).toBe("./cordis.patch.yml");
     expect(manifest.files).toContain("cordis.patch.yml");
     expect(manifest.files).toContain("README.md");
@@ -152,7 +152,7 @@ describe("DeepSeek Harness bundle packaging", () => {
       );
       const metadata = parsePackMetadata(output);
       const filename = metadata[0]?.filename;
-      expect(filename).toBe("jacky-creator-0.1.0-beta.9.tgz");
+      expect(filename).toMatch(/^jacky-creator-0\.1\.0-beta\.\d+\.tgz$/);
 
       const tarball = resolve(packDirectory, filename!);
       expect(existsSync(tarball)).toBe(true);

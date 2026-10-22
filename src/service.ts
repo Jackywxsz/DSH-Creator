@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { mkdirSync } from "node:fs";
-import { readdir, stat } from "node:fs/promises";
-import { dirname, isAbsolute, join } from "node:path";
+import { mkdir, readFile, readdir, rename, stat, writeFile } from "node:fs/promises";
+import { basename, dirname, isAbsolute, join } from "node:path";
 
 import type { Context } from "@deepseek-ai/cordis";
 import { TypertRemoteService } from "@deepseek-ai/dsh-typert-protocol";
@@ -11,6 +11,8 @@ import {
   countsOf,
   coverPathOf,
   createContentFolder,
+  folderNameForTitle,
+  readableTitle,
   matchesFilter,
   matchesQuery,
   readArticle,
@@ -115,6 +117,8 @@ import type {
   ListContentsRequest,
   ListContentsResult,
   OrganizePreview,
+  PresentationDeck,
+  PresentationPage,
   OrganizeRequest,
   SetLibraryRootRequest,
   SetProfileRequest,
@@ -305,8 +309,10 @@ export class OilCreatorService extends TypertRemoteService {
     if (item === undefined) {
       throw new Error(`content not found: ${request.id}`);
     }
+    const overlay = await loadOverlay(this.dataDir);
     return {
       ...item,
+      ...(overlay.items[item.id]?.coverTitle === undefined ? {} : { coverTitle: overlay.items[item.id]!.coverTitle }),
       publishCopy: await readPublishCopy(item.folderPath),
       topicNote: await readTopicNote(item.folderPath),
       script: await readScript(item.folderPath),
@@ -569,6 +575,57 @@ export class OilCreatorService extends TypertRemoteService {
     return this.getContent({ id: request.id }, signal);
   }
 
+  async setCoverTitle(
+    request: { id: string; title: string },
+    signal: AbortSignal,
+  ): Promise<ContentDetail> {
+    signal.throwIfAborted();
+    return this.patchItem(request.id, (item) => {
+      const title = request.title.trim();
+      if (title === "") delete item.coverTitle;
+      else item.coverTitle = title;
+    }, signal);
+  }
+
+  async setArticle(
+    request: { id: string; text: string },
+    signal: AbortSignal,
+  ): Promise<ContentDetail> {
+    signal.throwIfAborted();
+    const item = await this.find(request.id);
+    if (item === undefined) throw new Error(`content not found: ${request.id}`);
+    const path = item.articlePath ?? join(item.folderPath, "公众号文章", `${item.id}.md`);
+    await mkdir(dirname(path), { recursive: true });
+    await writeFile(path, request.text, "utf8");
+    this.invalidateCatalog();
+    return this.getContent({ id: request.id }, signal);
+  }
+
+  async getSubtitleSrt(
+    request: IdRequest,
+    signal: AbortSignal,
+  ): Promise<{ text: string; path: string }> {
+    signal.throwIfAborted();
+    const item = await this.find(request.id);
+    if (item === undefined) throw new Error(`content not found: ${request.id}`);
+    const path = item.subtitles.srt ?? join(item.folderPath, `${item.id}.srt`);
+    const text = await readFile(path, "utf8").catch(() => "");
+    return { text, path };
+  }
+
+  async saveSubtitleSrt(
+    request: { id: string; text: string },
+    signal: AbortSignal,
+  ): Promise<ContentDetail> {
+    signal.throwIfAborted();
+    const item = await this.find(request.id);
+    if (item === undefined) throw new Error(`content not found: ${request.id}`);
+    const path = item.subtitles.srt ?? join(item.folderPath, `${item.id}.srt`);
+    await writeFile(path, request.text, "utf8");
+    this.invalidateCatalog();
+    return this.getContent({ id: request.id }, signal);
+  }
+
   async organizeLibrary(request: OrganizeRequest, signal: AbortSignal): Promise<OrganizePreview> {
     signal.throwIfAborted();
     const overlay = await loadOverlay(this.dataDir);
@@ -638,6 +695,112 @@ export class OilCreatorService extends TypertRemoteService {
     const created = await createContentFolder(libraryRoot, request.title);
     this.invalidateCatalog();
     return created;
+  }
+
+  async deleteContent(
+    request: { id: string },
+    signal: AbortSignal,
+  ): Promise<{ deleted: boolean; trashPath: string }> {
+    signal.throwIfAborted();
+    const id = request.id;
+    if (id === "" || basename(id) !== id || id === "." || id === "..") {
+      throw new Error("invalid content id");
+    }
+    const overlay = await loadOverlay(this.dataDir);
+    const libraryRoot = overlay.libraryRoot ?? this.libraryRoot;
+    const source = join(libraryRoot, id);
+    const info = await stat(source).catch(() => undefined);
+    if (info === undefined || !info.isDirectory()) {
+      throw new Error(`content not found: ${id}`);
+    }
+    const trash = join(libraryRoot, ".trash");
+    await mkdir(trash, { recursive: true });
+    const target = join(trash, `${id}-${Date.now()}`);
+    await rename(source, target);
+    if (overlay.items[id] !== undefined) {
+      delete overlay.items[id];
+      await saveOverlay(this.dataDir, overlay);
+    }
+    this.invalidateCatalog();
+    return { deleted: true, trashPath: target };
+  }
+
+  async renameContent(
+    request: { id: string; title: string },
+    signal: AbortSignal,
+  ): Promise<{ id: string; folderPath: string }> {
+    signal.throwIfAborted();
+    const id = request.id;
+    if (id === "" || basename(id) !== id || id === "." || id === "..") {
+      throw new Error("invalid content id");
+    }
+    const title = readableTitle(request.title);
+    if (title === "") throw new Error("title is required");
+    const overlay = await loadOverlay(this.dataDir);
+    const libraryRoot = overlay.libraryRoot ?? this.libraryRoot;
+    const source = join(libraryRoot, id);
+    const info = await stat(source).catch(() => undefined);
+    if (info === undefined || !info.isDirectory()) {
+      throw new Error(`content not found: ${id}`);
+    }
+    const dated = /^(\d{4}-\d{2}-\d{2})_/.exec(id);
+    const nextId = dated?.[1] === undefined
+      ? folderNameForTitle(title, new Date())
+      : `${dated[1]}_${title}`;
+    const target = join(libraryRoot, nextId);
+    if (target !== source && await pathExists(target)) {
+      throw new Error(`target already exists: ${nextId}`);
+    }
+    if (target !== source) {
+      await rename(source, target);
+      const item = overlay.items[id];
+      if (item !== undefined) {
+        overlay.items[nextId] = item;
+        delete overlay.items[id];
+        await saveOverlay(this.dataDir, overlay);
+      }
+    }
+    this.invalidateCatalog();
+    return { id: nextId, folderPath: target };
+  }
+
+  async getPresentationDeck(
+    request: IdRequest,
+    signal: AbortSignal,
+  ): Promise<PresentationDeck> {
+    signal.throwIfAborted();
+    const item = await this.find(request.id);
+    if (item === undefined) throw new Error(`content not found: ${request.id}`);
+    const path = join(item.folderPath, "演示", "presentation.json");
+    const raw = await readFile(path, "utf8").catch(() => undefined);
+    if (raw !== undefined) {
+      try {
+        const parsed = JSON.parse(raw) as PresentationDeck;
+        if (Array.isArray(parsed.pages) && parsed.pages.length > 0) {
+          return normalizeDeck(parsed);
+        }
+      } catch {
+        // fall through to a deck derived from the script
+      }
+    }
+    const script = await readScript(item.folderPath);
+    return defaultDeck(item.title, script);
+  }
+
+  async savePresentationDeck(
+    request: { id: string; deck: PresentationDeck },
+    signal: AbortSignal,
+  ): Promise<ContentDetail> {
+    signal.throwIfAborted();
+    const item = await this.find(request.id);
+    if (item === undefined) throw new Error(`content not found: ${request.id}`);
+    const deck = normalizeDeck(request.deck);
+    const dir = join(item.folderPath, "演示");
+    await mkdir(dir, { recursive: true });
+    await writeFile(join(dir, "presentation.json"), JSON.stringify(deck, null, 2), "utf8");
+    await writeFile(join(dir, `${item.id}-16x9.html`), renderPresentationHtml(item.id, deck), "utf8");
+    this.invalidateCatalog();
+    return this.getContent({ id: item.id }, signal);
   }
 
   async bindStudio(request: BindStudioRequest, signal: AbortSignal): Promise<ContentDetail> {
@@ -1316,4 +1479,104 @@ async function waitForStableVideo(
     await sleep(2000, signal);
   }
   return false;
+}
+
+function normalizeDeck(deck: PresentationDeck): PresentationDeck {
+  const seen = new Set<string>();
+  const pages: PresentationPage[] = [];
+  for (const [index, page] of (deck.pages ?? []).slice(0, 30).entries()) {
+    const base = (page.id ?? "").trim() || `p${index + 1}`;
+    let id = base;
+    let suffix = 2;
+    while (seen.has(id)) id = `${base}-${suffix++}`;
+    seen.add(id);
+    pages.push({
+      id,
+      title: page.title ?? "",
+      body: page.body ?? "",
+      notes: page.notes ?? "",
+    });
+  }
+  return {
+    aspect: deck.aspect === "3x4" ? "3x4" : "16x9",
+    pages: pages.length > 0 ? pages : [{ id: "p1", title: "", body: "", notes: "" }],
+  };
+}
+
+function defaultDeck(title: string, script: string): PresentationDeck {
+  const paragraphs = script
+    .split(/\n{2,}/)
+    .map((part) => part.trim())
+    .filter((part) => part !== "")
+    .slice(0, 6);
+  const pages: PresentationPage[] = [{
+    id: "p1",
+    title,
+    body: "姜总拆新闻",
+    notes: "",
+  }];
+  paragraphs.forEach((paragraph, index) => {
+    const first = paragraph.split(/[。！？\n]/)[0]?.trim() ?? "";
+    pages.push({
+      id: `p${index + 2}`,
+      title: first.slice(0, 24) || `第 ${index + 1} 页`,
+      body: paragraph,
+      notes: "",
+    });
+  });
+  pages.push({
+    id: "end",
+    title: "姜总拆新闻",
+    body: "90 秒｜不构成投资建议",
+    notes: "",
+  });
+  return { aspect: "16x9", pages };
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function renderPresentationHtml(id: string, deck: PresentationDeck): string {
+  const slides = deck.pages.map((page, index) => {
+    const body = page.body
+      .split(/\n/)
+      .map((line) => line.trim())
+      .filter((line) => line !== "")
+      .map((line) => `<p>${escapeHtml(line)}</p>`)
+      .join("");
+    return `<section class="slide${index === 0 ? " cover" : ""}">
+      <div class="kicker">姜总拆新闻</div>
+      <h1>${escapeHtml(page.title || " ")}</h1>
+      <div class="body">${body}</div>
+      <footer><span>${escapeHtml(id)}</span><span class="num"></span></footer>
+    </section>`;
+  }).join("\n");
+
+  return `<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(id)}</title>
+<style>
+:root{--bg:#f6f4ef;--ink:#141a1f;--muted:#5e666e;--red:#c8102e;--line:#d9d3c8}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#111;font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Helvetica Neue",Arial,sans-serif}
+.slide{display:none;position:relative;width:100vw;height:100vh;background:var(--bg);color:var(--ink);padding:7vh 8vw 6vh;overflow:hidden}
+.slide.active{display:block}
+.slide:before{content:"";position:absolute;left:0;top:0;bottom:0;width:10px;background:var(--red)}
+.kicker{color:var(--red);font-weight:700;letter-spacing:.08em;font-size:clamp(12px,1.2vw,18px);margin:0 0 1.2rem}
+h1{font-size:clamp(36px,5vw,80px);line-height:1.08;margin:0 0 1.6rem;letter-spacing:-.02em}
+.body p{font-size:clamp(18px,1.8vw,28px);line-height:1.55;margin:.55rem 0;max-width:78vw}
+.cover h1{font-size:clamp(44px,6vw,100px)}
+footer{position:absolute;left:8vw;right:8vw;bottom:3.4vh;display:flex;justify-content:space-between;color:var(--muted);font-size:clamp(10px,.9vw,13px);border-top:1px solid var(--line);padding-top:1rem}
+</style></head><body>
+${slides}
+<script>
+const slides=[...document.querySelectorAll('.slide')];let i=0;
+function show(n){i=(n+slides.length)%slides.length;slides.forEach((s,k)=>s.classList.toggle('active',k===i));document.querySelectorAll('.num').forEach(e=>e.textContent=String(i+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0'));}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();show(i+1)}if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(i-1)}});
+document.addEventListener('click',()=>show(i+1));show(0);
+</script></body></html>`;
 }

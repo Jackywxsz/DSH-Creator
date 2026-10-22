@@ -34,6 +34,7 @@ import type {
   ListContentsResult,
   PublishMark,
   PublishBinding,
+  PresentationDeck,
   PublishPlatform,
   SubtitlePreviewResult,
   SyncPublishResult,
@@ -115,6 +116,10 @@ interface OilCreatorRemote {
   setScriptRules: (request: { text: string }) => Promise<RemoteAnswer<LibrarySettings>>;
   refreshCatalog: (request: Record<string, never>) => Promise<RemoteAnswer<ListContentsResult>>;
   createContent: (request: { title: string }) => Promise<RemoteAnswer<CreateContentResult>>;
+  getPresentationDeck: (request: { id: string }) => Promise<RemoteAnswer<PresentationDeck>>;
+  savePresentationDeck: (request: { id: string; deck: PresentationDeck }) => Promise<RemoteAnswer<ContentDetail>>;
+  deleteContent: (request: { id: string }) => Promise<RemoteAnswer<{ deleted: boolean; trashPath: string }>>;
+  renameContent: (request: { id: string; title: string }) => Promise<RemoteAnswer<{ id: string; folderPath: string }>>;
   setContentStage: (request: { id: string; readyToRecord: boolean }) => Promise<RemoteAnswer<ContentDetail>>;
   setContentSkip: (request: { id: string; step: ContentOptionalStep; skipped: boolean }) => Promise<RemoteAnswer<ContentDetail>>;
   bindStudio: (request: { id: string; path: string }) => Promise<RemoteAnswer<ContentDetail>>;
@@ -135,8 +140,12 @@ interface OilCreatorRemote {
   openSubtitlePreview: (request: { id: string }) => Promise<RemoteAnswer<SubtitlePreviewResult>>;
   startSubtitleBurn: (request: { id: string }) => Promise<RemoteAnswer<ContentDetail>>;
   startSubtitleGenerate: (request: { id: string }) => Promise<RemoteAnswer<ContentDetail>>;
-  startCoverGenerate: (request: { id: string }) => Promise<RemoteAnswer<ContentDetail>>;
+  startCoverGenerate: (request: { id: string; title?: string }) => Promise<RemoteAnswer<ContentDetail>>;
   setScript: (request: { id: string; text: string }) => Promise<RemoteAnswer<ContentDetail>>;
+  setArticle: (request: { id: string; text: string }) => Promise<RemoteAnswer<ContentDetail>>;
+  setCoverTitle: (request: { id: string; title: string }) => Promise<RemoteAnswer<ContentDetail>>;
+  getSubtitleSrt: (request: { id: string }) => Promise<RemoteAnswer<{ text: string; path: string }>>;
+  saveSubtitleSrt: (request: { id: string; text: string }) => Promise<RemoteAnswer<ContentDetail>>;
   setTopicNote: (request: { id: string; text: string }) => Promise<RemoteAnswer<ContentDetail>>;
 }
 
@@ -422,6 +431,32 @@ export function apply(ctx: ClientContext): void {
       bumpLibrary();
       return created;
     },
+    deleteContent: async (id) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      const result = unwrap(await remote.deleteContent({ id }), "delete failed");
+      bumpLibrary();
+      return result;
+    },
+    renameContent: async (id, title) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      const result = unwrap(await remote.renameContent({ id, title }), "rename failed");
+      bumpLibrary();
+      return result;
+    },
+    getPresentationDeck: async (id) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      return unwrap(await remote.getPresentationDeck({ id }), "deck failed");
+    },
+    savePresentationDeck: async (id, deck) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      const next = unwrap(await remote.savePresentationDeck({ id, deck }), "deck save failed");
+      bumpLibrary();
+      return next;
+    },
     markReadyToRecord: async (id) => {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
@@ -501,10 +536,10 @@ export function apply(ctx: ClientContext): void {
       bumpLibrary();
       return next;
     },
-    startCoverGenerate: async (id) => {
+    startCoverGenerate: async (id, title) => {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
-      const next = unwrap(await remote.startCoverGenerate({ id }), "cover failed");
+      const next = unwrap(await remote.startCoverGenerate(title === undefined ? { id } : { id, title }), "cover failed");
       bumpLibrary();
       return next;
     },
@@ -512,6 +547,30 @@ export function apply(ctx: ClientContext): void {
       const remote = remoteOf();
       if (remote === undefined) throw new Error("remote unavailable");
       return unwrap(await remote.setScript({ id, text }), "script failed");
+    },
+    setArticle: async (id, text) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      const next = unwrap(await remote.setArticle({ id, text }), "article failed");
+      bumpLibrary();
+      return next;
+    },
+    setCoverTitle: async (id, title) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      return unwrap(await remote.setCoverTitle({ id, title }), "cover title failed");
+    },
+    getSubtitleSrt: async (id) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      return unwrap(await remote.getSubtitleSrt({ id }), "srt failed");
+    },
+    saveSubtitleSrt: async (id, text) => {
+      const remote = remoteOf();
+      if (remote === undefined) throw new Error("remote unavailable");
+      const next = unwrap(await remote.saveSubtitleSrt({ id, text }), "srt save failed");
+      bumpLibrary();
+      return next;
     },
     setTopicNote: async (id, text) => {
       const remote = remoteOf();

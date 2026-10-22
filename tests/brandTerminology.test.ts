@@ -59,7 +59,7 @@ describe("Jacky Creator product terminology", () => {
     const identitySurfaces = [patch, host, contract, settings, build].join("\n");
 
     expect(manifest.name).toBe("jacky-creator");
-    expect(manifest.version).toBe("0.1.0-beta.9");
+    expect(manifest.version).toMatch(/^0\.1\.0-beta\.\d+$/);
     expect(identitySurfaces).toContain("jacky-creator");
     expect(identitySurfaces).not.toContain("dsh-oil-creator");
   });

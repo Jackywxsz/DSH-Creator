@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   IconBrowseOutlineMedium,
   IconCloseOutlineMedium,
+  IconEditOutlineMedium,
   IconFolderOpenOutlineMedium,
+  IconTrashOutlineMedium,
   MarkdownText,
   Menu,
   StateDot,
@@ -34,6 +36,7 @@ import {
   type PresentationAspect,
 } from "./presentationInstruction.ts";
 import { PlatformMark } from "./PlatformMark.tsx";
+import { PresentationDeckEditor } from "./PresentationDeckEditor.tsx";
 import { isPublishSyncDisabled, PUBLISH_UI_PLATFORMS, selectEnabledPublishPlatforms } from "./publishPlatforms.ts";
 import { formatRelativeTime } from "./relativeTime.ts";
 import {
@@ -502,7 +505,11 @@ export function ContentInspector({
   t,
   ready,
   getContent,
+  deleteContent,
+  renameContent,
   getCoverThumb,
+  getPresentationDeck,
+  savePresentationDeck,
   getVideoPlayback,
   getArticleMedia,
   getSubtitleText,
@@ -511,12 +518,17 @@ export function ContentInspector({
   bindStudio,
   openStudio,
   waitForExport,
+  refreshCatalog,
   setPublish,
   syncPublish,
   startSubtitleGenerate,
   startSubtitleBurn,
   startCoverGenerate,
   setScript,
+  setArticle,
+  setCoverTitle,
+  getSubtitleSrt,
+  saveSubtitleSrt,
   setTopicNote,
   pickDirectory,
   openSubtitlePreview,
@@ -530,7 +542,7 @@ export function ContentInspector({
     code: { copyLabel: t("markdown.copy"), copiedLabel: t("markdown.copied") },
     footnotes: t("markdown.footnotes"),
   }), [t]);
-  const [selectedId] = useSelectedContentId();
+  const [selectedId, setSelectedId] = useSelectedContentId();
   const libraryEpoch = useLibraryEpoch();
   const profileEpoch = useProfileEpoch();
   const [enabledPlatforms, setEnabledPlatforms] = useState<readonly PublishPlatform[] | undefined>(undefined);
@@ -560,6 +572,12 @@ export function ContentInspector({
   const [videoSrc, setVideoSrc] = useState<string | undefined>(undefined);
   const [videoReady, setVideoReady] = useState(false);
   const [articleOrigin, setArticleOrigin] = useState<string | undefined>(undefined);
+  const [articleDraft, setArticleDraft] = useState("");
+  const [articleSaved, setArticleSaved] = useState(true);
+  const [srtDraft, setSrtDraft] = useState("");
+  const [srtSaved, setSrtSaved] = useState(true);
+  const [srtPath, setSrtPath] = useState("");
+  const [coverTitleDraft, setCoverTitleDraft] = useState("");
   const [publishMenu, setPublishMenu] = useState<PublishPlatform | null>(null);
   const [publishPending, setPublishPending] = useState<PublishPlatform | null>(null);
   const [coverPreview, setCoverPreview] = useState<"3x4" | "4x3" | "16x9" | undefined>(undefined);
@@ -704,6 +722,27 @@ export function ContentInspector({
       window.clearTimeout(timer);
     };
   }, [detail?.id, scriptDraft, scriptSaved]);
+
+  useEffect(() => {
+    setArticleDraft(detail?.article ?? "");
+    setArticleSaved(true);
+  }, [detail?.id, detail?.article]);
+
+  useEffect(() => {
+    setCoverTitleDraft(detail?.coverTitle ?? detail?.title ?? "");
+  }, [detail?.id, detail?.coverTitle, detail?.title]);
+
+  useEffect(() => {
+    if (tab !== "subtitle" || selectedId === null || !ready()) return;
+    let live = true;
+    void getSubtitleSrt(selectedId).then((next) => {
+      if (!live) return;
+      setSrtDraft(next.text);
+      setSrtPath(next.path);
+      setSrtSaved(true);
+    }, () => undefined);
+    return () => { live = false; };
+  }, [tab, selectedId, libraryEpoch]);
 
   useEffect(() => {
     const running = detail?.burn.status === "running"
@@ -876,6 +915,71 @@ export function ContentInspector({
     setDetail(next);
   };
 
+  const onSaveArticle = (): void => {
+    if (detail === undefined) return;
+    setActionError(undefined);
+    void setArticle(detail.id, articleDraft).then((next) => {
+      setDetail(next);
+      setArticleSaved(true);
+    }, (cause: unknown) => {
+      setActionError(cause instanceof Error ? cause.message : "文章保存失败");
+    });
+  };
+
+  const onSaveSrt = (): void => {
+    if (detail === undefined) return;
+    setActionError(undefined);
+    void saveSubtitleSrt(detail.id, srtDraft).then((next) => {
+      setDetail(next);
+      setSrtSaved(true);
+    }, (cause: unknown) => {
+      setActionError(cause instanceof Error ? cause.message : "字幕保存失败");
+    });
+  };
+
+  const onSaveCoverTitle = (): void => {
+    if (detail === undefined) return;
+    setActionError(undefined);
+    void setCoverTitle(detail.id, coverTitleDraft).then((next) => {
+      setDetail(next);
+    }, (cause: unknown) => {
+      setActionError(cause instanceof Error ? cause.message : "封面标题保存失败");
+    });
+  };
+
+  const onRenameContent = (): void => {
+    if (detail === undefined) return;
+    const nextTitle = window.prompt("新的标题", detail.title);
+    if (nextTitle === null) return;
+    const title = nextTitle.trim();
+    if (title === "" || title === detail.title) return;
+    setActionError(undefined);
+    void renameContent(detail.id, title)
+      .then(async (result) => {
+        setSelectedId(result.id);
+        const next = await getContent(result.id);
+        setDetail(next);
+      })
+      .catch((cause: unknown) => {
+        setActionError(cause instanceof Error ? cause.message : "改名失败");
+      });
+  };
+
+  const onDeleteContent = (): void => {
+    if (detail === undefined) return;
+    if (!window.confirm(`删除「${detail.title}」？会移到 .trash，可恢复。`)) return;
+    setActionError(undefined);
+    void deleteContent(detail.id)
+      .then(async () => {
+        setSelectedId(null);
+        closeDetails();
+        await refreshCatalog();
+      })
+      .catch((cause: unknown) => {
+        setActionError(cause instanceof Error ? cause.message : "删除失败");
+      });
+  };
+
   const onBindStudio = (): void => {
     if (detail === undefined) return;
     setActionError(undefined);
@@ -943,7 +1047,7 @@ export function ContentInspector({
     }
     setActionError(undefined);
     setBusy("cover");
-    void startCoverGenerate(detail.id).then((next) => {
+    void startCoverGenerate(detail.id, coverTitleDraft.trim() || detail.title).then((next) => {
       setDetail(next);
       setBusy(undefined);
     }, (cause: unknown) => {
@@ -1088,14 +1192,34 @@ export function ContentInspector({
           </div>
           <div className="titleActions">
             {detail !== undefined && (
-              <button
-                type="button"
-                className="close"
-                aria-label={t("inspector.openFolder" as CreatorKey)}
-                onClick={() => { void openFolder(detail.folderPath); }}
-              >
-                <IconFolderOpenOutlineMedium size={14} />
-              </button>
+              <>
+                <button
+                  type="button"
+                  className="close"
+                  aria-label="改名"
+                  title="改名"
+                  onClick={onRenameContent}
+                >
+                  <IconEditOutlineMedium size={14} />
+                </button>
+                <button
+                  type="button"
+                  className="close"
+                  aria-label="删除"
+                  title="删除"
+                  onClick={onDeleteContent}
+                >
+                  <IconTrashOutlineMedium size={14} />
+                </button>
+                <button
+                  type="button"
+                  className="close"
+                  aria-label={t("inspector.openFolder" as CreatorKey)}
+                  onClick={() => { void openFolder(detail.folderPath); }}
+                >
+                  <IconFolderOpenOutlineMedium size={14} />
+                </button>
+              </>
             )}
             <button
               type="button"
@@ -1499,6 +1623,12 @@ export function ContentInspector({
                 )}
               </ActionBar>
             </Surface>
+            <PresentationDeckEditor
+              detail={detail}
+              getDeck={getPresentationDeck}
+              saveDeck={savePresentationDeck}
+              onSaved={(next) => { setDetail(next); }}
+            />
             <AssetShelf
               folderPath={detail.folderPath}
               openPath={openPath}
@@ -1532,6 +1662,15 @@ export function ContentInspector({
                       : "inspector.cover.generate") as CreatorKey)}
                 </ActionButton>
               </ActionBar>
+              <div className="editorBar">
+                <input
+                  className="coverTitleInput"
+                  value={coverTitleDraft}
+                  placeholder="封面标题"
+                  onChange={(event) => { setCoverTitleDraft(event.target.value); }}
+                />
+                <button type="button" onClick={onSaveCoverTitle}>保存标题</button>
+              </div>
               <div className="coverActionState" role="status">
                 {actionError !== undefined
                   ? <JobNote tone="error">{actionError}</JobNote>
@@ -1624,18 +1763,19 @@ export function ContentInspector({
             />
             {actionError !== undefined && <JobNote tone="error">{actionError}</JobNote>}
             {sessionHint !== undefined && <JobNote tone="done">{sessionHint}</JobNote>}
-            {detail.article.trim() === ""
-              ? <div className="empty">{t("inspector.article.empty" as CreatorKey)}</div>
-              : (
-                <div className="article">
-                  <MarkdownText
-                    labels={markdownLabels}
-                    text={articleOrigin === undefined
-                      ? detail.article
-                      : rewriteArticleImages(detail.article, articleOrigin)}
-                  />
-                </div>
-              )}
+            <div className="editorBar">
+              <span>{articleSaved ? "已保存" : "未保存"}</span>
+              <button type="button" disabled={articleSaved} onClick={onSaveArticle}>保存文章</button>
+            </div>
+            <textarea
+              className="articleEditor"
+              value={articleDraft}
+              placeholder="公众号文章 Markdown，可直接改正文、标题、图片链接"
+              onChange={(event) => {
+                setArticleDraft(event.target.value);
+                setArticleSaved(event.target.value === detail.article);
+              }}
+            />
           </div>
         )}
         {detail !== undefined && tab === "subtitle" && (
@@ -1745,6 +1885,24 @@ export function ContentInspector({
                 },
               ]}
             />
+            <Surface
+              title="字幕文稿（SRT）"
+              hint="可直接改文字和时间；保存后重新烧录。没有 SRT 时会新建。"
+            >
+              <div className="editorBar">
+                <span>{srtSaved ? "已保存" : "未保存"}{srtPath === "" ? "" : ` · ${srtPath}`}</span>
+                <button type="button" disabled={srtSaved} onClick={onSaveSrt}>保存字幕</button>
+              </div>
+              <textarea
+                className="srtEditor"
+                value={srtDraft}
+                placeholder="1\n00:00:00,000 --> 00:00:03,000\n字幕文字"
+                onChange={(event) => {
+                  setSrtDraft(event.target.value);
+                  setSrtSaved(false);
+                }}
+              />
+            </Surface>
             {cues.length === 0
               ? <div className="empty">{t("inspector.subtitle.empty" as CreatorKey)}</div>
               : (

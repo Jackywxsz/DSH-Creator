@@ -20,6 +20,8 @@ describe("creator settings platform contract", () => {
       "jacky_creator_script_rules",
       "jacky_creator_setup",
       "jacky_creator_create_content",
+      "jacky_creator_delete_content",
+      "jacky_creator_rename_content",
       "jacky_creator_update_content",
       "jacky_creator_profile",
       "jacky_creator_organize_library",
