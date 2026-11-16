@@ -4,12 +4,12 @@
 
 ## 当前状态
 
-- 发布阶段：官方 Harness `0.2.0-rc.2` 适配 Beta；已完成 macOS Electron 与 CLI/Web 隔离验收。
-- 当前版本：`v0.1.0-beta.9`。
-- 安装来源：npm 包 `jacky-creator`；GitHub Release 的预构建 `.tgz` 作为固定版本备用入口。
-- npm / GitHub Release：统一使用 beta.9 成品包，公开状态分别以 registry 与 Release 为准。市场更新须经上游合并；若卡片仍是 beta.8，请使用本文固定版本命令。
+- 发布阶段：官方 Harness `0.2.2-rc.3` 适配 Beta；本次验证范围见 rc.3 验收记录，不能沿用 beta.9 的桌面验收结论。
+- 当前版本：`v0.1.0-beta.10`。
+- 安装来源：GitHub Release 的预构建 `.tgz`；npm 同步后也可使用包名安装。
+- npm / GitHub Release：分发时须使用同一份 beta.10 成品包；npm 同步状态以 registry 为准，未同步时使用固定 Release 地址。市场更新须经上游合并；若卡片仍是旧版，请使用本文固定版本命令。
 - 插件市场：已收录到 `awesome-dsh-plugin`，由 `dsh-market` 同步市场卡片。
-- 主维护通道：官方 DeepSeek Harness `0.2.0-rc.2` 的 Electron 桌面端和官方 Web UI。桌面端使用 `desktop` Profile，官方 CLI 启动的 Web UI 使用 `web` Profile。
+- 主维护通道：官方 DeepSeek Harness `0.2.2-rc.3` 的 Electron 桌面端和官方 Web UI。桌面端使用 `desktop` Profile，官方 CLI 启动的 Web UI 使用 `web` Profile。
 - 社区客户端：保留兼容支持，以内置 Harness 运行时与 API 匹配为前提；不作为主要适配、回归和发布验收通道，不承诺跟进各封装的私有改动。社区插件市场是分发通道，不等于社区客户端。
 
 ## 发布链路
@@ -31,16 +31,16 @@ GitHub 是源码、Issue、文档和版本真源。社区目录只保存仓库�
 
 ## GitHub Beta
 
-Beta 的推荐安装入口使用 npm 成品包：
+Beta 的固定安装入口使用 GitHub Release 成品包：
 
 ```bash
-dsh plugin --profile web add jacky-creator@0.1.0-beta.9
+dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.10/jacky-creator-0.1.0-beta.10.tgz
 ```
 
 GitHub Release 保留固定版本备用入口：
 
 ```bash
-dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
+dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.10/jacky-creator-0.1.0-beta.10.tgz
 ```
 
 发布前必须：
@@ -80,7 +80,7 @@ Git 源码安装只供开发者使用。DeepSeek Harness rc.2 的 `dsh plugin` �
 url: https://github.com/Jackywxsz/DSH-Creator
 name: Jackywxsz/DSH-Creator
 category: workflow
-tarball: https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
+tarball: https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.10/jacky-creator-0.1.0-beta.10.tgz
 description:
   en: "Local-first content production and operations workspace for DSH: manage ideas, scripts, media assets, schedules, goals, publishing status, and post-publication reviews."
   zh: "面向 DSH 的本地内容生产与运营工作台：管理灵感、脚本、媒体资产、档期、目标、发布状态和发布后复盘。"

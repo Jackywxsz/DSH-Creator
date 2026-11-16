@@ -8,16 +8,17 @@ const manifest = JSON.parse(readFileSync(new URL("../package.json", import.meta.
 
 describe("official Harness compatibility", () => {
   it("passes the real host gate without exemptions and refuses older hosts", () => {
-    expect(evaluatePluginCompatibility(manifest, {}, "0.2.0-rc.2")).toBeUndefined();
+    expect(evaluatePluginCompatibility(manifest, {}, "0.2.2-rc.3")).toBeUndefined();
     expect(evaluatePluginCompatibility(manifest, {}, "0.1.1-rc.2")?.exempted).toBe(false);
   });
 
   it("reproduces the beta.8 installation refusal", () => {
-    const old = { ...manifest, version: "0.1.0-beta.8", peerDependencies: {
+    const { engines: _engines, ...legacyManifest } = manifest;
+    const old = { ...legacyManifest, version: "0.1.0-beta.8", peerDependencies: {
       "@deepseek-ai/dsh-client-ui-settings": "0.1.1-rc.2",
     } };
     expect(evaluatePluginCompatibility(old, {}, "0.2.0-rc.2")).toMatchObject({
-      exempted: false, peers: old.peerDependencies,
+      exempted: false, requirements: old.peerDependencies,
     });
   });
 

@@ -2,30 +2,30 @@
 
 ## 开始前准备
 
-**主维护通道：官方 DeepSeek Harness 桌面端、官方 CLI 启动的 Web UI。** 当前组合为 Harness `0.2.0-rc.2` + Jacky Creator `0.1.0-beta.9`，不是“任意最新版本均兼容”。
+**主维护通道：官方 DeepSeek Harness 桌面端、官方 CLI 启动的 Web UI。** 当前组合为 Harness `0.2.2-rc.3` + Jacky Creator `0.1.0-beta.10`，不是“任意最新版本均兼容”。
 
-桌面用户从 [DeepSeek 官网](https://www.deepseek.com/zh/download/) 安装官方 Harness，并确认运行时版本。Web UI 用户准备 Node.js `>=22.19.0`，按下方步骤安装官方 CLI。准备一个本地内容文件夹；Windows x64 尚未完成验收，Screen Studio、Ego Lite 等扩展仅支持 macOS。
+桌面用户从 [DeepSeek 官网](https://www.deepseek.com/zh/download/) 安装官方 Harness，并确认运行时版本。Web UI 用户准备 Node.js `>=24.9.0`，按下方步骤安装官方 CLI。准备一个本地内容文件夹；Windows x64 尚未完成验收，Screen Studio、Ego Lite 等扩展仅支持 macOS。
 
 社区桌面封装或分支保留兼容支持，但不是主要适配、回归和发布验收通道。先核对它内置的 Harness 运行时与插件 API，不要用社区客户端自身的版本号判断兼容，也不要套用官方桌面端的 Profile 命令。
 
-Jacky Creator 是社区插件。`0.1.0-beta.9` 面向官方 Harness `0.2.0-rc.2`，已在 macOS 官方 Electron 与 CLI/Web 隔离环境验收。固定版本成品包见 [Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.9)。
+Jacky Creator 是社区插件。`0.1.0-beta.10` 面向官方 Harness `0.2.2-rc.3`，本次按 macOS CLI/Web 隔离环境验证，Electron 界面与 Windows 未重新验收。固定版本成品包见 [Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.10)。
 
 ## 安装
 
 ### A. 官方桌面端
 
-1. 打开官方 Harness，确认运行时为 `0.2.0-rc.2`。
-2. 打开侧栏“插件”，通过内置插件管理器添加下面的成品包 URL；也可从 [Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.9) 下载 `.tgz` 后添加。
+1. 打开官方 Harness，确认运行时为 `0.2.2-rc.3`。
+2. 打开侧栏“插件”，通过内置插件管理器添加下面的成品包 URL；也可从 [Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.10) 下载 `.tgz` 后添加。
 3. 等待安装成功，彻底退出并重启桌面端。
 
 ```text
-https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
+https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.10/jacky-creator-0.1.0-beta.10.tgz
 ```
 
 如已安装桌面版附带的 `dsh` 命令，也可执行：
 
 ```bash
-dsh plugin --profile desktop add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
+dsh plugin --profile desktop add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.10/jacky-creator-0.1.0-beta.10.tgz
 ```
 
 ### B. 官方 Web UI
@@ -33,19 +33,21 @@ dsh plugin --profile desktop add https://github.com/Jackywxsz/DSH-Creator/releas
 首次安装官方 CLI、核对版本、安装插件并启动：
 
 ```bash
-npm install -g @deepseek-ai/dsh@0.2.0-rc.2
+npm install -g @deepseek-ai/dsh@0.2.2-rc.3
 dsh --version
-dsh plugin --profile web add jacky-creator@0.1.0-beta.9
+dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.10/jacky-creator-0.1.0-beta.10.tgz
 dsh web
 ```
 
-已有匹配 CLI 可跳过第一行；版本输出必须为 `0.2.0-rc.2`。在浏览器打开启动日志提供的本地地址。Web UI 正在运行时，安装后先停止原进程，再执行 `dsh web`。
+已有匹配 CLI 可跳过第一行；版本输出必须为 `0.2.2-rc.3`。在浏览器打开启动日志提供的本地地址。Web UI 正在运行时，安装后先停止原进程，再执行 `dsh web`。
 
 固定 Release 地址可替换 npm 包安装命令：
 
 ```bash
-dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
+dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.10/jacky-creator-0.1.0-beta.10.tgz
 ```
+
+若 npm 已同步该版本，也可执行 `dsh plugin --profile web add jacky-creator@0.1.0-beta.10`；提示版本不存在时请使用上面的固定 Release 地址。
 
 npm CLI 不能管理桌面端的 `desktop` Profile；安装到 `web` 不会使桌面端自动加载。两个入口并用时，要分别安装到各自 Profile，并确认所用 `dsh` 来自对应宿主。
 
@@ -89,7 +91,7 @@ Jacky Creator 会检查内容目录和可选能力，只显示凭据是否已配
 ### 安装完成但侧边栏没有变化
 
 1. 彻底退出并重新打开 DeepSeek Harness。
-2. 确认运行时为 `0.2.0-rc.2`，插件为 `0.1.0-beta.9`，且安装在当前 Profile。
+2. 确认运行时为 `0.2.2-rc.3`，插件为 `0.1.0-beta.10`，且安装在当前 Profile。
 3. 仍然失败时提交 Issue，并附上系统版本、DeepSeek Harness 版本和脱敏后的安装日志。
 
 不要自行编辑 DSH Profile 的 `package.json` 或 `cordis.patch.yml`。

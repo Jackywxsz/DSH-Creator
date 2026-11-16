@@ -50,7 +50,7 @@ describe("DeepSeek Harness bundle packaging", () => {
     );
 
     expect(manifest.name).toBe("jacky-creator");
-    expect(manifest.version).toBe("0.1.0-beta.9");
+    expect(manifest.version).toBe("0.1.0-beta.10");
     expect(manifest.dsh?.bundle?.patch).toBe("./cordis.patch.yml");
     expect(manifest.files).toContain("cordis.patch.yml");
     expect(manifest.files).toContain("README.md");
@@ -68,7 +68,7 @@ describe("DeepSeek Harness bundle packaging", () => {
     expect(manifest.scripts?.["release:check"]).toBe(
       "node scripts/check-release.mjs",
     );
-    expect(manifest.engines?.node).toBe(">=22.19.0");
+    expect(manifest.engines?.node).toBe(">=24.9.0");
     expect(manifest.repository).toEqual({
       type: "git",
       url: "git+https://github.com/Jackywxsz/DSH-Creator.git",
@@ -84,9 +84,9 @@ describe("DeepSeek Harness bundle packaging", () => {
       "@deepseek-ai/dsh-client-ui-settings-plugins",
     ]));
     expect(manifest.peerDependencies?.["@deepseek-ai/dsh-settings"])
-      .toContain("0.2.0-rc.2");
+      .toContain("0.2.2-rc.3");
     expect(manifest.peerDependencies?.["@deepseek-ai/dsh-client-ui-settings-plugins"])
-      .toContain("0.2.0-rc.2");
+      .toContain("0.2.2-rc.3");
     expect(patch).not.toMatch(/^\s*-?\s*id:\s*ui-sidebar\b/m);
     expect(patch).not.toMatch(/disabled:\s*true/);
     expect(patch).toMatch(/^- insert:\n    - id: jacky-creator\n      name: jacky-creator$/m);
@@ -116,7 +116,7 @@ describe("DeepSeek Harness bundle packaging", () => {
     }
     expect(readme).toContain("dsh plugin --profile desktop add");
     expect(readme).toContain(
-      "dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz",
+      "dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.10/jacky-creator-0.1.0-beta.10.tgz",
     );
     expect(readme).not.toContain("dsh plugin remove dsh-oil-creator");
     expect(implementation).toContain("dsh.bundle.patch");
@@ -152,7 +152,7 @@ describe("DeepSeek Harness bundle packaging", () => {
       );
       const metadata = parsePackMetadata(output);
       const filename = metadata[0]?.filename;
-      expect(filename).toBe("jacky-creator-0.1.0-beta.9.tgz");
+      expect(filename).toBe("jacky-creator-0.1.0-beta.10.tgz");
 
       const tarball = resolve(packDirectory, filename!);
       expect(existsSync(tarball)).toBe(true);

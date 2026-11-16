@@ -1,3 +1,4 @@
+import type { PanelInfo } from "@deepseek-ai/dsh-client-ui-layout/client";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   IconBrowseOutlineMedium,
@@ -72,7 +73,7 @@ export function CreatorWorkspace({ t, usePanelInfo, content, cockpit }: CreatorW
   const [selectedId] = useSelectedContentId();
   const inspectorVisible = useContentInspectorVisible();
   const theme = useOperationsTheme();
-  const activePanelId = usePanelInfo((panel) => panel.activePanelId);
+  const activePanelId = usePanelInfo((panel: PanelInfo) => panel.activePanelId);
   const [sidebarWidth, setSidebarWidth] = useState(280);
   const [navigationOpen, setNavigationOpen] = useState(true);
 

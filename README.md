@@ -43,48 +43,50 @@ Jacky Creator 把 DeepSeek Harness 的对话能力和本地创作目录连起来
 
 | 使用入口 | 当前适配版本 | 安装目标 |
 | --- | --- | --- |
-| 官方 Electron 桌面端 | Harness `0.2.0-rc.2` + Creator `0.1.0-beta.9` | 桌面端自己的 `desktop` Profile |
-| 官方 Web UI（由官方 CLI 启动） | `@deepseek-ai/dsh@0.2.0-rc.2` + Creator `0.1.0-beta.9` | CLI 的 `web` Profile |
+| 官方 Electron 桌面端 | Harness `0.2.2-rc.3` + Creator `0.1.0-beta.10` | 桌面端自己的 `desktop` Profile |
+| 官方 Web UI（由官方 CLI 启动） | `@deepseek-ai/dsh@0.2.2-rc.3` + Creator `0.1.0-beta.10` | CLI 的 `web` Profile |
 | 社区桌面封装 / 分支 | 以其内置 Harness 运行时与插件 API 为准 | 使用该客户端自己的插件管理入口 |
 
-桌面用户从 [DeepSeek 官网](https://www.deepseek.com/zh/download/) 获取官方 Harness，先确认版本匹配。Web UI 用户按下面的 CLI 步骤安装。当前已验证 macOS；不能据此推定所有系统或后续 Harness 版本兼容。
+桌面用户从 [DeepSeek 官网](https://www.deepseek.com/zh/download/) 获取官方 Harness，先确认版本匹配。Web UI 用户按下面的 CLI 步骤安装。本次验证以 macOS CLI/Web 为准；不能据此推定 Electron 界面、其他系统或后续 Harness 版本兼容。
 
 社区版保留兼容支持，但不作为主要适配、回归和发布验收通道，也不承诺逐个跟进其私有改动。社区客户端的应用版本号不等于内置 Harness 版本；只有运行时和 API 匹配时才可能使用同一插件包。
 
 ### 2. 安装 Jacky Creator
 
-`0.1.0-beta.9` 适配官方 Harness `0.2.0-rc.2`，安装包见 [GitHub Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.9)。市场若仍提供 `beta.8`，请使用下面的固定版本安装命令，不要对旧版授予版本豁免。
+`0.1.0-beta.10` 适配官方 Harness `0.2.2-rc.3`，安装包见 [GitHub Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.10)。市场若仍提供旧版，请使用下面的固定版本安装命令，不要对旧版授予版本豁免。
 
 **A. 官方桌面端（推荐）**
 
-打开侧栏“插件”，通过内置插件管理器添加下面的成品包 URL，或从 [Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.9) 下载 `.tgz` 后添加：
+打开侧栏“插件”，通过内置插件管理器添加下面的成品包 URL，或从 [Release](https://github.com/Jackywxsz/DSH-Creator/releases/tag/v0.1.0-beta.10) 下载 `.tgz` 后添加：
 
 ```text
-https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
+https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.10/jacky-creator-0.1.0-beta.10.tgz
 ```
 
 如已安装桌面版附带的 `dsh` 命令，也可在终端安装到 `desktop` Profile：
 
 ```bash
-dsh plugin --profile desktop add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
+dsh plugin --profile desktop add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.10/jacky-creator-0.1.0-beta.10.tgz
 ```
 
 **B. 官方 Web UI**
 
-准备 Node.js `>=22.19.0`。首次使用官方 CLI 时执行以下步骤；已有匹配版本可跳过第一行。`dsh --version` 应显示 `0.2.0-rc.2`：
+准备 Node.js `>=24.9.0`。首次使用官方 CLI 时执行以下步骤；已有匹配版本可跳过第一行。`dsh --version` 应显示 `0.2.2-rc.3`：
 
 ```bash
-npm install -g @deepseek-ai/dsh@0.2.0-rc.2
+npm install -g @deepseek-ai/dsh@0.2.2-rc.3
 dsh --version
-dsh plugin --profile web add jacky-creator@0.1.0-beta.9
+dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.10/jacky-creator-0.1.0-beta.10.tgz
 dsh web
 ```
 
 在浏览器打开 `dsh web` 启动时输出的本地地址，即进入官方 Web UI。也可以用固定 Release 地址替换上面的插件安装命令：
 
 ```bash
-dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.9/jacky-creator-0.1.0-beta.9.tgz
+dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/download/v0.1.0-beta.10/jacky-creator-0.1.0-beta.10.tgz
 ```
+
+若 npm 已同步该版本，也可执行 `dsh plugin --profile web add jacky-creator@0.1.0-beta.10`；提示版本不存在时请使用上面的固定 Release 地址。
 
 桌面与 Web 是两个独立安装目标：安装到 `web` 不会自动出现在桌面端。npm 安装的 CLI 不能管理 `desktop`；如果两种 CLI 并存，请确认当前执行的是对应宿主的命令。
 
@@ -152,16 +154,16 @@ dsh plugin --profile web add https://github.com/Jackywxsz/DSH-Creator/releases/d
 
 | 插件版本 | Harness 运行时 | 状态 |
 | --- | --- | --- |
-| `0.1.0-beta.9` | `0.2.0-rc.2` | macOS 官方 Electron / CLI 验收通过；范围见验收记录 |
-| `0.1.0-beta.8` | `0.1.1-rc.2` | 历史版本，不能安装到 `0.2.0-rc.2` |
+| `0.1.0-beta.10` | `0.2.2-rc.3` | macOS CLI/Web 验证；范围见验收记录 |
+| `0.1.0-beta.8` | `0.1.1-rc.2` | 历史版本，不能安装到 `0.2.2-rc.3` |
 
-本轮已在 macOS 官方 Electron 桌面端与 CLI/Web 隔离环境验收；原生目录弹窗、系统文件打开结果、其他 Harness 版本和 Windows x64 尚未完成完整验证，详见[验收记录](docs/harness-0.2.0-rc.2-validation.md)。Screen Studio、Ego Lite 等可选扩展仅支持 macOS。
+本轮面向 macOS 官方 CLI/Web 隔离环境；Electron 界面未重新验收，原生目录弹窗、系统文件打开结果、其他 Harness 版本和 Windows x64 尚未完成完整验证，详见[验收记录](docs/harness-0.2.2-rc.3-validation.md)。Screen Studio、Ego Lite 等可选扩展仅支持 macOS。旧 Harness `0.2.0-rc.2` 用户请继续使用 `0.1.0-beta.9`。
 
 遇到 `incompatible with dsh` 或 `dsh: nothing was installed`，表示插件未安装成功。`allow-version` 只豁免检查，不修复 API；请安装匹配版本，不要为旧插件降级宿主。
 
 ## 插件市场
 
-已收录到 [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)。beta.9 的目录更新见 [PR #6927](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/6927)；是否已生效以 PR 合并状态和市场卡片实际安装包为准。若卡片仍指向 beta.8，请使用上面的 beta.9 固定地址或 npm 命令。
+已收录到 [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)。市场目录更新需经上游合并；是否已生效以 PR 合并状态和市场卡片实际安装包为准。若卡片仍指向旧版，请使用上面的 beta.10 固定地址或 npm 命令。
 
 社区插件市场是分发入口，社区桌面客户端是另一种宿主；使用社区市场不改变“官方桌面端 / 官方 Web UI 为主维护通道”的原则。
 

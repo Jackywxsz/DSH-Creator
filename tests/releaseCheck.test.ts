@@ -149,7 +149,8 @@ function runReleaseCheck(repository: string) {
   }
 }
 
-describe("release:check", () => {
+// Each case starts real Git/npm processes; allow subprocess startup on loaded CI hosts.
+describe("release:check", { timeout: 30_000 }, () => {
   it("accepts a clean repository with origin and tracked release files", () => {
     const repository = createRepository();
     try {
@@ -159,7 +160,7 @@ describe("release:check", () => {
     } finally {
       rmSync(repository, { recursive: true, force: true });
     }
-  }, 15_000);
+  }, 30_000);
 
   it("rejects dirty and untracked work trees with explicit reasons", () => {
     const dirty = createRepository();
@@ -204,7 +205,7 @@ describe("release:check", () => {
       rmSync(wrongOrigin, { recursive: true, force: true });
       rmSync(missing, { recursive: true, force: true });
     }
-  }, 15_000);
+  }, 30_000);
 
   it("rejects official DSH runtime packages bundled as regular dependencies", () => {
     const repository = createRepository();
